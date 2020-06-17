@@ -1,0 +1,32 @@
+{
+    "Baltimore & Ohio": {
+        "nicknames": ["BO"],
+        "home": "G19"
+    },
+    "Illinois Central": {
+        "nicknames": ["IC"],
+        "home": "K3"
+    },
+    "New York Central": {
+        "nicknames": ["NYC"],
+        "home": "D20"
+    },
+    "Chesapeake & Ohio": {
+        "nicknames": ["CO"],
+        "home": "I15",
+        "is_removable": true
+    },
+    "Erie": {
+        "home": "E21",
+        "is_removable": true
+    },
+    "Grand Trunk": {
+        "nicknames": ["GT"],
+        "home": "B16"
+    },
+    "Pennsylvania": {
+        "nicknames": ["PRR"],
+        "home": "F20",
+        "is_removable": true
+    }
+}
