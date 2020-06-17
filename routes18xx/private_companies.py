@@ -80,12 +80,12 @@ def _handle_independent_railroad(board, railroads, name, kwargs):
             board.place_station(home_city, Railroad.create(name, "2"))
 
 
-def load_from_csv(board, railroads, companies_filepath):
+def load_from_csv(game, board, railroads, companies_filepath):
     if companies_filepath:
         with open(companies_filepath, newline='') as companies_file:
-            return load(board, railroads, tuple(csv.DictReader(companies_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)))
+            return load(game, board, railroads, tuple(csv.DictReader(companies_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)))
 
-def load(board, railroads, companies_rows):
+def load(game, board, railroads, companies_rows):
     if not companies_rows:
         return
 

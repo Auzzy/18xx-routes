@@ -20,7 +20,7 @@ def load(game, board_state_rows):
             raise ValueError("Invalid board state input. Row missing {}: {}".format(", ".join(missing), tile_args))
 
         tile_id = tile_args.pop("tile_id")
-        tile_args["tile"] = get_tile(tile_id)
+        tile_args["tile"] = get_tile(game, tile_id)
         if not tile_args["tile"]:
             raise ValueError("No tile with the tile ID {} was found.".format(tile_id))
         

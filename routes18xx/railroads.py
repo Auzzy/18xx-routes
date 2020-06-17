@@ -102,11 +102,11 @@ class RemovedRailroad(Railroad):
         return True
 
 
-def load_from_csv(board, railroads_filepath):
+def load_from_csv(game, board, railroads_filepath):
     with open(railroads_filepath, newline='') as railroads_file:
-        return load(board, csv.DictReader(railroads_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True))
+        return load(game, board, csv.DictReader(railroads_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True))
 
-def load(board, railroads_rows):
+def load(game, board, railroads_rows):
     railroads = {}
     for railroad_args in railroads_rows:
         trains_str = railroad_args.get("trains")

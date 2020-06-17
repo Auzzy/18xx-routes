@@ -43,15 +43,15 @@ class Tile(object):
             self.capacity = 0
 
 
-def _load_all():
+def _load_all(game):
     with open(get_data_file(game, _TILE_FILENAME)) as tiles_file:
         tiles_json = json.load(tiles_file)
 
     return {int(id): Tile.create(int(id), **args) for id, args in tiles_json.items()}
 
-def get_tile(tile_id):
+def get_tile(game, tile_id):
     global _TILES
     if not _TILES:
-        _TILES = _load_all()
+        _TILES = _load_all(game)
 
     return _TILES.get(int(tile_id))

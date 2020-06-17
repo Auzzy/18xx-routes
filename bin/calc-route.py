@@ -9,6 +9,8 @@ from routes18xx import boardstate, find_best_routes, private_companies, railroad
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("game",
+            help="The name of the game to use. Usually just the \"year\" (e.g. 1846, 18AL, etc).")
     parser.add_argument("active-railroad",
             help="The name of the railroad for whom to find the route. Must be present in the railroads file.")
     parser.add_argument("board-state-file",
@@ -31,9 +33,9 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
 
-    board = boardstate.load_from_csv(args["board-state-file"])
-    railroads = railroads.load_from_csv(board, args["railroads-file"])
-    private_companies.load_from_csv(board, railroads, args.get("private_companies_file"))
+    board = boardstate.load_from_csv(args["game"], args["board-state-file"])
+    railroads = railroads.load_from_csv(args["game"], board, args["railroads-file"])
+    private_companies.load_from_csv(args["game"], board, railroads, args.get("private_companies_file"))
     board.validate()
 
     active_railroad = railroads[args["active-railroad"]]
