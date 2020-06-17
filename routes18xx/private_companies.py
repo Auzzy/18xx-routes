@@ -1,6 +1,6 @@
 import csv
 
-from routes1846.railroads import Railroad
+from routes18xx.railroads import Railroad
 
 FIELDNAMES = ("name", "owner", "coord")
 

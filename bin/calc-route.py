@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from routes1846 import boardstate, find_best_routes, private_companies, railroads
+from routes18xx import boardstate, find_best_routes, private_companies, railroads
 
 
 def parse_args():
@@ -27,7 +27,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    logger = logging.getLogger("routes1846")
+    logger = logging.getLogger("routes18xx")
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
 

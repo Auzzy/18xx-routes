@@ -1,9 +1,9 @@
 import collections
 import json
 
-from routes1846 import get_data_file
-from routes1846.cell import Cell, CHICAGO_CELL
-from routes1846.tokens import MeatPackingToken, SeaportToken, Station
+from routes18xx import get_data_file
+from routes18xx.cell import Cell, CHICAGO_CELL
+from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 
 BASE_BOARD_FILENAME = "base-board.json"
 
@@ -198,9 +198,9 @@ class WestTerminalCity(TerminalCity):
     def value(self, railroad, phase, east_to_west=False):
         return super(WestTerminalCity, self).value(railroad, phase) + (self.bonus if east_to_west else 0)
 
-def load():
+def load(game):
     board_tiles = []
-    with open(get_data_file(BASE_BOARD_FILENAME)) as board_file:
+    with open(get_data_file(game, BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
         board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json["tracks"].items()])
         board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json["cities"].items()])
