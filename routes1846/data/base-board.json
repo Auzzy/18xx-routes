@@ -1,0 +1,259 @@
+{
+    "tracks": {
+        "A15": {
+            "edges": [[0, 5]],
+            "phase": 4
+        },
+        "C7": {
+            "edges": [[0, 5]],
+            "phase": 4
+        }
+    },
+    "cities": {
+        "B16": {
+            "name": "Port Huron",
+            "capacity": 1
+        },
+        "C9": {
+            "name": "South Bend",
+            "capacity": 1
+        },
+        "C15": {
+            "name": "Detroit",
+            "edges": [1, 3],
+            "phase": 1,
+            "value": 40,
+            "capacity": 2,
+            "is_z": true
+        },
+        "D6": {
+            "name": "Chicago",
+            "edges": [0, 3, 4, 5],
+            "phase": 1,
+            "value": 10,
+            "meat_value": 30,
+            "capacity": 4
+        },
+        "D14": {
+            "name": "Toledo",
+            "capacity": 1,
+            "port_value": 20
+        },
+        "D20": {
+            "name": "Erie",
+            "edges": [0, 1, 3],
+            "phase": 1,
+            "value": 10,
+            "capacity": 2
+        },
+        "E11": {
+            "name": "Fort Wayne",
+            "capacity": 1
+        },
+        "E17": {
+            "name": "Cleveland",
+            "capacity": 1,
+            "is_z": true
+        },
+        "E21": {
+            "name": "Salamanca",
+            "edges": [1, 2, 4],
+            "phase": 4,
+            "value": 10,
+            "capacity": 1
+        },
+        "F20": {
+            "name": "Homewood",
+            "edges": [1, 2, 4, 5],
+            "phase": 4,
+            "value": 10,
+            "capacity": 1
+        },
+        "G3": {
+            "name": "Springfield",
+            "capacity": 1
+        },
+        "G7": {
+            "name": "Terre Haute",
+            "capacity": 1
+        },
+        "G9": {
+            "name": "Indianapolis",
+            "capacity": 1
+        },
+        "G13": {
+            "name": "Dayton",
+            "capacity": 1
+        },
+        "G15": {
+            "name": "Columbus",
+            "capacity": 1
+        },
+        "G19": {
+            "name": "Wheeling",
+            "edges": [5],
+            "phase": 1,
+            "value": 10,
+            "capacity": 1,
+            "port_value": 40
+        },
+        "H12": {
+            "name": "Cinncinati",
+            "capacity": 1,
+            "is_z": true
+        },
+        "I5": {
+            "name": "Centralia",
+            "edges": [0, 1, 3, 4],
+            "phase": 4,
+            "value": 10,
+            "capacity": 2
+        },
+        "I15": {
+            "name": "Huntington",
+            "edges": [2, 3, 4],
+            "phase": 4,
+            "value": 20,
+            "capacity": 1
+        },
+        "K3": {
+            "name": "Cairo",
+            "edges": [3],
+            "phase": 4,
+            "value": 20,
+            "capacity": 1
+        }
+    },
+    "edges": {
+        "B8": {
+            "name": "Holland",
+            "edges": [4],
+            "values": {
+                "phase1": 40,
+                "phase3": 10
+            },
+            "port_value": 40
+        },
+        "B18": {
+            "name": "Sarnia",
+            "edges": [1],
+            "values": {
+                "phase1": 30,
+                "phase3": 50,
+                "bonus": 20
+            },
+            "is_east": true
+        },
+        "C5": {
+            "name": "Chicago Connections",
+            "edges": [5],
+            "values": {
+                "phase1": 20,
+                "phase3": 40,
+                "bonus": 50
+            },
+            "port_value": 20,
+            "is_west": true
+        },
+        "C17": {
+            "name": "Windsor",
+            "edges": [1],
+            "values": {
+                "phase1": 40,
+                "phase3": 60,
+                "bonus": 30
+            },
+            "is_east": true
+        },
+        "C21": {
+            "name": "Buffalo",
+            "edges": [0],
+            "values": {
+                "phase1": 30,
+                "phase3": 60,
+                "bonus": 30
+            },
+            "is_east": true
+        },
+        "D22": {
+            "name": "Buffalo",
+            "edges": [1],
+            "values": {
+                "phase1": 30,
+                "phase3": 60,
+                "bonus": 30
+            },
+            "is_east": true
+        },
+        "E23": {
+            "name": "Binghamton",
+            "edges": [1],
+            "values": {
+                "phase1": 20,
+                "phase3": 50,
+                "bonus": 30
+            },
+            "is_east": true
+        },
+        "F22": {
+            "name": "Pittsburg",
+            "edges": [1],
+            "values": {
+                "phase1": 30,
+                "phase3": 70,
+                "bonus": 20
+            },
+            "is_east": true
+        },
+        "G21": {
+            "name": "Pittsburg",
+            "edges": [1, 2],
+            "values": {
+                "phase1": 30,
+                "phase3": 70,
+                "bonus": 20
+            },
+            "is_east": true
+        },
+        "H20": {
+            "name": "Cumberland",
+            "edges": [2],
+            "values": {
+                "phase1": 20,
+                "phase3": 40,
+                "bonus": 30
+            },
+            "is_east": true
+        },
+        "I1": {
+            "name": "St. Louis",
+            "edges": [3, 4],
+            "values": {
+                "phase1": 50,
+                "phase3": 70,
+                "bonus": 20
+            },
+            "port_value": 20,
+            "meat_value": 30,
+            "is_west": true
+        },
+        "I17": {
+            "name": "Charleston",
+            "edges": [1],
+            "values": {
+                "phase1": 20,
+                "phase3": 50,
+                "bonus": 20
+            },
+            "is_east": true
+        },
+        "J10": {
+            "name": "Louisville",
+            "edges": [2, 3],
+            "values": {
+                "phase1": 50,
+                "phase3": 70
+            }
+        }
+    }
+}

@@ -1,0 +1,320 @@
+{
+    "5": {
+        "edges": [0, 5],
+        "value": 20,
+        "quantity": 3,
+        "phase": 1,
+        "is_city": true
+    },
+    "6": {
+        "edges": [0, 4],
+        "value": 20,
+        "quantity": 4,
+        "phase": 1,
+        "is_city": true
+    },
+    "57": {
+        "edges": [0, 3],
+        "value": 20,
+        "quantity": 4,
+        "phase": 1,
+        "is_city": true
+    },
+    "291": {
+        "edges": [0, 5],
+        "value": 40,
+        "quantity": 3,
+        "phase": 1,
+        "is_city": true,
+        "is_z": true
+    },
+    "292": {
+        "edges": [0, 4],
+        "value": 40,
+        "quantity": 4,
+        "phase": 1,
+        "is_city": true,
+        "is_z": true
+    },
+    "293": {
+        "edges": [0, 3],
+        "value": 40,
+        "quantity": 4,
+        "phase": 1,
+        "is_city": true,
+        "is_z": true
+    },
+    "7": {
+        "edges": [[0, 5]],
+        "value": 0,
+        "quantity": 100,
+        "phase": 1
+    },
+    "8": {
+        "edges": [[0, 4]],
+        "value": 0,
+        "quantity": 100,
+        "phase": 1
+    },
+    "9": {
+        "edges": [[0, 3]],
+        "value": 0,
+        "quantity": 100,
+        "phase": 1
+    },
+    "14": {
+        "edges": [0, 2, 3, 5],
+        "value": 30,
+        "quantity": 4,
+        "phase": 2,
+        "is_city": true
+    },
+    "15": {
+        "edges": [0, 1, 2, 3],
+        "value": 30,
+        "quantity": 5,
+        "phase": 2,
+        "is_city": true
+    },
+    "619": {
+        "edges": [0, 2, 3, 4],
+        "value": 30,
+        "quantity": 3,
+        "phase": 2,
+        "is_city": true
+    },
+    "294": {
+        "edges": [0, 1, 3, 4],
+        "value": 50,
+        "quantity": 2,
+        "phase": 2,
+        "is_city": true,
+        "is_z": true
+    },
+    "295": {
+        "edges": [0, 1, 2, 3],
+        "value": 50,
+        "quantity": 2,
+        "phase": 2,
+        "is_city": true,
+        "is_z": true
+    },
+    "296": {
+        "edges": [0, 2, 3, 4],
+        "value": 50,
+        "quantity": 1,
+        "phase": 2,
+        "is_city": true,
+        "is_z": true
+    },
+    "16": {
+        "edges": [[0, 4], [1, 5]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 2
+    },
+    "17": {
+        "edges": [[0, 4], [1, 3]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "18": {
+        "edges": [[0, 3], [1, 2]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "19": {
+        "edges": [[0, 3], [1, 5]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 2
+    },
+    "20": {
+        "edges": [[0, 3], [1, 4]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 2
+    },
+    "21": {
+        "edges": [[0, 2], [3, 4]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "22": {
+        "edges": [[0, 4], [2, 3]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "23": {
+        "edges": [[0, 3], [0, 4]],
+        "value": 0,
+        "quantity": 4,
+        "phase": 2
+    },
+    "24": {
+        "edges": [[0, 2], [0, 3]],
+        "value": 0,
+        "quantity": 4,
+        "phase": 2
+    },
+    "25": {
+        "edges": [[0, 2], [0, 4]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 2
+    },
+    "26": {
+        "edges": [[0, 3], [0, 5]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "27": {
+        "edges": [[0, 1], [0, 3]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "28": {
+        "edges": [[0, 4], [0, 5]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "29": {
+        "edges": [[0, 1], [0, 2]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "30": {
+        "edges": [[0, 1], [0, 4]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "31": {
+        "edges": [[0, 2], [0, 5]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 2
+    },
+    "611": {
+        "edges": [0, 1, 2, 3, 4],
+        "value": 40,
+        "quantity": 4,
+        "phase": 3,
+        "is_city": true
+    },
+    "297": {
+        "edges": [0, 1, 2, 3, 4],
+        "value": 60,
+        "quantity": 2,
+        "phase": 3,
+        "is_city": true,
+        "is_z": true
+    },
+    "39": {
+        "edges": [[0, 1], [0, 5], [1, 5]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 3
+    },
+    "40": {
+        "edges": [[0, 2], [0, 4], [2, 4]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 3
+    },
+    "41": {
+        "edges": [[0, 3], [0, 4], [3, 4]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3
+    },
+    "42": {
+        "edges": [[0, 2], [0, 3], [2, 3]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3
+    },
+    "43": {
+        "edges": [[0, 2], [0, 3], [1, 2], [1, 3]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3
+    },
+    "44": {
+        "edges": [[0, 1], [0, 3], [1, 4], [3, 4]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 3
+    },
+    "45": {
+        "edges": [[0, 3], [0, 4], [2, 3], [2, 4]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3
+    },
+    "46": {
+        "edges": [[0, 2], [0, 3], [2, 4], [3, 4]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3      
+    },
+    "47": {
+        "edges": [[0, 2], [0, 3], [2, 5], [3, 5]],
+        "value": 0,
+        "quantity": 2,
+        "phase": 3
+    },
+    "70": {
+        "edges": [[0, 1], [0, 2], [1, 3], [2, 3]],
+        "value": 0,
+        "quantity": 1,
+        "phase": 3
+    },
+    "51": {
+        "is_city": true,
+        "edges": [0, 1, 2, 4, 5],
+        "value": 50,
+        "quantity": 2,
+        "phase": 4
+    },
+    "290": {
+        "edges": [0, 1, 2, 3, 4],
+        "value": 70,
+        "quantity": 1,
+        "phase": 4,
+        "is_city": true,
+        "is_z": true
+    },
+    "298": {
+        "edges": [[0, 2], [2, 3], [2, 4], [2, 5]],
+        "value": 40,
+        "quantity": 1,
+        "phase": 2,
+        "is_city": true,
+        "is_chicago": true
+    },
+    "299": {
+        "edges": [[0, 2], [2, 3], [2, 4], [2, 5]],
+        "value": 70,
+        "quantity": 1,
+        "phase": 3,
+        "is_city": true,
+        "is_chicago": true
+    },
+    "300": {
+        "edges": [[0, 2], [2, 3], [2, 4], [2, 5]],
+        "value": 90,
+        "quantity": 1,
+        "phase": 4,
+        "is_city": true,
+        "is_chicago": true
+    }
+}
