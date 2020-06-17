@@ -1,7 +1,7 @@
 import collections
 
-from routes1846.cell import Cell, CHICAGO_CELL
-from routes1846.tokens import MeatPackingToken, SeaportToken, Station
+from routes18xx.cell import Cell, CHICAGO_CELL
+from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 
 class PlacedTile(object):
     @staticmethod

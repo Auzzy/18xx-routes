@@ -6,10 +6,10 @@ import multiprocessing
 import os
 import queue
 
-from routes1846.board import Board
-from routes1846.boardtile import EastTerminalCity
-from routes1846.route import Route
-from routes1846.cell import CHICAGO_CELL, CHICAGO_CONNECTIONS_CELL
+from routes18xx.board import Board
+from routes18xx.boardtile import EastTerminalCity
+from routes18xx.route import Route
+from routes18xx.cell import CHICAGO_CELL, CHICAGO_CONNECTIONS_CELL
 
 LOG = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 import csv
 import itertools
 
-from routes1846.tokens import Station
-from routes1846.cell import CHICAGO_CELL, Cell
+from routes18xx.tokens import Station
+from routes18xx.cell import CHICAGO_CELL, Cell
 
 FIELDNAMES = ("name", "trains", "stations", "chicago_station_exit_coord")
 

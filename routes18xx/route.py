@@ -1,6 +1,6 @@
 import heapq
 
-from routes1846.boardtile import EastTerminalCity, WestTerminalCity
+from routes18xx.boardtile import EastTerminalCity, WestTerminalCity
 
 class Route(object):
     @staticmethod

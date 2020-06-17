@@ -1,14 +1,14 @@
 import itertools
 
-from routes1846 import boardtile
-from routes1846.cell import Cell, CHICAGO_CELL, board_cells
-from routes1846.placedtile import Chicago, PlacedTile
-from routes1846.tokens import Station
+from routes18xx import boardtile
+from routes18xx.cell import Cell, CHICAGO_CELL, board_cells
+from routes18xx.placedtile import Chicago, PlacedTile
+from routes18xx.tokens import Station
 
 class Board(object):
     @staticmethod
-    def load():
-        board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load()}
+    def load(game):
+        board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load(game)}
         return Board(board_tiles)
 
     def __init__(self, board_tiles):

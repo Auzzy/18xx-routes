@@ -1,17 +1,17 @@
 import csv
 
-from routes1846.board import Board
-from routes1846.tiles import get_tile
+from routes18xx.board import Board
+from routes18xx.tiles import get_tile
 
 FIELDNAMES = ("coord", "tile_id", "orientation")
 
-def load_from_csv(board_state_filepath):
+def load_from_csv(game, board_state_filepath):
     with open(board_state_filepath, newline='') as tiles_file:
         board_state_rows = csv.DictReader(tiles_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)
-        return load(board_state_rows)
+        return load(game, board_state_rows)
 
-def load(board_state_rows):
-    board = Board.load()
+def load(game, board_state_rows):
+    board = Board.load(game)
 
     tile_args_dicts = []
     for tile_args in board_state_rows:
