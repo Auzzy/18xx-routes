@@ -1,6 +1,6 @@
 import collections
 
-from routes18xx.cell import Cell, CHICAGO_CELL
+from routes18xx.cell import Cell, get_chicago_cell
 from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 
 class PlacedTile(object):
@@ -109,11 +109,11 @@ class PlacedTile(object):
 class Chicago(PlacedTile):
     @staticmethod
     def place(tile, exit_cell_to_station={}, port_value=None, meat_value=None):
-        paths = PlacedTile.get_paths(CHICAGO_CELL, tile, 0)
+        paths = PlacedTile.get_paths(get_chicago_cell(), tile, 0)
         return Chicago(tile, exit_cell_to_station, paths, port_value, meat_value)
 
     def __init__(self, tile, exit_cell_to_station={}, paths={}, port_value=None, meat_value=None):
-        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, tile, paths, port_value, meat_value)
+        super(Chicago, self).__init__("Chicago", get_chicago_cell(), tile, paths, port_value, meat_value)
         
         self.exit_cell_to_station = exit_cell_to_station
 

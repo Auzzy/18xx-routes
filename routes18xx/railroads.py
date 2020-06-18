@@ -4,7 +4,7 @@ import json
 
 from routes18xx import get_data_file, trains
 from routes18xx.tokens import Station
-from routes18xx.cell import CHICAGO_CELL, Cell
+from routes18xx.cell import get_chicago_cell, Cell
 
 _RAILROADS_FILENAME = "railroads.json"
 
@@ -86,10 +86,10 @@ def load(game, board, railroads_rows):
         if station_coords_str:
             station_coords = [coord.strip() for coord in station_coords_str.split(",")]
             for coord in station_coords:
-                if coord and coord != info["home"] and Cell.from_coord(coord) != CHICAGO_CELL:
+                if coord and coord != info["home"] and Cell.from_coord(coord) != get_chicago_cell():
                     board.place_station(coord, railroad)
 
-            if str(CHICAGO_CELL) in station_coords:
+            if str(get_chicago_cell()) in station_coords:
                 chicago_station_exit_coord = str(railroad_args.get("chicago_station_exit_coord", "")).strip()
                 if not chicago_station_exit_coord:
                     raise ValueError("Chicago is listed as a station for {}, but not exit side was specified.".format(railroad.name))
