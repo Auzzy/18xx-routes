@@ -40,7 +40,7 @@ class PlacedTile(object):
         self._stations = []
         self.upgrade_level = self.tile.upgrade_level
         self.is_city = self.tile.is_city
-        self.is_z = self.tile.is_z
+        self.upgrade_attrs = self.tile.upgrade_attrs
         self.is_terminal_city = False
 
     def value(self, railroad, phase):

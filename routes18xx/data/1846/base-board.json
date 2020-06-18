@@ -24,7 +24,7 @@
             "upgrade_level": 1,
             "value": 40,
             "capacity": 2,
-            "is_z": true
+            "upgrade_attrs": ["z"]
         },
         "D6": {
             "name": "Chicago",
@@ -32,7 +32,8 @@
             "upgrade_level": 1,
             "value": 10,
             "meat_value": 30,
-            "capacity": 4
+            "capacity": 4,
+            "upgrade_attrs": ["chicago"]
         },
         "D14": {
             "name": "Toledo",
@@ -53,7 +54,7 @@
         "E17": {
             "name": "Cleveland",
             "capacity": 1,
-            "is_z": true
+            "upgrade_attrs": ["z"]
         },
         "E21": {
             "name": "Salamanca",
@@ -100,7 +101,7 @@
         "H12": {
             "name": "Cinncinati",
             "capacity": 1,
-            "is_z": true
+            "upgrade_attrs": ["z"]
         },
         "I5": {
             "name": "Centralia",

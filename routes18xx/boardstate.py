@@ -3,6 +3,7 @@ import csv
 from routes18xx.board import Board
 from routes18xx.tiles import get_tile
 
+
 FIELDNAMES = ("coord", "tile_id", "orientation")
 
 def load_from_csv(game, board_state_filepath):
@@ -27,9 +28,6 @@ def load(game, board_state_rows):
         tile_args_dicts.append(tile_args)
 
     for tile_args in sorted(tile_args_dicts, key=lambda adict: adict["tile"].upgrade_level):
-        if tile_args["tile"].is_chicago:
-            board.place_chicago(tile_args["tile"])
-        else:
-            board.place_tile(**tile_args)
+        board.place_tile(**tile_args)
 
     return board

@@ -19,8 +19,6 @@ class Board(object):
 
     def place_tile(self, coord, tile, orientation):
         cell = Cell.from_coord(coord)
-        if cell == get_chicago_cell() or tile.is_chicago:
-            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago().".format(get_chicago_cell()))
 
         if int(orientation) not in range(0, 6):
             raise ValueError("Orientation out of range. Expected between 0 and 5, inclusive. Got {}.".format(orientation))
@@ -31,7 +29,10 @@ class Board(object):
         if old_tile:
             self._validate_place_tile_upgrade(old_tile, cell, tile, orientation)
 
-            self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+            if "chicago" in old_tile.upgrade_attrs:
+                self._placed_tiles[cell] = Chicago.place(tile, old_tile.exit_cell_to_station, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+            else:
+                self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
         else:
             self._placed_tiles[cell] = PlacedTile.place(None, cell, tile, orientation)
 
@@ -45,15 +46,6 @@ class Board(object):
             raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
 
         tile.add_station(railroad)
-
-    def place_chicago(self, tile):
-        cell = get_chicago_cell()
-        old_tile = self._placed_tiles.get(cell) or self._board_tiles.get(cell)
-        if not old_tile.phase or old_tile.phase >= tile.phase:
-            raise ValueError("{}: Going from phase {} to phase {} is not an upgrade.".format(cell, old_tile.phase, tile.phase))
-
-        new_tile = Chicago.place(tile, old_tile.exit_cell_to_station, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
-        self._placed_tiles[cell] = new_tile
 
     def place_chicago_station(self, railroad, exit_side):
         chicago = self.get_space(get_chicago_cell())
@@ -105,7 +97,7 @@ class Board(object):
                         break
                 else:
                     invalid.append(cell)
-        
+
         if invalid:
             invalid_str = ", ".join([str(cell) for cell in invalid])
             raise ValueError("Tiles at the following spots have no neighbors and no stations: {}".format(invalid_str))
@@ -114,18 +106,18 @@ class Board(object):
         if old_tile and old_tile.is_terminal_city:
             raise ValueError("Cannot upgrade the terminal cities.")
 
-        if not old_tile or not old_tile.is_city:
-            if tile.is_city or tile.is_z:
-                tile_type = "Z city" if tile.is_z else "city"
-                raise ValueError("{} is a track space, but you placed a {} ({}).".format(cell, tile_type, tile.id))
-        elif old_tile.is_z:
-            if not tile.is_z:
-                tile_type = "city" if tile.is_city else "track"
-                raise ValueError("{} is a Z city space, but you placed a {} ({}).".format(cell, tile_type, tile.id))
-        elif old_tile.is_city:
-            if not tile.is_city or tile.is_z:
-                tile_type = "Z city" if tile.is_z else "track"
-                raise ValueError("{} is a regular city space, but you placed a {} ({}).".format(cell, tile_type, tile.id))
+        if old_tile:
+            if old_tile.is_city != tile.is_city:
+                raise ValueError("Tried to mix a city and non-city tile.")
+
+            if tile.is_city:
+                if old_tile.upgrade_attrs != tile.upgrade_attrs:
+                    old_tile_type = ", ".join(old_tile.upgrade_attrs) if old_tile.upgrade_attrs else "city"
+                    tile_type = ", ".join(tile.upgrade_attrs) if tile.upgrade_attrs else "city"
+                    raise ValueError("Tried to mix a {} tile and a {} city tile.".format(old_tile_type, tile_type))
+        else:
+            if tile.is_city:
+                raise ValueError("Tried to place a city tile on a track space.")
 
     def _validate_place_tile_neighbors(self, cell, tile, orientation):
         for neighbor in PlacedTile.get_paths(cell, tile, orientation):

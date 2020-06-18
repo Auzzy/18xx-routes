@@ -9,10 +9,10 @@ _TILES = {}
 
 class Tile(object):
     @staticmethod
-    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_z=False, is_chicago=False):
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
         
         paths = collections.defaultdict(list)
-        if is_city and not is_chicago:
+        if is_city and "chicago" not in upgrade_attrs:
             exits = set(edges)
             for side in exits:
                 paths[side].extend(list(exits - {side}))
@@ -21,26 +21,17 @@ class Tile(object):
                 paths[edge[0]].append(edge[1])
                 paths[edge[1]].append(edge[0])
 
-        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, is_z, is_chicago)
+        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, capacity, upgrade_attrs)
 
-    def __init__(self, id, paths, value, quantity, phase, is_city=False, is_z=False, is_chicago=False):
+    def __init__(self, id, paths, value, quantity, phase, is_city=False, capacity=0, upgrade_attrs=set()):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
         self.quantity = quantity
         self.upgrade_level = upgrade_level
         self.is_city = is_city
-        self.is_z = is_z
-        self.is_chicago = is_chicago
-
-        if self.is_chicago:
-            self.capacity = 4
-        elif self.is_z:
-            self.capacity = min(self.phase, 3)
-        elif self.is_city:
-            self.capacity = min(self.phase, 2)
-        else:
-            self.capacity = 0
+        self.capacity = capacity
+        self.upgrade_attrs = set(upgrade_attrs)
 
 
 def _load_all(game):
