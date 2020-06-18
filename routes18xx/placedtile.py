@@ -1,6 +1,6 @@
 import collections
 
-from routes18xx.cell import Cell, get_chicago_cell
+from routes18xx.cell import Cell
 from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 
 class PlacedTile(object):
@@ -106,34 +106,66 @@ class PlacedTile(object):
         else:
             return tuple(self._paths.keys())
 
-class Chicago(PlacedTile):
+class SplitCity(PlacedTile):
     @staticmethod
-    def place(tile, exit_cell_to_station={}, port_value=None, meat_value=None):
-        paths = PlacedTile.get_paths(get_chicago_cell(), tile, 0)
-        return Chicago(tile, exit_cell_to_station, paths, port_value, meat_value)
+    def _map_branches_to_cells(cell, orientation, branch_to_station):
+        branches_to_cells = {}
+        for branch, value in branch_to_station.items():
+            branch_to_cells = []
+            for path in branch:
+                path_to_cells = []
+                for side in path:
+                    rotated_side = int(orientation) if isinstance(side, Cell) else PlacedTile._rotate(side, orientation)
+                    path_to_cells.append(cell.neighbors[rotated_side])
+                branch_to_cells.append(tuple(path_to_cells))
+            branches_to_cells[tuple(branch_to_cells)] = value
+        return branches_to_cells
 
-    def __init__(self, tile, exit_cell_to_station={}, paths={}, port_value=None, meat_value=None):
-        super(Chicago, self).__init__("Chicago", get_chicago_cell(), tile, paths, port_value, meat_value)
-        
-        self.exit_cell_to_station = exit_cell_to_station
+    @staticmethod
+    def place(name, cell, tile, orientation, port_value=None, meat_value=None):
+        paths = PlacedTile.get_paths(cell, tile, orientation)
+        return SplitCity(name, cell, tile, orientation, paths, port_value, meat_value)
 
-    def add_station(self, railroad, exit_cell):
-        if exit_cell not in self.paths():
-            raise ValueError("Illegal exit cell for Chicago")
+    def __init__(self, name, cell, tile, orientation, paths={}, port_value=None, meat_value=None):
+        super(SplitCity, self).__init__(name, cell, tile, paths, port_value, meat_value)
 
-        station = super(Chicago, self).add_station(railroad)
-        self.exit_cell_to_station[exit_cell] = station
+        self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
+        self.branch_to_station = {key: [] for key in self.capacity.keys()}
+
+    def add_station(self, railroad, branch):
+        if self.has_station(railroad.name):
+            raise ValueError("{} already has a station in {} ({}).".format(railroad.name, self.name, self.cell))
+
+        split_branch = tuple()
+        for branch_key, value in self.capacity.items():
+            if branch in branch_key:
+                split_branch = branch_key
+                break
+        else:
+            raise ValueError("Attempted to add a station to a non-existant branch of a split city: {}".format(branch))
+
+        if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
+            raise ValueError("The {} branch of {} ({}) cannot hold any more stations.".format(branch, self.name, self.cell))
+
+        station = Station(self.cell, railroad)
+        self._stations.append(station)
+        self.branch_to_station[split_branch].append(station)
         return station
 
-    def get_station_exit_cell(self, user_station):
-        for exit_cell, station in self.exit_cell_to_station.items():
-            if station == user_station:
-                return exit_cell
-        raise ValueError("The requested station was not found: {}".format(user_station))
-
     def passable(self, enter_cell, railroad):
-        chicago_station = self.exit_cell_to_station.get(enter_cell)
-        if chicago_station:
-            return chicago_station.railroad == railroad
-        else:
-            return True
+        for branch, stations in self.branch_to_station.items():
+            for path in branch:
+                if enter_cell in path:
+                    if len(stations) < self.capacity[branch]:
+                        return True
+
+                    for station in stations:
+                        if station.railroad == railroad:
+                            return True
+        return False
+
+    def get_station_branch(self, user_station):
+        for branch, stations in self.branch_to_station.items():
+            if user_station in stations:
+                return branch
+        raise ValueError("The requested station was not found: {}".format(user_station))

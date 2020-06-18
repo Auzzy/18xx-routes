@@ -1,8 +1,8 @@
 import itertools
 
 from routes18xx import boardtile
-from routes18xx.cell import Cell, get_chicago_cell, board_cells, initialize_cells
-from routes18xx.placedtile import Chicago, PlacedTile
+from routes18xx.cell import Cell, board_cells, initialize_cells
+from routes18xx.placedtile import PlacedTile, SplitCity
 from routes18xx.tokens import Station
 
 class Board(object):
@@ -29,8 +29,8 @@ class Board(object):
         if old_tile:
             self._validate_place_tile_upgrade(old_tile, cell, tile, orientation)
 
-            if "chicago" in old_tile.upgrade_attrs:
-                self._placed_tiles[cell] = Chicago.place(tile, old_tile.exit_cell_to_station, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+            if isinstance(old_tile, (boardtile.SplitCity, SplitCity)):
+                self._placed_tiles[cell] = SplitCity.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
             else:
                 self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
         else:
@@ -38,19 +38,20 @@ class Board(object):
 
     def place_station(self, coord, railroad):
         cell = Cell.from_coord(coord)
-        if cell == get_chicago_cell():
-            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago_station().".format(get_chicago_cell()))
-
         tile = self.get_space(cell)
         if not tile.is_city:
             raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
 
+        if isinstance(tile, (boardtile.SplitCity, SplitCity)):
+            raise ValueError("Since {} is a split city tile, please use Board.place_split_station().".format(coord))
+
         tile.add_station(railroad)
 
-    def place_chicago_station(self, railroad, exit_side):
-        chicago = self.get_space(get_chicago_cell())
-        exit_cell = get_chicago_cell().neighbors[exit_side]
-        chicago.add_station(railroad, exit_cell)
+    def place_split_station(self, coord, railroad, branch):
+        cell = Cell.from_coord(coord)
+        space = self.get_space(cell)
+        path = tuple([Cell.from_coord(coord) for coord in branch])
+        space.add_station(railroad, path)
 
     def place_seaport_token(self, coord, railroad):
         if railroad.is_removed:

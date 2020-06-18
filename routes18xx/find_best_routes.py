@@ -211,9 +211,13 @@ def _filter_invalid_routes(routes, board, railroad):
             continue
         # If the only station is Chicago, the path must be [D6, C5], or exit through the appropriate side.
         elif [get_chicago_cell()] == [station.cell for station in stations_on_route]:
-            exit_cell = board.get_space(get_chicago_cell()).get_station_exit_cell(stations_on_route[0])
-            chicago_exit_route = Route.create([chicago_space, board.get_space(exit_cell)])
-            if not (len(route) == 2 and route.contains_cell(get_chicago_connections_cell())) and not route.overlap(chicago_exit_route):
+            station_branch = board.get_space(get_chicago_cell()).get_station_branch(stations_on_route[0])
+            chicago_exit_routes = []
+            for paths in station_branch:
+                exit_cell = paths[0] if paths[0] != get_chicago_connections_cell() else paths[1]
+                chicago_exit_routes.append(Route.create([chicago_space, board.get_space(exit_cell)]))
+            if not (len(route) == 2 and route.contains_cell(get_chicago_connections_cell())) \
+                    and not any(route.overlap(chicago_exit_route) for chicago_exit_route in chicago_exit_routes):
                 continue
 
         valid_routes.add(route)

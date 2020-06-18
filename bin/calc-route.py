@@ -18,7 +18,7 @@ def parse_args():
                   "coord; tile_id; orientation"))
     parser.add_argument("railroads-file",
             help=("CSV file containing railroads. Semi-colon is the column separator. The columns are: "
-                  "name; trains (comma-separated); stations (comma-separated); chicago_station_exit (optional)"))
+                  "name; trains (comma-separated); stations (comma-separated); station_branch_map (optional, repeating)"))
     parser.add_argument("-p", "--private-companies-file",
             help=("CSV file containing private company info. Semi-colon is the column separator. A column's precise "
                   "meaning depends on the company. The columns are: "

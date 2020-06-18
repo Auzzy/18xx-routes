@@ -4,11 +4,15 @@ import json
 
 from routes18xx import get_data_file, trains
 from routes18xx.tokens import Station
-from routes18xx.cell import get_chicago_cell, Cell
+from routes18xx.cell import Cell
+
+from routes18xx import boardtile, placedtile
+
 
 _RAILROADS_FILENAME = "railroads.json"
 
-FIELDNAMES = ("name", "trains", "stations", "chicago_station_exit_coord")
+FIELDNAMES = ("name", "trains", "stations")
+RESTKEY = "station_branch_map"
 
 class Railroad(object):
     @staticmethod
@@ -44,13 +48,29 @@ class RemovedRailroad(Railroad):
     def is_removed(self):
         return True
 
+def _build_station_branch_map(station_branch_map_strs):
+    if not station_branch_map_strs or (len(station_branch_map_strs) == 1 and not station_branch_map_strs[0].strip()):
+        return {}
+
+    station_branch_map = {}
+    for station_branch_map_str in station_branch_map_strs:
+        coord, branch_str = station_branch_map_str.split(':')
+        branch_str = branch_str.strip()
+        if not branch_str.startswith('[') or not branch_str.endswith(']'):
+            raise ValueError("Malformed station branch map.")
+
+        branch_str = branch_str[1:-1]
+        coords = tuple([coord.strip() for coord in branch_str.split(',')])
+        station_branch_map[coord.strip()] = coords
+    return station_branch_map
+
 def _load_railroad_info(game):
     with open(get_data_file(game, _RAILROADS_FILENAME)) as railroads_file:
         return json.load(railroads_file)
 
 def load_from_csv(game, board, railroads_filepath):
     with open(railroads_filepath, newline='') as railroads_file:
-        return load(game, board, csv.DictReader(railroads_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True))
+            return load(game, board, csv.DictReader(railroads_file, fieldnames=FIELDNAMES, delimiter=';', restkey=RESTKEY, skipinitialspace=True))
 
 def load(game, board, railroads_rows):
     railroad_info = _load_railroad_info(game)
@@ -85,16 +105,17 @@ def load(game, board, railroads_rows):
         station_coords_str = railroad_args.get("stations")
         if station_coords_str:
             station_coords = [coord.strip() for coord in station_coords_str.split(",")]
+            station_branch_map = _build_station_branch_map(railroad_args.get("station_branch_map"))
             for coord in station_coords:
-                if coord and coord != info["home"] and Cell.from_coord(coord) != get_chicago_cell():
-                    board.place_station(coord, railroad)
+                if coord and coord != info["home"]:
+                    if isinstance(board.get_space(Cell.from_coord(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
+                        station_branch = station_branch_map.get(coord)
+                        if not station_branch:
+                            raise ValueError("A split city ({}) is listed as a station for {}, but no station branch was specified.".format(coord, railroad.name))
 
-            if str(get_chicago_cell()) in station_coords:
-                chicago_station_exit_coord = str(railroad_args.get("chicago_station_exit_coord", "")).strip()
-                if not chicago_station_exit_coord:
-                    raise ValueError("Chicago is listed as a station for {}, but not exit side was specified.".format(railroad.name))
-
-                board.place_chicago_station(railroad, int(chicago_station_exit_coord))
+                        board.place_split_station(coord, railroad, station_branch)
+                    else:
+                        board.place_station(coord, railroad)
 
     for name, info in railroad_info.items():
         if name in railroads:

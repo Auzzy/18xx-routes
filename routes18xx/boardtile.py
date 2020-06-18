@@ -2,8 +2,9 @@ import collections
 import json
 
 from routes18xx import get_data_file
-from routes18xx.cell import Cell, get_chicago_cell
+from routes18xx.cell import Cell
 from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
+import itertools
 
 BASE_BOARD_FILENAME = "base-board.json"
 
@@ -79,16 +80,44 @@ class Track(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
+    def _calc_paths(cell, edges):
+        paths = collections.defaultdict(list)
+        for exits in edges:
+            if isinstance(exits, list):
+                for path in itertools.permutations(exits, 2):
+                    paths[cell.neighbors[path[0]]].append(cell.neighbors[path[1]])
+            else:
+                paths[cell.neighbors[exits]] = []
+        return paths
+
+    @staticmethod
     def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), port_value=0, meat_value=0):
         cell = Cell.from_coord(coord)
 
-        neighbors = {cell.neighbors[side] for side in edges}
+        neighbors = set()
+        for sides in edges:
+            if isinstance(sides, list):
+                neighbors.update({cell.neighbors[side] for side in sides})
+            else:
+                neighbors.add(cell.neighbors[sides])
 
-        if cell == get_chicago_cell():
-            paths = {cell.neighbors[side]: [] for side in edges}
-            return Chicago(upgrade_level, paths, neighbors, value, capacity, port_value=port_value, meat_value=meat_value)
+        paths = City._calc_paths(cell, edges)
+
+        if isinstance(capacity, dict):
+            split_city_capacity = {}
+            for branch_paths_str, branch_capacity in capacity.items():
+                branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
+                branch_path_list = []
+                for entrance, exits in branch_path_dict.items():
+                    if not exits:
+                        branch_paths = [(entrance, )]
+                    else:
+                        branch_paths = [(entrance, exit) for exit in exits]
+                    branch_path_list.extend(tuple(branch_paths))
+
+                split_city_capacity[tuple(branch_path_list)] = branch_capacity
+            return SplitCity(name, cell, upgrade_level, paths, neighbors, value, split_city_capacity, upgrade_attrs, port_value=port_value, meat_value=meat_value)
         else:
-            paths = {neighbor: list(neighbors - {neighbor}) for neighbor in neighbors}
             return City(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, port_value=port_value, meat_value=meat_value)
 
     def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs=set(), port_value=0, meat_value=0):
@@ -129,25 +158,49 @@ class City(BoardSpace):
     def passable(self, enter_cell, railroad):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
-class Chicago(City):
-    def __init__(self, upgrade_level, paths, neighbors, value, capacity, port_value, meat_value):
-        super(Chicago, self).__init__("Chicago", get_chicago_cell(), upgrade_level, paths, neighbors, value, capacity, ["chicago"],
+class SplitCity(City):
+    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, port_value, meat_value):
+        super(SplitCity, self).__init__(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs,
                 port_value=port_value, meat_value=meat_value)
 
-        self.exit_cell_to_station = {}
+        self.branch_to_station = {key: [] for key in self.capacity.keys()}
 
-    def add_station(self, railroad, exit_cell):
-        station = super(Chicago, self).add_station(railroad)
-        self.exit_cell_to_station[exit_cell] = station
+    def add_station(self, railroad, branch):
+        if self.has_station(railroad.name):
+            raise ValueError("{} already has a station in {} ({}).".format(railroad.name, self.name, self.cell))
+
+        split_branch = tuple()
+        for branch_key, value in self.capacity.items():
+            if branch in branch_key:
+                split_branch = branch_key
+                break
+        else:
+            raise ValueError("Attempted to add a station to a non-existant branch of a split city: {}".format(branch))
+
+        if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
+            raise ValueError("The {} branch of {} ({}) cannot hold any more stations.".format(branch, self.name, self.cell))
+
+        station = Station(self.cell, railroad)
+        self._stations.append(station)
+        self.branch_to_station[split_branch].append(station)
         return station
 
     def passable(self, enter_cell, railroad):
+        for branch, stations in self.branch_to_station.items():
+            for path in branch:
+                if enter_cell in path:
+                    if len(stations) < self.capacity[branch]:
+                        return True
+
+                    for station in stations:
+                        if station.railroad == railroad:
+                            return True
         return False
 
-    def get_station_exit_cell(self, user_station):
-        for exit_cell, station in self.exit_cell_to_station.items():
-            if station == user_station:
-                return exit_cell
+    def get_station_branch(self, user_station):
+        for branch, stations in self.branch_to_station.items():
+            if user_station in stations:
+                return branch
         raise ValueError("The requested station was not found: {}".format(user_station))
 
 class TerminalCity(BoardSpace):
