@@ -8,7 +8,7 @@ from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 BASE_BOARD_FILENAME = "base-board.json"
 
 class BoardSpace(object):
-    def __init__(self, name, cell, upgrade_level, paths, is_city=False, is_z=False, is_chicago=False, is_terminal_city=False,
+    def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(), is_terminal_city=False,
             port_value=0, meat_value=0):
         self.name = name or str(cell)
         self.cell = cell
@@ -20,8 +20,7 @@ class BoardSpace(object):
         self.meat_token = None
 
         self.is_city = is_city
-        self.is_z = is_z
-        self.is_chicago = is_chicago
+        self.upgrade_attrs = set(upgrade_attrs)
         self.is_terminal_city = is_terminal_city
 
     def paths(self, enter_from=None, railroad=None):
@@ -80,7 +79,7 @@ class Track(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
-    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, is_z=False, port_value=0, meat_value=0):
+    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), port_value=0, meat_value=0):
         cell = Cell.from_coord(coord)
 
         neighbors = {cell.neighbors[side] for side in edges}
@@ -90,10 +89,10 @@ class City(BoardSpace):
             return Chicago(upgrade_level, paths, neighbors, value, capacity, port_value=port_value, meat_value=meat_value)
         else:
             paths = {neighbor: list(neighbors - {neighbor}) for neighbor in neighbors}
-            return City(name, cell, upgrade_level, paths, neighbors, value, capacity, is_z, False, port_value=port_value, meat_value=meat_value)
+            return City(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, port_value=port_value, meat_value=meat_value)
 
-    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, is_z=False, is_chicago=False, port_value=0, meat_value=0):
-        super(City, self).__init__(name, cell, upgrade_level, paths, True, is_z, is_chicago, port_value=port_value, meat_value=meat_value)
+    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs=set(), port_value=0, meat_value=0):
+        super(City, self).__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, port_value=port_value, meat_value=meat_value)
 
         self.neighbors = neighbors
         self._value = value
@@ -132,7 +131,7 @@ class City(BoardSpace):
 
 class Chicago(City):
     def __init__(self, upgrade_level, paths, neighbors, value, capacity, port_value, meat_value):
-        super(Chicago, self).__init__("Chicago", get_chicago_cell(), upgrade_level, paths, neighbors, value, capacity, False, True,
+        super(Chicago, self).__init__("Chicago", get_chicago_cell(), upgrade_level, paths, neighbors, value, capacity, ["chicago"],
                 port_value=port_value, meat_value=meat_value)
 
         self.exit_cell_to_station = {}
