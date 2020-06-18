@@ -1,4 +1,5 @@
 import collections
+import itertools
 import json
 
 from routes18xx import get_data_file
@@ -9,21 +10,38 @@ _TILES = {}
 
 class Tile(object):
     @staticmethod
-    def create(id, edges, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
-        
+    def _calc_paths(edges):
         paths = collections.defaultdict(list)
-        if is_city and "chicago" not in upgrade_attrs:
-            exits = set(edges)
-            for side in exits:
-                paths[side].extend(list(exits - {side}))
-        else:
-            for edge in edges:
-                paths[edge[0]].append(edge[1])
-                paths[edge[1]].append(edge[0])
+        for exits in edges:
+            if isinstance(exits, list):
+                for path in itertools.permutations(exits, 2):
+                    paths[path[0]].append(path[1])
+            else:
+                paths[exits] = []
+        return paths
+
+    @staticmethod
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
+        paths = Tile._calc_paths(edges)
+
+        if isinstance(capacity, dict):
+            split_city_capacity = {}
+            for branch_paths_str, branch_capacity in capacity.items():
+                branch_path_dict = Tile._calc_paths(json.loads(branch_paths_str))
+                branch_path_list = []
+                for entrance, exits in branch_path_dict.items():
+                    if not exits:
+                        branch_paths = [(entrance, )]
+                    else:
+                        branch_paths = [(entrance, exit) for exit in exits]
+                    branch_path_list.extend(tuple(branch_paths))
+
+                split_city_capacity[tuple(branch_path_list)] = branch_capacity
+            capacity = split_city_capacity
 
         return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, capacity, upgrade_attrs)
 
-    def __init__(self, id, paths, value, quantity, phase, is_city=False, capacity=0, upgrade_attrs=set()):
+    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
