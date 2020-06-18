@@ -1,4 +1,8 @@
-import itertools
+import json
+
+from routes18xx import get_data_file
+
+BASE_BOARD_FILENAME = "base-board.json"
 
 _CELL_DB = {}
 
@@ -60,19 +64,19 @@ class Cell(object):
     def __repr__(self):
         return str(self)
 
-_CELL_DB = {
-    "A": {15: Cell("A", 15)},
-    "B": {col: Cell("B", col) for col in range(8, 19, 2)},
-    "C": {col: Cell("C", col) for col in itertools.chain([5], range(7, 18, 2), [21])},
-    "D": {col: Cell("D", col) for col in itertools.chain(range(6, 15, 2), range(18, 23, 2))},
-    "E": {col: Cell("E", col) for col in range(5, 24, 2)},
-    "F": {col: Cell("F", col) for col in range(4, 23, 2)},
-    "G": {col: Cell("G", col) for col in range(3, 22, 2)},
-    "H": {col: Cell("H", col) for col in itertools.chain(range(2, 17, 2), [20])},
-    "I": {col: Cell("I", col) for col in itertools.chain(range(1, 12, 2), range(15, 18, 2))},
-    "J": {col: Cell("J", col) for col in itertools.chain(range(4, 11, 2))},
-    "K": {3: Cell("K", 3)}
-}
+def initialize_cells(game):
+    global _CELL_DB
+
+    with open(get_data_file(game, BASE_BOARD_FILENAME)) as board_file:
+        boundaries_json = json.load(board_file)["boundaries"]
+        for row, col_ranges in boundaries_json.items():
+            _CELL_DB[row] = {}
+            for col_range in col_ranges:
+                if isinstance(col_range, int):
+                    _CELL_DB[row][col_range] = Cell(row, col_range)
+                elif isinstance(col_range, list):
+                    for col in range(col_range[0], col_range[1] + 1, 2):
+                        _CELL_DB[row][col] = Cell(row, col)
 
 def board_cells():
     for row, columns in _CELL_DB.items():
