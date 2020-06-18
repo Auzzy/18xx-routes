@@ -9,7 +9,7 @@ import queue
 from routes18xx.board import Board
 from routes18xx.boardtile import EastTerminalCity
 from routes18xx.route import Route
-from routes18xx.cell import CHICAGO_CELL, CHICAGO_CONNECTIONS_CELL
+from routes18xx.cell import get_chicago_cell, get_chicago_connections_cell
 
 LOG = logging.getLogger(__name__)
 
@@ -176,9 +176,9 @@ def _filter_invalid_routes(routes, board, railroad):
     (important for the Chicago checks), which would be tricky, since the algorithm operates on pairs of cells (at the
     time of writing).
     """
-    chicago_space = board.get_space(CHICAGO_CELL)
+    chicago_space = board.get_space(get_chicago_cell())
 
-    chicago_neighbor_cells = [cell for cell in CHICAGO_CELL.neighbors.values() if cell != CHICAGO_CONNECTIONS_CELL]
+    chicago_neighbor_cells = [cell for cell in get_chicago_cell().neighbors.values() if cell != get_chicago_connections_cell()]
     stations = board.stations(railroad.name)
 
     # A sieve style filter. If a condition isn't met, iteration continues to the next item. Items meeting all conditions
@@ -194,9 +194,9 @@ def _filter_invalid_routes(routes, board, railroad):
             continue
 
         # If the route goes through Chicago and isn't [C5, D6], ensure the path it took either contains its station or is unblocked
-        if route.contains_cell(CHICAGO_CONNECTIONS_CELL) and len(route.cities) != 2:
+        if route.contains_cell(get_chicago_connections_cell()) and len(route.cities) != 2:
             # Finds the subroute which starts at Chicago and is 3 tiles long. That is, it will go [C5, D6, chicago exit]
-            all_chicago_subroutes = [subroute for subroute in route.subroutes(CHICAGO_CONNECTIONS_CELL) if len(subroute) == 3]
+            all_chicago_subroutes = [subroute for subroute in route.subroutes(get_chicago_connections_cell()) if len(subroute) == 3]
             chicago_subroute = all_chicago_subroutes[0] if all_chicago_subroutes else None
             for cell in chicago_neighbor_cells:
                 chicago_exit = chicago_subroute and chicago_subroute.contains_cell(cell)
@@ -210,10 +210,10 @@ def _filter_invalid_routes(routes, board, railroad):
         if not stations_on_route:
             continue
         # If the only station is Chicago, the path must be [D6, C5], or exit through the appropriate side.
-        elif [CHICAGO_CELL] == [station.cell for station in stations_on_route]:
-            exit_cell = board.get_space(CHICAGO_CELL).get_station_exit_cell(stations_on_route[0])
+        elif [get_chicago_cell()] == [station.cell for station in stations_on_route]:
+            exit_cell = board.get_space(get_chicago_cell()).get_station_exit_cell(stations_on_route[0])
             chicago_exit_route = Route.create([chicago_space, board.get_space(exit_cell)])
-            if not (len(route) == 2 and route.contains_cell(CHICAGO_CONNECTIONS_CELL)) and not route.overlap(chicago_exit_route):
+            if not (len(route) == 2 and route.contains_cell(get_chicago_connections_cell())) and not route.overlap(chicago_exit_route):
                 continue
 
         valid_routes.add(route)

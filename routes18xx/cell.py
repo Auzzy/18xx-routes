@@ -1,9 +1,6 @@
 import itertools
 
-CHICAGO_CELL = None  # Defined below
-CHICAGO_CONNECTIONS_CELL = None  # Defined below
 _CELL_DB = {}
-
 
 class Cell(object):
     @staticmethod
@@ -77,10 +74,13 @@ _CELL_DB = {
     "K": {3: Cell("K", 3)}
 }
 
-CHICAGO_CELL = Cell.from_coord("D6")
-CHICAGO_CONNECTIONS_CELL = Cell.from_coord("C5")
-
 def board_cells():
     for row, columns in _CELL_DB.items():
         for column, cell in columns.items():
             yield cell
+
+def get_chicago_cell():
+    return Cell.from_coord("D6")
+
+def get_chicago_connections_cell():
+    return Cell.from_coord("C5")

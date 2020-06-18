@@ -1,7 +1,7 @@
 import itertools
 
 from routes18xx import boardtile
-from routes18xx.cell import Cell, CHICAGO_CELL, board_cells
+from routes18xx.cell import Cell, get_chicago_cell, board_cells
 from routes18xx.placedtile import Chicago, PlacedTile
 from routes18xx.tokens import Station
 
@@ -17,8 +17,8 @@ class Board(object):
 
     def place_tile(self, coord, tile, orientation):
         cell = Cell.from_coord(coord)
-        if cell == CHICAGO_CELL or tile.is_chicago:
-            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago().".format(CHICAGO_CELL))
+        if cell == get_chicago_cell() or tile.is_chicago:
+            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago().".format(get_chicago_cell()))
 
         if int(orientation) not in range(0, 6):
             raise ValueError("Orientation out of range. Expected between 0 and 5, inclusive. Got {}.".format(orientation))
@@ -35,8 +35,8 @@ class Board(object):
 
     def place_station(self, coord, railroad):
         cell = Cell.from_coord(coord)
-        if cell == CHICAGO_CELL:
-            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago_station().".format(CHICAGO_CELL))
+        if cell == get_chicago_cell():
+            raise ValueError("Since Chicago ({}) is a special tile, please use Board.place_chicago_station().".format(get_chicago_cell()))
 
         tile = self.get_space(cell)
         if not tile.is_city:
@@ -45,7 +45,7 @@ class Board(object):
         tile.add_station(railroad)
 
     def place_chicago(self, tile):
-        cell = CHICAGO_CELL
+        cell = get_chicago_cell()
         old_tile = self._placed_tiles.get(cell) or self._board_tiles.get(cell)
         if not old_tile.phase or old_tile.phase >= tile.phase:
             raise ValueError("{}: Going from phase {} to phase {} is not an upgrade.".format(cell, old_tile.phase, tile.phase))
@@ -54,8 +54,8 @@ class Board(object):
         self._placed_tiles[cell] = new_tile
 
     def place_chicago_station(self, railroad, exit_side):
-        chicago = self.get_space(CHICAGO_CELL)
-        exit_cell = CHICAGO_CELL.neighbors[exit_side]
+        chicago = self.get_space(get_chicago_cell())
+        exit_cell = get_chicago_cell().neighbors[exit_side]
         chicago.add_station(railroad, exit_cell)
 
     def place_seaport_token(self, coord, railroad):

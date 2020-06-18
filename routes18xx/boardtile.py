@@ -2,7 +2,7 @@ import collections
 import json
 
 from routes18xx import get_data_file
-from routes18xx.cell import Cell, CHICAGO_CELL
+from routes18xx.cell import Cell, get_chicago_cell
 from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 
 BASE_BOARD_FILENAME = "base-board.json"
@@ -85,7 +85,7 @@ class City(BoardSpace):
 
         neighbors = {cell.neighbors[side] for side in edges}
 
-        if cell == CHICAGO_CELL:
+        if cell == get_chicago_cell():
             paths = {cell.neighbors[side]: [] for side in edges}
             return Chicago(upgrade_level, paths, neighbors, value, capacity, port_value=port_value, meat_value=meat_value)
         else:
@@ -132,7 +132,7 @@ class City(BoardSpace):
 
 class Chicago(City):
     def __init__(self, upgrade_level, paths, neighbors, value, capacity, port_value, meat_value):
-        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, upgrade_level, paths, neighbors, value, capacity, False, True,
+        super(Chicago, self).__init__("Chicago", get_chicago_cell(), upgrade_level, paths, neighbors, value, capacity, False, True,
                 port_value=port_value, meat_value=meat_value)
 
         self.exit_cell_to_station = {}
