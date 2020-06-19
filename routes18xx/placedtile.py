@@ -117,24 +117,6 @@ class Chicago(PlacedTile):
         
         self.exit_cell_to_station = exit_cell_to_station
 
-    def paths(self, enter_from=None, railroad=None):
-        paths = list(super(Chicago, self).paths(enter_from))
-        if railroad:
-            enter_from_station = self.exit_cell_to_station.get(enter_from)
-            if enter_from_station:
-                if enter_from_station.railroad != railroad:
-                    paths = []
-            else:
-                if not enter_from:
-                    station = self.get_station(railroad.name)
-                    paths = [self.get_station_exit_cell(station), Cell.from_coord("C5")] if station else []
-                else:
-                    for exit in paths:
-                        station = self.exit_cell_to_station.get(exit)
-                        if station and station.railroad != railroad:
-                            paths.remove(exit)
-        return tuple(paths)
-
     def add_station(self, railroad, exit_cell):
         if exit_cell not in self.paths():
             raise ValueError("Illegal exit cell for Chicago")
