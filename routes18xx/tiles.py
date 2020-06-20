@@ -2,8 +2,6 @@ import collections
 import itertools
 import json
 
-from routes18xx import get_data_file
-
 
 _TILE_FILENAME = "tiles.json"
 _TILES = {}
@@ -53,7 +51,7 @@ class Tile(object):
 
 
 def _load_all(game):
-    with open(get_data_file(game, _TILE_FILENAME)) as tiles_file:
+    with open(game.get_data_file(_TILE_FILENAME)) as tiles_file:
         tiles_json = json.load(tiles_file)
 
     return {int(id): Tile.create(int(id), **args) for id, args in tiles_json.items()}

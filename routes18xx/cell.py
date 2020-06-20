@@ -1,7 +1,5 @@
 import json
 
-from routes18xx import get_data_file
-
 BASE_BOARD_FILENAME = "base-board.json"
 
 _CELL_DB = {}
@@ -67,7 +65,7 @@ class Cell(object):
 def initialize_cells(game):
     global _CELL_DB
 
-    with open(get_data_file(game, BASE_BOARD_FILENAME)) as board_file:
+    with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
         boundaries_json = json.load(board_file)["boundaries"]
         for row, col_ranges in boundaries_json.items():
             _CELL_DB[row] = {}
