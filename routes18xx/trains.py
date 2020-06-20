@@ -1,7 +1,5 @@
 import json
 
-from routes18xx import get_data_file
-
 _TRAINS_FILENAME = "trains.json"
 
 class Train:
@@ -63,7 +61,7 @@ def convert(train_info, trains_str):
     return railroad_trains
 
 def load_train_info(game):
-    with open(get_data_file(game, _TRAINS_FILENAME)) as trains_file:
+    with open(game.get_data_file(_TRAINS_FILENAME)) as trains_file:
         trains_json = json.load(trains_file)
 
     return [Train.create(info.get("name"), info["collect"], info.get("visit"), info["phase"]) for info in trains_json["trains"]]

@@ -2,7 +2,7 @@ import csv
 import itertools
 import json
 
-from routes18xx import get_data_file, trains
+from routes18xx import trains
 from routes18xx.tokens import Station
 from routes18xx.cell import Cell
 
@@ -65,7 +65,7 @@ def _build_station_branch_map(station_branch_map_strs):
     return station_branch_map
 
 def _load_railroad_info(game):
-    with open(get_data_file(game, _RAILROADS_FILENAME)) as railroads_file:
+    with open(game.get_data_file(_RAILROADS_FILENAME)) as railroads_file:
         return json.load(railroads_file)
 
 def load_from_csv(game, board, railroads_filepath):

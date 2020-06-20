@@ -164,7 +164,6 @@ def _walk_routes(board, railroad, enter_from, cell, length, visited=None):
 
     return tuple(set(routes))
 
-
 def _filter_invalid_routes(routes, board, railroad):
     """
     Given a collection of routes, returns a new set containing only valid routes. Invalid routes removed:
@@ -246,7 +245,7 @@ def _find_connected_routes(board, railroad, station, train):
     LOG.debug("Found %d routes from connected cities.", len(connected_routes))
     return connected_routes
 
-def _find_all_routes(board, railroad):
+def _find_all_routes(game, board, railroad):
     LOG.info("Finding all possible routes for each train from %s's stations.", railroad.name)
 
     stations = board.stations(railroad.name)
@@ -267,7 +266,7 @@ def _find_all_routes(board, railroad):
             routes.update(_get_subroutes(routes, stations))
 
             LOG.debug("Filtering out invalid routes")
-            routes_by_train[train] = _filter_invalid_routes(routes, board, railroad)
+            routes_by_train[train] = filter_invalid_routes(routes, board, railroad)
 
     LOG.info("Found %d routes.", sum(len(route) for route in routes_by_train.values()))
     for train, routes in routes_by_train.items():
@@ -280,13 +279,13 @@ def _detect_phase(railroads):
     all_train_phases = [train.phase for railroad in railroads.values() for train in railroad.trains]
     return max(all_train_phases) if all_train_phases else 1
 
-def find_best_routes(board, railroads, active_railroad):
+def find_best_routes(game, board, railroads, active_railroad):
     if active_railroad.is_removed:
         raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
 
     LOG.info("Finding the best route for %s.", active_railroad.name)
 
-    routes = _find_all_routes(board, active_railroad)
+    routes = _find_all_routes(game, board, active_railroad)
 
     phase = _detect_phase(railroads)
 

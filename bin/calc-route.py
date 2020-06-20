@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from routes18xx import boardstate, find_best_routes, private_companies, railroads
+from routes18xx import boardstate, find_best_routes, game, railroads, private_companies
 
 
 def parse_args():
@@ -33,16 +33,17 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
 
-    board = boardstate.load_from_csv(args["game"], args["board-state-file"])
-    railroads = railroads.load_from_csv(args["game"], board, args["railroads-file"])
-    private_companies.load_from_csv(args["game"], board, railroads, args.get("private_companies_file"))
+    game = game.Game.load(args["game"])
+    board = boardstate.load_from_csv(game, args["board-state-file"])
+    railroads = railroads.load_from_csv(game, board, args["railroads-file"])
+    private_companies.load_from_csv(game, board, railroads, args.get("private_companies_file"))
     board.validate()
 
     active_railroad = railroads[args["active-railroad"]]
     if active_railroad.is_removed:
         raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
 
-    best_routes = find_best_routes(board, railroads, active_railroad)
+    best_routes = find_best_routes(game, board, railroads, active_railroad)
     print("RESULT")
     for route in best_routes:
         city_path = " -> ".join("{} [{}]".format(city.name, route.city_values[city]) for city in route.visited_cities)

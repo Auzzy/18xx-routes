@@ -1,7 +1,6 @@
 import collections
 import json
 
-from routes18xx import get_data_file
 from routes18xx.cell import Cell
 from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 import itertools
@@ -252,7 +251,7 @@ class WestTerminalCity(TerminalCity):
 
 def load(game):
     board_tiles = []
-    with open(get_data_file(game, BASE_BOARD_FILENAME)) as board_file:
+    with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
         board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
         board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json.get("cities", {}).items()])
