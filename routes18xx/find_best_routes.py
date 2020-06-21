@@ -244,23 +244,19 @@ def _find_all_routes(game, board, railroad):
 
     return routes_by_train
 
-def _detect_phase(railroads):
-    all_train_phases = [train.phase for railroad in railroads.values() for train in railroad.trains]
-    return max(all_train_phases) if all_train_phases else 1
-
 def find_best_routes(game, board, railroads, active_railroad):
     if active_railroad.is_removed:
         raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
+
+    game.capture_phase(railroads)
 
     LOG.info("Finding the best route for %s.", active_railroad.name)
 
     routes = _find_all_routes(game, board, active_railroad)
 
-    phase = _detect_phase(railroads)
-
     LOG.info("Calculating route values.")
     route_value_by_train = {}
     for train in routes:
-        route_value_by_train[train] = [route.run(board, train, active_railroad, phase) for route in routes[train]]
+        route_value_by_train[train] = [route.run(game, board, train, active_railroad) for route in routes[train]]
 
     return _find_best_routes_by_train(game, route_value_by_train, active_railroad)

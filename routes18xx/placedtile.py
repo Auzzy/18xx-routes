@@ -41,8 +41,8 @@ class PlacedTile(object):
         self.upgrade_attrs = self.tile.upgrade_attrs
         self.is_terminal_city = False
 
-    def value(self, railroad, phase):
-        return self.tile.value + sum(token.value(railroad, phase) for token in self.tokens)
+    def value(self, game, railroad):
+        return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
 
     def passable(self, enter_cell, railroad):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)

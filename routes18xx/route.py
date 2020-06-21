@@ -42,8 +42,8 @@ class Route(object):
 
         return best_cities, sum(best_cities.values())
 
-    def value(self, board, train, railroad, phase):
-        route_city_values = {tile: tile.value(railroad, phase) for tile in self if tile.is_city}
+    def value(self, game, board, train, railroad):
+        route_city_values = {tile: tile.value(game, railroad) for tile in self if tile.is_city}
         station_cells = {station.cell for station in board.stations(railroad.name)}
         station_cities = {tile: value for tile, value in route_city_values.items() if tile.cell in station_cells}
 
@@ -56,7 +56,7 @@ class Route(object):
             # There is an east-west route. Confirm that a route including those
             # terminal cities is the highest value route (including bonuses).
             route_city_values_e2w = route_city_values.copy()
-            route_city_values_e2w.update({terminal: terminal.value(railroad, phase, east_to_west) for terminal in terminals})
+            route_city_values_e2w.update({terminal: terminal.value(game, railroad, east_to_west) for terminal in terminals})
 
             best_cities_e2w, route_value_e2w = self._best_cities(train, route_city_values_e2w, station_cities, terminals)
 
@@ -105,11 +105,11 @@ class Route(object):
     def __str__(self):
         return ", ".join([str(tile.cell) for tile in self])
 
-    def run(self, board, train, railroad, phase):
+    def run(self, game, board, train, railroad):
         if railroad.is_removed:
             raise ValueError("Cannot run routes for a removed railroad: {}".format(railroad.name))
 
-        visited_cities = self.value(board, train, railroad, phase)
+        visited_cities = self.value(game, board, train, railroad)
         return _RunRoute(self, visited_cities, train)
 
 class _RunRoute(object):

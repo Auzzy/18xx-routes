@@ -36,6 +36,8 @@ if __name__ == "__main__":
     game = game.Game.load(args["game"])
     board = boardstate.load_from_csv(game, args["board-state-file"])
     railroads = railroads.load_from_csv(game, board, args["railroads-file"])
+    game.capture_phase(railroads)
+
     private_companies_module = game.get_game_submodule("private_companies")
     if private_companies_module:
         private_companies_module.load_from_csv(game, board, railroads, args.get("private_companies_file"))

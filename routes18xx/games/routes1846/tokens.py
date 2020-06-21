@@ -15,7 +15,7 @@ class SteamboatToken(PrivateCompanyToken):
         if not bonus:
             raise ValueError("{} does not define a seaport bonus value.".format(cell))
 
-        return SteamboatToken(cell, railroad, bonus)
+        return SteamboatToken("Steamboat Company", cell, railroad, bonus)
 
 class MeatPackingToken(PrivateCompanyToken):
     COORDS = ("D6", "I1")
@@ -32,4 +32,4 @@ class MeatPackingToken(PrivateCompanyToken):
         if not bonus:
             raise ValueError("{} does not define a meat packing bonus value.".format(cell))
 
-        return MeatPackingToken(cell, railroad, bonus)
+        return MeatPackingToken("Meat Packing Company", cell, railroad, bonus)

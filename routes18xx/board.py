@@ -1,6 +1,6 @@
 import itertools
 
-from routes18xx import boardtile
+from routes18xx import boardtile, games
 from routes18xx.cell import Cell, board_cells, initialize_cells
 from routes18xx.placedtile import PlacedTile, SplitCity
 from routes18xx.tokens import Station

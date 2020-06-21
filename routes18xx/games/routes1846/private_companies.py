@@ -6,11 +6,11 @@ from routes18xx.games.routes1846.tokens import MeatPackingToken, SteamboatToken
 FIELDNAMES = ("name", "owner", "coord")
 
 COMPANIES = {
-    "Steamboat Company": lambda board, railroads, kwargs: _handle_steamboat_company(board, railroads, kwargs),
-    "Meat Packing Company": lambda board, railroads, kwargs: _handle_meat_packing_company(board, railroads, kwargs),
-    "Mail Contract": lambda board, railroads, kwargs: _handle_mail_contract(board, railroads, kwargs),
-    "Big 4": lambda board, railroads, kwargs: _handle_independent_railroad(board, railroads, "Big 4", kwargs),
-    "Michigan Southern": lambda board, railroads, kwargs: _handle_independent_railroad(board, railroads, "Michigan Southern", kwargs)
+    "Steamboat Company": lambda game, board, railroads, kwargs: _handle_steamboat_company(game, board, railroads, kwargs),
+    "Meat Packing Company": lambda game, board, railroads, kwargs: _handle_meat_packing_company(game, board, railroads, kwargs),
+    "Mail Contract": lambda game, board, railroads, kwargs: _handle_mail_contract(game, board, railroads, kwargs),
+    "Big 4": lambda game, board, railroads, kwargs: _handle_independent_railroad(game, board, railroads, "Big 4", kwargs),
+    "Michigan Southern": lambda game, board, railroads, kwargs: _handle_independent_railroad(game, board, railroads, "Michigan Southern", kwargs)
 }
 
 HOME_CITIES = {
@@ -18,7 +18,7 @@ HOME_CITIES = {
     "Michigan Southern": "C15"
 }
 
-def _handle_steamboat_company(board, railroads, kwargs):
+def _handle_steamboat_company(game, board, railroads, kwargs):
     owner = kwargs.get("owner")
     coord = kwargs["coord"]
     if not owner or not coord:
@@ -30,7 +30,7 @@ def _handle_steamboat_company(board, railroads, kwargs):
     board.place_token(coord, railroads[owner], SteamboatToken)
     railroads[owner].add_private_company("Steamboat Company")
 
-def _handle_meat_packing_company(board, railroads, kwargs):
+def _handle_meat_packing_company(game, board, railroads, kwargs):
     owner = kwargs.get("owner")
     coord = kwargs["coord"]
     if not owner or not coord:
@@ -42,7 +42,7 @@ def _handle_meat_packing_company(board, railroads, kwargs):
     board.place_token(coord, railroads[owner], MeatPackingToken)
     railroads[owner].add_private_company("Meat Packing Company")
 
-def _handle_mail_contract(board, railroads, kwargs):
+def _handle_mail_contract(game, board, railroads, kwargs):
     owner = kwargs.get("owner")
     if not owner:
         return
@@ -52,7 +52,7 @@ def _handle_mail_contract(board, railroads, kwargs):
 
     railroads[owner].add_private_company("Mail Contract")
 
-def _handle_independent_railroad(board, railroads, name, kwargs):
+def _handle_independent_railroad(game, board, railroads, name, kwargs):
     home_city = HOME_CITIES[name]
     owner = kwargs.get("owner")
     if owner:
@@ -70,17 +70,16 @@ def _handle_independent_railroad(board, railroads, name, kwargs):
         board.place_station(home_city, owner_railroad)
         railroads[owner].add_private_company(name)
     else:
-        phase = max([train.phase for railroad in railroads.values() for train in railroad.trains])
-        if phase < 3:
+        if game.compare_phases("3") < 0:
             board.place_station(home_city, Railroad.create(name, "2"))
 
 
-def load_from_csv(board, railroads, companies_filepath):
+def load_from_csv(game, board, railroads, companies_filepath):
     if companies_filepath:
         with open(companies_filepath, newline='') as companies_file:
-            return load(board, railroads, tuple(csv.DictReader(companies_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)))
+            return load(game, board, railroads, tuple(csv.DictReader(companies_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)))
 
-def load(board, railroads, companies_rows):
+def load(game, board, railroads, companies_rows):
     if not companies_rows:
         return
 
@@ -93,4 +92,4 @@ def load(board, railroads, companies_rows):
         if name not in COMPANIES:
             raise ValueError("An unrecognized private company was provided: {}".format(name))
 
-        COMPANIES[name](board, railroads, company_kwargs)
+        COMPANIES[name](game, board, railroads, company_kwargs)
