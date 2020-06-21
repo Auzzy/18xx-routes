@@ -29,7 +29,7 @@ class Board(object):
         if old_tile:
             self._validate_place_tile_upgrade(old_tile, cell, tile, orientation)
 
-            self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, stations=old_tile.stations, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+            self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
         else:
             self._placed_tiles[cell] = PlacedTile.place(None, cell, tile, orientation)
 
