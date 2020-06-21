@@ -1,0 +1,10 @@
+{
+    "phases": ["1", "2", "3", "4"],
+    "privates_close": {
+        "Steamboat Company": "4",
+        "Meat Packing Company": "4",
+        "Mail Contract": null,
+        "Big 4": "3",
+        "Michigan Southern": "3"
+    }
+}

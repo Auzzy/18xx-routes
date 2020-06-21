@@ -2,34 +2,34 @@
     "trains": [
         {
             "collect": 2,
-            "phase": 1
+            "phase": "1"
         },
         {
             "collect": 3,
             "visit": 5,
-            "phase": 2
+            "phase": "2"
         },
         {
             "collect": 4,
-            "phase": 2
+            "phase": "2"
         },
         {
             "collect": 4,
             "visit": 6,
-            "phase": 3
+            "phase": "3"
         },
         {
             "collect": 5,
-            "phase": 3
+            "phase": "3"
         },
         {
             "collect": 6,
-            "phase": 4
+            "phase": "4"
         },
         {
             "collect": 7,
             "visit": 8,
-            "phase": 4
+            "phase": "4"
         }
     ]
 }

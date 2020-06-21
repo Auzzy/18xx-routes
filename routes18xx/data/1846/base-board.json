@@ -141,8 +141,10 @@
             "name": "Holland",
             "edges": [4],
             "values": {
-                "phase1": 40,
-                "phase3": 10
+                "phase": {
+                    "1": 40,
+                    "3": 10
+                }
             },
             "properties": {
                 "port_value": 40
@@ -152,9 +154,11 @@
             "name": "Sarnia",
             "edges": [1],
             "values": {
-                "phase1": 30,
-                "phase3": 50,
-                "bonus": 20
+                "phase": {
+                    "1": 30,
+                    "3": 50
+                },
+                "e2w-bonus": 20
             },
             "is_east": true
         },
@@ -162,9 +166,11 @@
             "name": "Chicago Connections",
             "edges": [5],
             "values": {
-                "phase1": 20,
-                "phase3": 40,
-                "bonus": 50
+                "phase": {
+                    "1": 20,
+                    "3": 40
+                },
+                "e2w-bonus": 50
             },
             "properties": {
                 "port_value": 20
@@ -175,9 +181,11 @@
             "name": "Windsor",
             "edges": [1],
             "values": {
-                "phase1": 40,
-                "phase3": 60,
-                "bonus": 30
+                "phase": {
+                    "1": 40,
+                    "3": 60
+                },
+                "e2w-bonus": 30
             },
             "is_east": true
         },
@@ -185,9 +193,11 @@
             "name": "Buffalo",
             "edges": [0],
             "values": {
-                "phase1": 30,
-                "phase3": 60,
-                "bonus": 30
+                "phase": {
+                    "1": 30,
+                    "3": 60
+                },
+                "e2w-bonus": 30
             },
             "is_east": true
         },
@@ -195,9 +205,11 @@
             "name": "Buffalo",
             "edges": [1],
             "values": {
-                "phase1": 30,
-                "phase3": 60,
-                "bonus": 30
+                "phase": {
+                    "1": 30,
+                    "3": 60
+                },
+                "e2w-bonus": 30
             },
             "is_east": true
         },
@@ -205,9 +217,11 @@
             "name": "Binghamton",
             "edges": [1],
             "values": {
-                "phase1": 20,
-                "phase3": 50,
-                "bonus": 30
+                "phase": {
+                    "1": 20,
+                    "3": 50
+                },
+                "e2w-bonus": 30
             },
             "is_east": true
         },
@@ -215,9 +229,11 @@
             "name": "Pittsburg",
             "edges": [1],
             "values": {
-                "phase1": 30,
-                "phase3": 70,
-                "bonus": 20
+                "phase": {
+                    "1": 30,
+                    "3": 70
+                },
+                "e2w-bonus": 20
             },
             "is_east": true
         },
@@ -225,9 +241,11 @@
             "name": "Pittsburg",
             "edges": [1, 2],
             "values": {
-                "phase1": 30,
-                "phase3": 70,
-                "bonus": 20
+                "phase": {
+                    "1": 30,
+                    "3": 70
+                },
+                "e2w-bonus": 20
             },
             "is_east": true
         },
@@ -235,9 +253,11 @@
             "name": "Cumberland",
             "edges": [2],
             "values": {
-                "phase1": 20,
-                "phase3": 40,
-                "bonus": 30
+                "phase": {
+                    "1": 20,
+                    "3": 40
+                },
+                "e2w-bonus": 30
             },
             "is_east": true
         },
@@ -245,9 +265,11 @@
             "name": "St. Louis",
             "edges": [3, 4],
             "values": {
-                "phase1": 50,
-                "phase3": 70,
-                "bonus": 20
+                "phase": {
+                    "1": 50,
+                    "3": 70
+                },
+                "e2w-bonus": 20
             },
             "properties": {
                 "port_value": 20,
@@ -259,9 +281,11 @@
             "name": "Charleston",
             "edges": [1],
             "values": {
-                "phase1": 20,
-                "phase3": 50,
-                "bonus": 20
+                "phase": {
+                    "1": 20,
+                    "3": 50
+                },
+                "e2w-bonus": 20
             },
             "is_east": true
         },
@@ -269,8 +293,10 @@
             "name": "Louisville",
             "edges": [2, 3],
             "values": {
-                "phase1": 50,
-                "phase3": 70
+                "phase": {
+                    "1": 50,
+                    "3": 70
+                }
             }
         }
     },
