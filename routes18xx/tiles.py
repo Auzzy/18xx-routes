@@ -9,7 +9,7 @@ _TILES = {}
 
 class Tile(object):
     @staticmethod
-    def create(id, edges, value, quantity, phase, is_city=False, is_z=False, is_chicago=False):
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_z=False, is_chicago=False):
         
         paths = collections.defaultdict(list)
         if is_city and not is_chicago:
@@ -21,14 +21,14 @@ class Tile(object):
                 paths[edge[0]].append(edge[1])
                 paths[edge[1]].append(edge[0])
 
-        return Tile(id, paths, int(value), int(quantity), int(phase), is_city, is_z, is_chicago)
+        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, is_z, is_chicago)
 
     def __init__(self, id, paths, value, quantity, phase, is_city=False, is_z=False, is_chicago=False):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
         self.quantity = quantity
-        self.phase = phase
+        self.upgrade_level = upgrade_level
         self.is_city = is_city
         self.is_z = is_z
         self.is_chicago = is_chicago

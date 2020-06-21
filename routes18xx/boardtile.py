@@ -8,11 +8,11 @@ from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
 BASE_BOARD_FILENAME = "base-board.json"
 
 class BoardSpace(object):
-    def __init__(self, name, cell, phase, paths, is_city=False, is_z=False, is_chicago=False, is_terminal_city=False,
+    def __init__(self, name, cell, upgrade_level, paths, is_city=False, is_z=False, is_chicago=False, is_terminal_city=False,
             port_value=0, meat_value=0):
         self.name = name or str(cell)
         self.cell = cell
-        self.phase = phase = None if phase == 4 else phase  # A built-in phase 4 tile is similar to a terminal city
+        self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminal city
         self._paths = paths
         self.port_value = port_value
         self.port_token = None
@@ -59,7 +59,7 @@ class BoardSpace(object):
 
 class Track(BoardSpace):
     @staticmethod
-    def create(coord, edges, phase=None):
+    def create(coord, edges, upgrade_level=None):
         cell = Cell.from_coord(coord)
         
         paths = collections.defaultdict(list)
@@ -70,30 +70,30 @@ class Track(BoardSpace):
             paths[start_cell].append(end_cell)
             paths[end_cell].append(start_cell)
 
-        return Track(cell, phase, paths)
+        return Track(cell, upgrade_level, paths)
 
-    def __init__(self, cell, phase, paths):
-        super(Track, self).__init__(None, cell, phase, paths)
+    def __init__(self, cell, upgrade_level, paths):
+        super(Track, self).__init__(None, cell, upgrade_level, paths)
 
     def value(self, railroad, phase):
         return 0
 
 class City(BoardSpace):
     @staticmethod
-    def create(coord, name, phase=0, edges=[], value=0, capacity=0, is_z=False, port_value=0, meat_value=0):
+    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, is_z=False, port_value=0, meat_value=0):
         cell = Cell.from_coord(coord)
 
         neighbors = {cell.neighbors[side] for side in edges}
 
         if cell == CHICAGO_CELL:
             paths = {cell.neighbors[side]: [] for side in edges}
-            return Chicago(phase, paths, neighbors, value, capacity, port_value=port_value, meat_value=meat_value)
+            return Chicago(upgrade_level, paths, neighbors, value, capacity, port_value=port_value, meat_value=meat_value)
         else:
             paths = {neighbor: list(neighbors - {neighbor}) for neighbor in neighbors}
-            return City(name, cell, phase, paths, neighbors, value, capacity, is_z, False, port_value=port_value, meat_value=meat_value)
+            return City(name, cell, upgrade_level, paths, neighbors, value, capacity, is_z, False, port_value=port_value, meat_value=meat_value)
 
-    def __init__(self, name, cell, phase, paths, neighbors, value, capacity, is_z=False, is_chicago=False, port_value=0, meat_value=0):
-        super(City, self).__init__(name, cell, phase, paths, True, is_z, is_chicago, port_value=port_value, meat_value=meat_value)
+    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, is_z=False, is_chicago=False, port_value=0, meat_value=0):
+        super(City, self).__init__(name, cell, upgrade_level, paths, True, is_z, is_chicago, port_value=port_value, meat_value=meat_value)
 
         self.neighbors = neighbors
         self._value = value
@@ -131,8 +131,8 @@ class City(BoardSpace):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
 class Chicago(City):
-    def __init__(self, phase, paths, neighbors, value, capacity, port_value, meat_value):
-        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, phase, paths, neighbors, value, capacity, False, True,
+    def __init__(self, upgrade_level, paths, neighbors, value, capacity, port_value, meat_value):
+        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, upgrade_level, paths, neighbors, value, capacity, False, True,
                 port_value=port_value, meat_value=meat_value)
 
         self.exit_cell_to_station = {}

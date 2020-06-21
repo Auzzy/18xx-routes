@@ -38,7 +38,7 @@ class PlacedTile(object):
         self.meat_token = None
         
         self._stations = []
-        self.phase = self.tile.phase
+        self.upgrade_level = self.tile.upgrade_level
         self.is_city = self.tile.is_city
         self.is_z = self.tile.is_z
         self.is_terminal_city = False
