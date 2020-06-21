@@ -26,7 +26,7 @@ def load(game, board_state_rows):
         
         tile_args_dicts.append(tile_args)
 
-    for tile_args in sorted(tile_args_dicts, key=lambda adict: adict["tile"].phase):
+    for tile_args in sorted(tile_args_dicts, key=lambda adict: adict["tile"].upgrade_level):
         if tile_args["tile"].is_chicago:
             board.place_chicago(tile_args["tile"])
         else:

@@ -128,17 +128,17 @@ class Board(object):
     def _validate_place_tile_neighbors(self, cell, tile, orientation):
         for neighbor in PlacedTile.get_paths(cell, tile, orientation):
             neighbor_space = self.get_space(neighbor)
-            if neighbor_space and  neighbor_space.phase is None and cell not in neighbor_space.paths():
-                tile_type = "terminal city" if neighbor_space.is_terminal_city else "pre-printed phase 4 tile"
+            if neighbor_space and  neighbor_space.upgrade_level is None and cell not in neighbor_space.paths():
+                tile_type = "terminal city" if neighbor_space.is_terminal_city else "pre-printed gray tile"
                 raise ValueError("Placing tile {} on {} in orientation {} runs into the side of the {} at {}.".format(
                     tile.id, cell, orientation, tile_type, neighbor_space.cell))
 
     def _validate_place_tile_upgrade(self, old_tile, cell, new_tile, orientation):
         if old_tile:
-            if old_tile.phase is None:
+            if old_tile.upgrade_level is None:
                 raise ValueError("{} cannot be upgraded.".format(cell))
-            elif old_tile.phase >= new_tile.phase:
-                raise ValueError("{}: Going from phase {} to phase {} is not an upgrade.".format(cell, old_tile.phase, new_tile.phase))
+            elif old_tile.upgrade_level >= new_tile.upgrade_level:
+                raise ValueError("{}: Going from upgrade level {} to {} is not an upgrade.".format(cell, old_tile.upgrade_level, new_tile.upgrade_level))
 
             for old_start, old_ends in old_tile._paths.items():
                 old_paths = tuple([(old_start, end) for end in old_ends])
