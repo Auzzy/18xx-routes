@@ -22,22 +22,22 @@ class PlacedTile(object):
         return paths
 
     @staticmethod
-    def place(name, cell, tile, orientation, stations=[], port_value=None, meat_value=None):
+    def place(name, cell, tile, orientation, port_value=None, meat_value=None):
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return PlacedTile(name, cell, tile, stations, paths, port_value, meat_value)
+        return PlacedTile(name, cell, tile, paths, port_value, meat_value)
 
-    def __init__(self, name, cell, tile, stations=[], paths={}, port_value=None, meat_value=None):
+    def __init__(self, name, cell, tile, paths={}, port_value=None, meat_value=None):
         self.name = name or str(cell)
         self.cell = cell
         self.tile = tile
         self.capacity = tile.capacity
-        self._stations = list(stations)
         self._paths = paths
         self.port_value = port_value
         self.port_token = None
         self.meat_value = meat_value
         self.meat_token = None
         
+        self._stations = []
         self.phase = self.tile.phase
         self.is_city = self.tile.is_city
         self.is_z = self.tile.is_z
@@ -113,7 +113,7 @@ class Chicago(PlacedTile):
         return Chicago(tile, exit_cell_to_station, paths, port_value, meat_value)
 
     def __init__(self, tile, exit_cell_to_station={}, paths={}, port_value=None, meat_value=None):
-        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, tile, list(exit_cell_to_station.values()), paths, port_value, meat_value)
+        super(Chicago, self).__init__("Chicago", CHICAGO_CELL, tile, paths, port_value, meat_value)
         
         self.exit_cell_to_station = exit_cell_to_station
 
