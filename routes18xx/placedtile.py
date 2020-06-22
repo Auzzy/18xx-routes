@@ -38,8 +38,9 @@ class PlacedTile(object):
         self.tokens = []
         self.upgrade_level = self.tile.upgrade_level
         self.is_city = self.tile.is_city
+        self.is_terminus = self.tile.is_terminus
+        self.is_stop = self.tile.is_stop
         self.upgrade_attrs = self.tile.upgrade_attrs
-        self.is_terminus = False
 
     def value(self, game, railroad):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)

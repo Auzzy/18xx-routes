@@ -19,18 +19,18 @@ class BoardSpace(object):
                 paths[cell.neighbors[exits]] = []
         return paths
 
-    def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(),
-            properties={}, is_terminus=False):
+    def __init__(self, name, cell, upgrade_level, paths, upgrade_attrs=set(), properties={}):
         self.name = name or str(cell)
         self.cell = cell
         self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminus
         self._paths = paths
         self.tokens = []
 
-        self.is_city = is_city
+        self.is_city = isinstance(self, City)
+        self.is_terminus = isinstance(self, Terminus)
+        self.is_stop = self.is_city or self.is_terminus
         self.upgrade_attrs = set(upgrade_attrs)
         self.properties = properties
-        self.is_terminus = is_terminus
 
     def paths(self, enter_from=None, railroad=None):
         if railroad and railroad.is_removed:
@@ -72,7 +72,7 @@ class City(BoardSpace):
             return City(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
-        super().__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, properties)
+        super().__init__(name, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
         self.capacity = capacity
@@ -183,7 +183,7 @@ class Terminus(BoardSpace):
             return Terminus(name, cell, paths, values, properties)
 
     def __init__(self, name, cell, paths, value_dict, properties):
-        super().__init__(name, cell, None, paths, True, properties=properties, is_terminus=True)
+        super().__init__(name, cell, None, paths, properties=properties)
 
         self.phase_value = {phase: val for phase, val in value_dict["phase"].items()}
 

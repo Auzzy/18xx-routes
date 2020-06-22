@@ -50,6 +50,9 @@ class Board(object):
     def place_split_station(self, coord, railroad, branch):
         cell = Cell.from_coord(coord)
         space = self.get_space(cell)
+        if not space.is_city:
+            raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
+
         path = tuple([Cell.from_coord(coord) for coord in branch])
         space.add_station(railroad, path)
 
@@ -91,17 +94,14 @@ class Board(object):
             raise ValueError("Cannot upgrade the terminus.")
 
         if old_tile:
-            if old_tile.is_city != tile.is_city:
-                raise ValueError("Tried to mix a city and non-city tile.")
-
-            if tile.is_city:
+            if tile.is_stop:
                 if old_tile.upgrade_attrs != tile.upgrade_attrs:
-                    old_tile_type = ", ".join(old_tile.upgrade_attrs) if old_tile.upgrade_attrs else "city"
-                    tile_type = ", ".join(tile.upgrade_attrs) if tile.upgrade_attrs else "city"
-                    raise ValueError("Tried to mix a {} tile and a {} city tile.".format(old_tile_type, tile_type))
+                    old_tile_type = ", ".join(old_tile.upgrade_attrs)
+                    tile_type = ", ".join(tile.upgrade_attrs)
+                    raise ValueError("Tried to mix a {} tile and a {} tile.".format(old_tile_type, tile_type))
         else:
-            if tile.is_city:
-                raise ValueError("Tried to place a city tile on a track space.")
+            if tile.is_stop:
+                raise ValueError("Tried to place a non-track tile on a track space.")
 
     def _validate_place_tile_neighbors(self, cell, tile, orientation):
         for neighbor in PlacedTile.get_paths(cell, tile, orientation):
