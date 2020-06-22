@@ -1,0 +1,29 @@
+{
+    "trains": [
+        {
+            "collect": 2,
+            "phase": "2"
+        },
+        {
+            "collect": 3,
+            "phase": "3"
+        },
+        {
+            "collect": 4,
+            "phase": "4"
+        },
+        {
+            "collect": 5,
+            "phase": "5"
+        },
+        {
+            "collect": 6,
+            "phase": "6"
+        },
+        {
+            "name": "diesel",
+            "collect": null,
+            "phase": "D"
+        }
+    ]
+}

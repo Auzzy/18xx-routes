@@ -1,0 +1,171 @@
+{
+    "tracks": {
+        "D15": {
+            "edges": [[0, 4]],
+            "upgrade_level": 4
+        }
+    },
+    "cities": {
+        "B11": {
+            "name": "Marugame",
+            "capacity": 1
+        },
+        "B15": {
+            "name": "Takamatsu",
+            "edges": [[0, 1, 5]],
+            "upgrade_level": 1,
+            "value": 30,
+            "capacity": 1,
+            "upgrade_attrs": ["takamatsu"]
+        },
+        "C12": {
+            "name": "Kotohira",
+            "capacity": 1,
+            "upgrade_attrs": ["kotohira"]
+        },
+        "D5": {
+            "name": "Matsuyama",
+            "capacity": 1
+        },
+        "D7": {
+            "name": "Saijo",
+            "capacity": 1
+        },
+        "D9": {
+            "name": "Nihama",
+            "capacity": 1
+        },
+        "D17": {
+            "name": "Tokushima",
+            "capacity": 1
+        },
+        "E12": {
+            "name": "Ikeda",
+            "capacity": 1
+        },
+        "F3": {
+            "name": "Ozu",
+            "edges": [1],
+            "upgrade_level": 1,
+            "value": 20,
+            "capacity": 1
+        },
+        "F17": {
+            "name": "Anan",
+            "capacity": 1
+        },
+        "G10": {
+            "name": "Kochi",
+            "edges": [[1, 2, 3, 4]],
+            "upgrade_level": 2,
+            "value": 30,
+            "capacity": 2,
+            "upgrade_attrs": ["kochi"]
+        },
+        "H3": {
+            "name": "Uwajima",
+            "edges": [[0, 2, 4]],
+            "upgrade_level": 4,
+            "value": 40,
+            "capacity": 2
+        },
+        "H13": {
+            "name": "Nahari",
+            "capacity": 1
+        },
+        "I6": {
+            "name": "Kubokawa",
+            "capacity": 1
+        },
+        "J3": {
+            "name": "Sukumo",
+            "capacity": 1
+        }
+    },
+    "towns": {
+        "C14": {
+            "name": "Ritsurin Koen"
+        },
+        "E16": {
+            "name": "Komatsujima",
+            "upgrade_attrs": ["port"]
+        },
+        "F1": {
+            "name": "Yawatahama",
+            "edges": [[4, 5]],
+            "upgrade_level": 4,
+            "value": 20
+        },
+        "G12": {
+            "name": "Nankoku",
+            "upgrade_attrs": ["port"]
+        },
+        "G16": {
+            "name": "Mugi",
+            "upgrade_attrs": ["port"]
+        },
+        "I14": {
+            "name": "Muroto",
+            "edges": [[2, 3]],
+            "upgrade_level": 4,
+            "value": 20
+        },
+        "J5": {
+            "name": "Nakamura",
+            "upgrade_attrs": ["port"]
+        }
+    },
+    "termini": {
+        "A12": {
+            "name": "Sakaide & Okayama",
+            "edges": [0, 5],
+            "values": {
+                "phase": {
+                    "2": 20,
+                    "5": 40
+                },
+                "train": {
+                    "diesel": 80
+                }
+            }
+        },
+        "C6": {
+            "name": "Imabari",
+            "edges": [0, 5],
+            "values": {
+                "phase": {
+                    "2": 30,
+                    "5": 60
+                },
+                "train": {
+                    "diesel": 100
+                }
+            }
+        },
+        "C18": {
+            "name": "Naruto & Awaji",
+            "edges": [0, 1],
+            "values": {
+                "phase": {
+                    "2": 20,
+                    "5": 40
+                },
+                "train": {
+                    "diesel": 80
+                }
+            }
+        }
+    },
+    "boundaries": {
+        "A": [12],
+        "B": [[11, 15]],
+        "C": [6, [10, 18]],
+        "D": [[5, 17]],
+        "E": [[4, 16]],
+        "F": [[1, 17]],
+        "G": [[2, 16]],
+        "H": [[3, 7], 13, 15],
+        "I": [[2, 6], 14],
+        "J": [3, 5]
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "Awa Railroad": {
+        "nicknames": ["AR"],
+        "home": "D17"
+    },
+    "Tosa Electric Rail": {
+        "nicknames": ["TR", "TER"],
+        "home": "G10"
+    },
+    "Tosa Kuroshio Railroad": {
+        "nicknames": ["KU", "TKR"],
+        "home": "I6"
+    },
+    "Iyo Railroad": {
+        "nicknames": ["IR", "Iyo"],
+        "home": "D5"
+    },
+    "Takamatsu-Kotohira Electric Rail": {
+        "nicknames": ["KO", "TKER"],
+        "home": "B15"
+    },
+    "Uwajima Railroad": {
+        "nicknames": ["UR"],
+        "home": "H3"
+    },
+    "Sanuki Railways": {
+        "nicknames": ["SR"],
+        "home": "B11"
+    }
+}
