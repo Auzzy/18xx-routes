@@ -50,5 +50,5 @@ if __name__ == "__main__":
     best_routes = find_best_routes(game, board, railroads, active_railroad)
     print("RESULT")
     for route in best_routes:
-        city_path = " -> ".join("{} [{}]".format(city.name, route.city_values[city]) for city in route.visited_cities)
-        print("{}: {} = {} ({})".format(route.train, route, route.value, city_path))
+        stop_path = " -> ".join("{} [{}]".format(stop.name, route.stop_values[stop]) for stop in route.visited_stops)
+        print("{}: {} = {} ({})".format(route.train, route, route.value, stop_path))

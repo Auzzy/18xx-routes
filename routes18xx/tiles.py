@@ -19,7 +19,7 @@ class Tile(object):
         return paths
 
     @staticmethod
-    def create(id, edges, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_terminus=False, capacity=0, upgrade_attrs=set()):
         paths = Tile._calc_paths(edges)
 
         if isinstance(capacity, dict):
@@ -37,17 +37,20 @@ class Tile(object):
                 split_city_capacity[tuple(branch_path_list)] = branch_capacity
             capacity = split_city_capacity
 
-        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, capacity, upgrade_attrs)
+        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, is_terminus, capacity, upgrade_attrs)
 
-    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, capacity=0, upgrade_attrs=set()):
+    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_terminus=False, capacity=0, upgrade_attrs=set()):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
         self.quantity = quantity
         self.upgrade_level = upgrade_level
         self.is_city = is_city
+        self.is_terminus = is_terminus
         self.capacity = capacity
         self.upgrade_attrs = set(upgrade_attrs)
+
+        self.is_stop = self.is_city or self.is_terminus
 
 
 def _load_all(game):

@@ -26,11 +26,11 @@ def filter_invalid_routes(routes, board, railroad):
     valid_routes = set()
     for route in routes:
         # A route cannot run from east to east
-        if isinstance(route.cities[0], EasternTerminus) and isinstance(route.cities[-1], EasternTerminus):
+        if isinstance(route.stops[0], EasternTerminus) and isinstance(route.stops[-1], EasternTerminus):
             continue
 
         # If the route goes through Chicago and isn't [C5, D6], ensure the path it took either contains its station or is unblocked
-        if route.contains_cell(get_chicago_connections_cell()) and len(route.cities) != 2:
+        if route.contains_cell(get_chicago_connections_cell()) and len(route.stops) != 2:
             # Finds the subroute which starts at Chicago and is 3 tiles long. That is, it will go [C5, D6, chicago exit]
             all_chicago_subroutes = [subroute for subroute in route.subroutes(get_chicago_connections_cell()) if len(subroute) == 3]
             chicago_subroute = all_chicago_subroutes[0] if all_chicago_subroutes else None
@@ -60,5 +60,5 @@ def filter_invalid_routes(routes, board, railroad):
 def hook_after_route_sets(route_sets, railroad):
     if railroad.has_private_company("Mail Contract"):
         for route_set in route_sets:
-            route = max(route_set, key=lambda run_route: len(run_route.cities))
-            route.adjust_value(len(route.cities) * 10)
+            route = max(route_set, key=lambda run_route: len(run_route.stops))
+            route.adjust_value(len(route.stops) * 10)

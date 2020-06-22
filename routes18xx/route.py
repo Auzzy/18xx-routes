@@ -22,32 +22,32 @@ class Route(object):
     def merge(self, route):
         return Route.create(self._path + route._path)
 
-    def _best_cities(self, train, route_city_values, station_cities, include=None):
-        always_include = [(city, route_city_values[city]) for city in (include or [])]
+    def _best_stops(self, train, route_stop_values, station_cities, include=None):
+        always_include = [(city, route_stop_values[city]) for city in (include or [])]
 
         # Find the station city to always include
         always_include.append(max(station_cities.items(), key=lambda tile_and_value: tile_and_value[1]))
 
-        # Remove from consideration the station city and any cities that should always be included.
-        city_values = route_city_values.copy()
+        # Remove from consideration the station city and any stops that should always be included.
+        stop_values = route_stop_values.copy()
         for to_include in always_include:
-            del city_values[to_include[0]]
+            del stop_values[to_include[0]]
 
-        # The route can collect cities only after accounting for anything marked always collect
+        # The route can collect stops only after accounting for anything marked always collect
         collect = train.collect - len(always_include)
-        best_cities = dict(heapq.nlargest(collect, city_values.items(), key=lambda city_item: city_item[1]))
+        best_stops = dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
 
-        # Add back in the cities marked always collect
-        best_cities.update(dict(always_include))
+        # Add back in the stops marked always collect
+        best_stops.update(dict(always_include))
 
-        return best_cities, sum(best_cities.values())
+        return best_stops, sum(best_stops.values())
 
     def value(self, game, board, railroad, train):
-        route_city_values = {tile: tile.value(game, railroad) for tile in self if tile.is_city}
+        route_stop_values = {tile: tile.value(game, railroad) for tile in self if tile.is_stop}
         station_cells = {station.cell for station in board.stations(railroad.name)}
-        station_cities = {tile: value for tile, value in route_city_values.items() if tile.cell in station_cells}
+        station_cities = {tile: value for tile, value in route_stop_values.items() if tile.cell in station_cells}
 
-        best_cities, route_value = self._best_cities(train, route_city_values, station_cities)
+        best_stops, route_value = self._best_stops(train, route_stop_values, station_cities)
 
         # Check if the route runs from east to west.
         termini = [self._path[0], self._path[-1]]
@@ -55,14 +55,14 @@ class Route(object):
         if east_to_west:
             # There is an east-west route. Confirm that a route including those
             # termini is the highest value route (including bonuses).
-            route_city_values_e2w = route_city_values.copy()
-            route_city_values_e2w.update({terminus: terminus.value(game, railroad, east_to_west) for terminus in termini})
+            route_stop_values_e2w = route_stop_values.copy()
+            route_stop_values_e2w.update({terminus: terminus.value(game, railroad, east_to_west) for terminus in termini})
 
-            best_cities_e2w, route_value_e2w = self._best_cities(train, route_city_values_e2w, station_cities, termini)
+            best_stops_e2w, route_value_e2w = self._best_stops(train, route_stop_values_e2w, station_cities, termini)
 
-            return best_cities_e2w if route_value_e2w >= route_value else best_cities
+            return best_stops_e2w if route_value_e2w >= route_value else best_stops
         else:
-            return best_cities
+            return best_stops
 
     def overlap(self, other):
         for edge in self._edges:
@@ -78,7 +78,7 @@ class Route(object):
         backwards_subroutes = {Route.create(self._path[index:start_index + 1]) for index in range(start_index, -1, -1)}
         forwards_subroutes = {Route.create(self._path[start_index:index]) for index in range(start_index + 1, len(self._path) + 1)}
         subroutes = backwards_subroutes.union(forwards_subroutes)
-        return [subroute for subroute in subroutes if len(subroute.cities) >= 2]
+        return [subroute for subroute in subroutes if len(subroute.stops) >= 2]
 
     def contains_cell(self, cell):
         return cell in [tile.cell for tile in self]
@@ -86,6 +86,10 @@ class Route(object):
     @property
     def cities(self):
         return [tile for tile in self._path if tile.is_city]
+
+    @property
+    def stops(self):
+        return [tile for tile in self._path if tile.is_stop]
 
     def __iter__(self):
         return iter(self._path)
@@ -109,15 +113,15 @@ class Route(object):
         if railroad.is_removed:
             raise ValueError("Cannot run routes for a removed railroad: {}".format(railroad.name))
 
-        visited_cities = self.value(game, board, railroad, train)
-        return _RunRoute(self, visited_cities, train)
+        visited_stops = self.value(game, board, railroad, train)
+        return _RunRoute(self, visited_stops, train)
 
 class _RunRoute(object):
-    def __init__(self, route, visited_city_values, train):
+    def __init__(self, route, visited_stop_values, train):
         self._route = route
-        self.city_values = dict.fromkeys(route.cities, 0)
-        self.city_values.update(visited_city_values)
-        self.value = sum(self.city_values.values())
+        self.stop_values = dict.fromkeys(route.stops, 0)
+        self.stop_values.update(visited_stop_values)
+        self.value = sum(self.stop_values.values())
         self.train = train
 
     def overlap(self, other):
@@ -131,8 +135,16 @@ class _RunRoute(object):
         return self._route.cities
 
     @property
+    def stops(self):
+        return self._route.stops
+
+    @property
     def visited_cities(self):
-        return [city for city in self.cities if self.city_values[city] > 0]
+        return [city for city in self.cities if self.stop_values[city] > 0]
+
+    @property
+    def visited_stops(self):
+        return [stop for stop in self.stops if self.stop_values[stop] > 0]
 
     def __str__(self):
         return str(self._route)
