@@ -136,7 +136,7 @@
             "capacity": 1
         }
     },
-    "edges": {
+    "termini": {
         "B8": {
             "name": "Holland",
             "edges": [4],
