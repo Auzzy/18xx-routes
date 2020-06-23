@@ -104,7 +104,7 @@ class SplitCity(PlacedTile):
         return SplitCity(name, cell, tile, orientation, paths, properties)
 
     def __init__(self, name, cell, tile, orientation, paths={}, properties={}):
-        super(SplitCity, self).__init__(name, cell, tile, paths, properties)
+        super().__init__(name, cell, tile, paths, properties)
 
         self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
         self.branch_to_station = {key: [] for key in self.capacity.keys()}
