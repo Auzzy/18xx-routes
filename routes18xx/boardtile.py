@@ -8,6 +8,17 @@ import itertools
 BASE_BOARD_FILENAME = "base-board.json"
 
 class BoardSpace(object):
+    @staticmethod
+    def _calc_paths(cell, edges):
+        paths = collections.defaultdict(list)
+        for exits in edges:
+            if isinstance(exits, list):
+                for path in itertools.permutations(exits, 2):
+                    paths[cell.neighbors[path[0]]].append(cell.neighbors[path[1]])
+            else:
+                paths[cell.neighbors[exits]] = []
+        return paths
+
     def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(),
             properties={}, is_terminus=False):
         self.name = name or str(cell)
@@ -37,14 +48,8 @@ class Track(BoardSpace):
     @staticmethod
     def create(coord, edges, upgrade_level=None):
         cell = Cell.from_coord(coord)
-        
-        paths = collections.defaultdict(list)
-        for start_edge, end_edge in edges:
-            start_cell = cell.neighbors[start_edge]
-            end_cell = cell.neighbors[end_edge]
 
-            paths[start_cell].append(end_cell)
-            paths[end_cell].append(start_cell)
+        paths = BoardSpace._calc_paths(cell, edges)
 
         return Track(cell, upgrade_level, paths)
 
@@ -56,21 +61,10 @@ class Track(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
-    def _calc_paths(cell, edges):
-        paths = collections.defaultdict(list)
-        for exits in edges:
-            if isinstance(exits, list):
-                for path in itertools.permutations(exits, 2):
-                    paths[cell.neighbors[path[0]]].append(cell.neighbors[path[1]])
-            else:
-                paths[cell.neighbors[exits]] = []
-        return paths
-
-    @staticmethod
     def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
         cell = Cell.from_coord(coord)
 
-        paths = City._calc_paths(cell, edges)
+        paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
             return SplitCity.create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
