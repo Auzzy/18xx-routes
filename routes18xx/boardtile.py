@@ -27,8 +27,9 @@ class BoardSpace(object):
         self.tokens = []
 
         self.is_city = isinstance(self, City)
+        self.is_town = isinstance(self, Town)
         self.is_terminus = isinstance(self, Terminus)
-        self.is_stop = self.is_city or self.is_terminus
+        self.is_stop = self.is_city or self.is_terminus or self.is_town
         self.upgrade_attrs = set(upgrade_attrs)
         self.properties = properties
 
@@ -44,6 +45,9 @@ class BoardSpace(object):
     def place_token(self, railroad, TokenType):
         self.tokens.append(TokenType.place(self.cell, railroad, self.properties))
 
+    def passable(self, enter_cell, railroad):
+        return True
+
 class Track(BoardSpace):
     @staticmethod
     def create(coord, edges, upgrade_level=None):
@@ -58,6 +62,23 @@ class Track(BoardSpace):
 
     def value(self, game, railroad):
         return 0
+
+class Town(BoardSpace):
+    @staticmethod
+    def create(coord, name, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
+        cell = Cell.from_coord(coord)
+
+        paths = BoardSpace._calc_paths(cell, edges)
+
+        return Town(name, cell, upgrade_level, paths, value, upgrade_attrs, properties)
+
+    def __init__(self, name, cell, upgrade_level, paths, value, upgrade_attrs=set(), properties={}):
+        super().__init__(name, cell, upgrade_level, paths, upgrade_attrs, properties)
+
+        self._value = value
+
+    def value(self, game, railroad):
+        return self._value + sum(token.value(game, railroad) for token in self.tokens)
 
 class City(BoardSpace):
     @staticmethod
@@ -223,6 +244,7 @@ def load(game):
     with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
         board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
+        board_tiles.extend([Town.create(coord, **town_args) for coord, town_args in board_json.get("towns", {}).items()])
         board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json.get("cities", {}).items()])
         board_tiles.extend([Terminus.create(coord, **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
     return board_tiles

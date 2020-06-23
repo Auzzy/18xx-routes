@@ -38,6 +38,7 @@ class PlacedTile(object):
         self.tokens = []
         self.upgrade_level = self.tile.upgrade_level
         self.is_city = self.tile.is_city
+        self.is_town = self.tile.is_town
         self.is_terminus = self.tile.is_terminus
         self.is_stop = self.tile.is_stop
         self.upgrade_attrs = self.tile.upgrade_attrs
@@ -46,6 +47,11 @@ class PlacedTile(object):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
 
     def passable(self, enter_cell, railroad):
+        if not self.is_stop or self.is_town:
+            return True
+        if self.is_terminus:
+            return False
+
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
     @property
