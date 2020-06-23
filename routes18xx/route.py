@@ -1,4 +1,5 @@
 import heapq
+import math
 
 from routes18xx.boardtile import EasternTerminus, WesternTerminus
 
@@ -41,7 +42,7 @@ class Route(object):
         collect = train.collect - len(always_include)
         if game.rules.towns_omit_from_limit:
             collect += len(path_towns)
-        best_stops = dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
+        best_stops = stop_values if collect == math.inf else dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
 
         # Add back in the stops marked always collect
         best_stops.update(dict(always_include))
@@ -49,7 +50,7 @@ class Route(object):
         return best_stops, sum(best_stops.values())
 
     def value(self, game, board, railroad, train):
-        route_stop_values = {tile: tile.value(game, railroad) for tile in self if tile.is_stop}
+        route_stop_values = {tile: tile.value(game, railroad, train) for tile in self if tile.is_stop}
         station_cells = {station.cell for station in board.stations(railroad.name)}
         station_cities = {tile: value for tile, value in route_stop_values.items() if tile.cell in station_cells}
 
@@ -62,7 +63,7 @@ class Route(object):
             # There is an east-west route. Confirm that a route including those
             # termini is the highest value route (including bonuses).
             route_stop_values_e2w = route_stop_values.copy()
-            route_stop_values_e2w.update({terminus: terminus.value(game, railroad, east_to_west) for terminus in termini})
+            route_stop_values_e2w.update({terminus: terminus.value(game, railroad, train, east_to_west) for terminus in termini})
 
             best_stops_e2w, route_value_e2w = self._best_stops(game, train, route_stop_values_e2w, station_cities, termini)
 

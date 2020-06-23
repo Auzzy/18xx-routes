@@ -43,7 +43,7 @@ class PlacedTile(object):
         self.is_stop = self.tile.is_stop
         self.upgrade_attrs = self.tile.upgrade_attrs
 
-    def value(self, game, railroad):
+    def value(self, game, railroad, train):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
 
     def passable(self, enter_cell, railroad):
