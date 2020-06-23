@@ -49,7 +49,7 @@ class Track(BoardSpace):
         return Track(cell, upgrade_level, paths)
 
     def __init__(self, cell, upgrade_level, paths):
-        super(Track, self).__init__(None, cell, upgrade_level, paths)
+        super().__init__(None, cell, upgrade_level, paths)
 
     def value(self, game, railroad):
         return 0
@@ -90,7 +90,7 @@ class City(BoardSpace):
             return City(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties=properties)
 
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
-        super(City, self).__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, properties)
+        super().__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, properties)
 
         self._value = value
         self.capacity = capacity
@@ -128,7 +128,7 @@ class City(BoardSpace):
 
 class SplitCity(City):
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
-        super(SplitCity, self).__init__(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+        super().__init__(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
         self.branch_to_station = {key: [] for key in self.capacity.keys()}
 
@@ -185,7 +185,7 @@ class Terminus(BoardSpace):
             return Terminus(name, cell, paths, values, properties)
 
     def __init__(self, name, cell, paths, value_dict, properties):
-        super(Terminus, self).__init__(name, cell, None, paths, True, properties=properties, is_terminus=True)
+        super().__init__(name, cell, None, paths, True, properties=properties, is_terminus=True)
 
         self.phase_value = {phase: val for phase, val in value_dict["phase"].items()}
 
@@ -204,21 +204,21 @@ class Terminus(BoardSpace):
 
 class EasternTerminus(Terminus):
     def __init__(self, name, cell, paths, value_dict, properties):
-        super(EasternTerminus, self).__init__(name, cell, paths, value_dict, properties)
+        super().__init__(name, cell, paths, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
     def value(self, game, railroad, east_to_west=False):
-        return super(EasternTerminus, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+        return super().value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
     def __init__(self, name, cell, paths, value_dict, properties):
-        super(WesternTerminus, self).__init__(name, cell, paths, value_dict, properties)
+        super().__init__(name, cell, paths, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
     def value(self, game, railroad, east_to_west=False):
-        return super(WesternTerminus, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+        return super().value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
 
 def load(game):
     board_tiles = []
