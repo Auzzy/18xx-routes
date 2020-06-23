@@ -60,8 +60,7 @@
         "value": 30,
         "quantity": 1,
         "upgrade_level": 1,
-        "is_town": true,
-        "upgrade_attrs": ["port"]
+        "is_town": true
     },
     "438": {
         "edges": [[0, 2]],
