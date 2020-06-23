@@ -127,14 +127,15 @@ def _get_subroutes(routes, stations):
     subroutes = [route.subroutes(station.cell) for station in stations for route in routes]
     return set(itertools.chain.from_iterable([subroute for subroute in subroutes if subroute]))
 
-def _walk_routes(board, railroad, enter_from, cell, length, visited=None):
+def _walk_routes(game, board, railroad, enter_from, cell, length, visited=None):
     visited = visited or []
 
     tile = board.get_space(cell)
     if not tile or (enter_from and enter_from not in tile.paths()) or tile in visited:
         return (Route.empty(), )
 
-    if tile.is_stop:
+    if tile.is_stop \
+            and (not game.rules.towns_omit_from_limit or not tile.is_town):
         if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
             LOG.debug("- %s", ", ".join([str(tile.cell) for tile in visited + [tile]]))
             return (Route.single(tile), )
@@ -147,7 +148,7 @@ def _walk_routes(board, railroad, enter_from, cell, length, visited=None):
 
     routes = []
     for neighbor in neighbors:
-        neighbor_paths = _walk_routes(board, railroad, cell, neighbor, remaining_stops, visited + [tile])
+        neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops, visited + [tile])
         routes += [Route.single(tile).merge(neighbor_path) for neighbor_path in neighbor_paths if neighbor_path]
 
     if not routes and tile.is_stop:
@@ -187,25 +188,25 @@ def _filter_invalid_routes(game, routes, board, railroad):
 
     return game.filter_invalid_routes(valid_routes, board, railroad)
 
-def _find_routes_from_cell(board, railroad, cell, train):
-    routes = _walk_routes(board, railroad, None, cell, train.visit)
+def _find_routes_from_cell(game, board, railroad, cell, train):
+    routes = _walk_routes(game, board, railroad, None, cell, train.visit)
 
     LOG.debug("Found %d routes starting at %s.", len(routes), cell)
     return routes
 
-def _find_connected_cities(board, railroad, cell, dist):
-    tiles = itertools.chain.from_iterable(_walk_routes(board, railroad, None, cell, dist))
+def _find_connected_cities(game,board, railroad, cell, dist):
+    tiles = itertools.chain.from_iterable(_walk_routes(game, board, railroad, None, cell, dist))
     return {tile.cell for tile in tiles if tile.is_city or tile.is_terminus} - {cell}
 
-def _find_connected_routes(board, railroad, station, train):
+def _find_connected_routes(game, board, railroad, station, train):
     LOG.debug("Finding connected cities.")
-    connected_cities = _find_connected_cities(board, railroad, station.cell, train.visit - 1)
+    connected_cities = _find_connected_cities(game, board, railroad, station.cell, train.visit - 1)
     LOG.debug("Connected cities: %s", ", ".join([str(cell) for cell in connected_cities]))
 
     LOG.debug("Finding routes starting from connected cities.")
     connected_routes = set()
     for cell in connected_cities:
-        connected_routes.update(_find_routes_from_cell(board, railroad, cell, train))
+        connected_routes.update(_find_routes_from_cell(game, board, railroad, cell, train))
     LOG.debug("Found %d routes from connected cities.", len(connected_routes))
     return connected_routes
 
@@ -220,10 +221,10 @@ def _find_all_routes(game, board, railroad):
             routes = set()
             for station in stations:
                 LOG.debug("Finding routes starting at station at %s.", station.cell)
-                routes.update(_find_routes_from_cell(board, railroad, station.cell, train))
+                routes.update(_find_routes_from_cell(game, board, railroad, station.cell, train))
 
                 LOG.debug("Finding routes which pass through station at %s.", station.cell)
-                connected_paths = _find_connected_routes(board, railroad, station, train)
+                connected_paths = _find_connected_routes(game, board, railroad, station, train)
                 routes.update(connected_paths)
 
             LOG.debug("Add subroutes")
