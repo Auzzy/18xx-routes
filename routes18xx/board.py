@@ -87,8 +87,8 @@ class Board(object):
             raise ValueError("Tiles at the following spots have no neighbors and no stations: {}".format(invalid_str))
 
     def _validate_place_tile_space_type(self, tile, old_tile):
-        if old_tile and old_tile.is_terminal_city:
-            raise ValueError("Cannot upgrade the terminal cities.")
+        if old_tile and old_tile.is_terminus:
+            raise ValueError("Cannot upgrade the terminus.")
 
         if old_tile:
             if old_tile.is_city != tile.is_city:
@@ -107,7 +107,7 @@ class Board(object):
         for neighbor in PlacedTile.get_paths(cell, tile, orientation):
             neighbor_space = self.get_space(neighbor)
             if neighbor_space and  neighbor_space.upgrade_level is None and cell not in neighbor_space.paths():
-                tile_type = "terminal city" if neighbor_space.is_terminal_city else "pre-printed gray tile"
+                tile_type = "terminus" if neighbor_space.is_terminus else "pre-printed gray tile"
                 raise ValueError("Placing tile {} on {} in orientation {} runs into the side of the {} at {}.".format(
                     tile.id, cell, orientation, tile_type, neighbor_space.cell))
 

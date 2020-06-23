@@ -1,5 +1,5 @@
 from routes18xx.cell import Cell
-from routes18xx.boardtile import EastTerminalCity
+from routes18xx.boardtile import EasternTerminus
 from routes18xx.route import Route
 
 def get_chicago_cell():
@@ -26,7 +26,7 @@ def filter_invalid_routes(routes, board, railroad):
     valid_routes = set()
     for route in routes:
         # A route cannot run from east to east
-        if isinstance(route.cities[0], EastTerminalCity) and isinstance(route.cities[-1], EastTerminalCity):
+        if isinstance(route.cities[0], EasternTerminus) and isinstance(route.cities[-1], EasternTerminus):
             continue
 
         # If the route goes through Chicago and isn't [C5, D6], ensure the path it took either contains its station or is unblocked

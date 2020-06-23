@@ -7,7 +7,6 @@ import os
 import queue
 
 from routes18xx.board import Board
-from routes18xx.boardtile import EastTerminalCity
 from routes18xx.route import Route
 from routes18xx.cell import get_chicago_cell, get_chicago_connections_cell
 

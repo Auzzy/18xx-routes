@@ -1,6 +1,6 @@
 import heapq
 
-from routes18xx.boardtile import EastTerminalCity, WestTerminalCity
+from routes18xx.boardtile import EasternTerminus, WesternTerminus
 
 class Route(object):
     @staticmethod
@@ -50,15 +50,15 @@ class Route(object):
         best_cities, route_value = self._best_cities(train, route_city_values, station_cities)
 
         # Check if the route runs from east to west.
-        terminals = [self._path[0], self._path[-1]]
-        east_to_west = all(isinstance(tile, (EastTerminalCity, WestTerminalCity)) for tile in terminals) and type(terminals[0]) != type(terminals[1])
+        termini = [self._path[0], self._path[-1]]
+        east_to_west = all(isinstance(tile, (EasternTerminus, WesternTerminus)) for tile in termini) and type(termini[0]) != type(termini[1])
         if east_to_west:
             # There is an east-west route. Confirm that a route including those
-            # terminal cities is the highest value route (including bonuses).
+            # termini is the highest value route (including bonuses).
             route_city_values_e2w = route_city_values.copy()
-            route_city_values_e2w.update({terminal: terminal.value(game, railroad, east_to_west) for terminal in terminals})
+            route_city_values_e2w.update({terminus: terminus.value(game, railroad, east_to_west) for terminus in termini})
 
-            best_cities_e2w, route_value_e2w = self._best_cities(train, route_city_values_e2w, station_cities, terminals)
+            best_cities_e2w, route_value_e2w = self._best_cities(train, route_city_values_e2w, station_cities, termini)
 
             return best_cities_e2w if route_value_e2w >= route_value else best_cities
         else:

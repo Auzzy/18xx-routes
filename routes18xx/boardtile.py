@@ -9,17 +9,17 @@ BASE_BOARD_FILENAME = "base-board.json"
 
 class BoardSpace(object):
     def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(),
-            properties={}, is_terminal_city=False):
+            properties={}, is_terminus=False):
         self.name = name or str(cell)
         self.cell = cell
-        self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminal city
+        self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminus
         self._paths = paths
         self.tokens = []
 
         self.is_city = is_city
         self.upgrade_attrs = set(upgrade_attrs)
         self.properties = properties
-        self.is_terminal_city = is_terminal_city
+        self.is_terminus = is_terminus
 
     def paths(self, enter_from=None, railroad=None):
         if railroad and railroad.is_removed:
@@ -178,7 +178,7 @@ class SplitCity(City):
                 return branch
         raise ValueError("The requested station was not found: {}".format(user_station))
 
-class TerminalCity(BoardSpace):
+class Terminus(BoardSpace):
     @staticmethod
     def create(coord, name, edges, values, is_east=False, is_west=False, properties={}):
         cell = Cell.from_coord(coord)
@@ -187,14 +187,14 @@ class TerminalCity(BoardSpace):
         neighbors = set(paths.keys())
 
         if is_east:
-            return EastTerminalCity(name, cell, paths, neighbors, values, properties)
+            return EasternTerminus(name, cell, paths, values, properties)
         elif is_west:
-            return WestTerminalCity(name, cell, paths, neighbors, values, properties)
+            return WesternTerminus(name, cell, paths, values, properties)
         else:
-            return TerminalCity(name, cell, paths, neighbors, values, properties)
+            return Terminus(name, cell, paths, values, properties)
 
     def __init__(self, name, cell, paths, neighbors, value_dict, properties):
-        super(TerminalCity, self).__init__(name, cell, None, paths, True, is_terminal_city=True, properties=properties)
+        super(Terminus, self).__init__(name, cell, None, paths, True, is_terminus=True, properties=properties)
 
         self.neighbors = neighbors
         self.phase_value = {phase: val for phase, val in value_dict["phase"].items()}
@@ -212,23 +212,23 @@ class TerminalCity(BoardSpace):
     def passable(self, enter_cell, railroad):
         return False
 
-class EastTerminalCity(TerminalCity):
+class EasternTerminus(Terminus):
     def __init__(self, name, cell, paths, neighbors, value_dict, properties):
-        super(EastTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, properties)
+        super(EasternTerminus, self).__init__(name, cell, paths, neighbors, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
     def value(self, game, railroad, east_to_west=False):
-        return super(EastTerminalCity, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+        return super(EasternTerminus, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
 
-class WestTerminalCity(TerminalCity):
+class WesternTerminus(Terminus):
     def __init__(self, name, cell, paths, neighbors, value_dict, properties):
-        super(WestTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, properties)
+        super(WesternTerminus, self).__init__(name, cell, paths, neighbors, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
     def value(self, game, railroad, east_to_west=False):
-        return super(WestTerminalCity, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+        return super(WesternTerminus, self).value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
 
 def load(game):
     board_tiles = []
@@ -236,5 +236,5 @@ def load(game):
         board_json = json.load(board_file)
         board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
         board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json.get("cities", {}).items()])
-        board_tiles.extend([TerminalCity.create(coord, **board_edge_args) for coord, board_edge_args in board_json.get("edges", {}).items()])
+        board_tiles.extend([Terminus.create(coord, **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
     return board_tiles
