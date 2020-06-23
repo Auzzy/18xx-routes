@@ -73,21 +73,9 @@ class City(BoardSpace):
         paths = City._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
-            split_city_capacity = {}
-            for branch_paths_str, branch_capacity in capacity.items():
-                branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
-                branch_path_list = []
-                for entrance, exits in branch_path_dict.items():
-                    if not exits:
-                        branch_paths = [(entrance, )]
-                    else:
-                        branch_paths = [(entrance, exit) for exit in exits]
-                    branch_path_list.extend(tuple(branch_paths))
-
-                split_city_capacity[tuple(branch_path_list)] = branch_capacity
-            return SplitCity(name, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties=properties)
+            return SplitCity.create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
         else:
-            return City(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties=properties)
+            return City(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
         super().__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, properties)
@@ -127,6 +115,22 @@ class City(BoardSpace):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
 class SplitCity(City):
+    @staticmethod
+    def create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+        split_city_capacity = {}
+        for branch_paths_str, branch_capacity in capacity.items():
+            branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
+            branch_path_list = []
+            for entrance, exits in branch_path_dict.items():
+                if not exits:
+                    branch_paths = [(entrance, )]
+                else:
+                    branch_paths = [(entrance, exit) for exit in exits]
+                branch_path_list.extend(tuple(branch_paths))
+
+            split_city_capacity[tuple(branch_path_list)] = branch_capacity
+        return SplitCity(name, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
+
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
         super().__init__(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
