@@ -60,7 +60,7 @@ class Track(BoardSpace):
     def __init__(self, cell, upgrade_level, paths):
         super().__init__(None, cell, upgrade_level, paths)
 
-    def value(self, game, railroad):
+    def value(self, game, railroad, train):
         return 0
 
 class Town(BoardSpace):
@@ -77,7 +77,7 @@ class Town(BoardSpace):
 
         self._value = value
 
-    def value(self, game, railroad):
+    def value(self, game, railroad, train):
         return self._value + sum(token.value(game, railroad) for token in self.tokens)
 
 class City(BoardSpace):
@@ -103,7 +103,7 @@ class City(BoardSpace):
     def stations(self):
         return tuple(self._stations)
 
-    def value(self, game, railroad):
+    def value(self, game, railroad, train):
         return self._value + sum(token.value(game, railroad) for token in self.tokens)
 
     def add_station(self, railroad):
@@ -207,14 +207,18 @@ class Terminus(BoardSpace):
         super().__init__(name, cell, None, paths, properties=properties)
 
         self.phase_value = {phase: val for phase, val in value_dict["phase"].items()}
+        self.train_value = {train: val for train, val in value_dict["train"].items()}
 
-    def value(self, game, railroad):
-        for phase, value in sorted(self.phase_value.items(), reverse=True):
-            if game.compare_phases(phase) >= 0:
-                base_value = value
-                break
+    def value(self, game, railroad, train):
+        if train.name in self.train_value:
+            base_value = self.train_value[train.name]
         else:
-            raise ValueError("No value could be found for the provided phase: {}".format(game.current_phase))
+            for phase, value in sorted(self.phase_value.items(), reverse=True):
+                if game.compare_phases(phase) >= 0:
+                    base_value = value
+                    break
+            else:
+                raise ValueError("No value could be found for the provided phase: {}".format(game.current_phase))
 
         return base_value + sum(token.value(game, railroad) for token in self.tokens)
 
@@ -227,8 +231,8 @@ class EasternTerminus(Terminus):
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
-    def value(self, game, railroad, east_to_west=False):
-        return super().value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+    def value(self, game, railroad, train, east_to_west=False):
+        return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
     def __init__(self, name, cell, paths, value_dict, properties):
@@ -236,8 +240,8 @@ class WesternTerminus(Terminus):
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
-    def value(self, game, railroad, east_to_west=False):
-        return super().value(game, railroad) + (self.e2w_bonus if east_to_west else 0)
+    def value(self, game, railroad, train, east_to_west=False):
+        return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 def load(game):
     board_tiles = []

@@ -1,4 +1,5 @@
 import json
+import math
 
 _TRAINS_FILENAME = "trains.json"
 
@@ -12,6 +13,9 @@ class Train:
 
     @staticmethod
     def create(name, collect, visit, phase):
+        if not collect:
+            collect = math.inf
+
         if not visit:
             visit = collect
 
@@ -40,8 +44,11 @@ class TrainContainer(Train):
     @staticmethod
     def from_string(train_str):
         parts = train_str.split("/")
-        collect = int(parts[0].strip())
-        visit = int((parts[0] if len(parts) == 1 else parts[1]).strip())
+        try:
+            collect = int(parts[0].strip())
+        except ValueError:
+            collect = math.inf
+        visit = collect if len(parts) == 1 else int(parts[1].strip())
         return TrainContainer(collect, visit)
 
     def __init__(self, collect, visit):
