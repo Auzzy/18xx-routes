@@ -22,11 +22,15 @@ class Route(object):
     def merge(self, route):
         return Route.create(self._path + route._path)
 
-    def _best_stops(self, train, route_stop_values, station_cities, include=None):
+    def _best_stops(self, game, train, route_stop_values, station_cities, include=None):
         always_include = [(city, route_stop_values[city]) for city in (include or [])]
 
         # Find the station city to always include
         always_include.append(max(station_cities.items(), key=lambda tile_and_value: tile_and_value[1]))
+
+        path_towns = [(stop, value) for stop, value in route_stop_values.items() if stop.is_town]
+        if game.rules.towns_omit_from_limit:
+            always_include.extend(path_towns)
 
         # Remove from consideration the station city and any stops that should always be included.
         stop_values = route_stop_values.copy()
@@ -35,6 +39,8 @@ class Route(object):
 
         # The route can collect stops only after accounting for anything marked always collect
         collect = train.collect - len(always_include)
+        if game.rules.towns_omit_from_limit:
+            collect += len(path_towns)
         best_stops = dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
 
         # Add back in the stops marked always collect
@@ -47,7 +53,7 @@ class Route(object):
         station_cells = {station.cell for station in board.stations(railroad.name)}
         station_cities = {tile: value for tile, value in route_stop_values.items() if tile.cell in station_cells}
 
-        best_stops, route_value = self._best_stops(train, route_stop_values, station_cities)
+        best_stops, route_value = self._best_stops(game, train, route_stop_values, station_cities)
 
         # Check if the route runs from east to west.
         termini = [self._path[0], self._path[-1]]
@@ -58,7 +64,7 @@ class Route(object):
             route_stop_values_e2w = route_stop_values.copy()
             route_stop_values_e2w.update({terminus: terminus.value(game, railroad, east_to_west) for terminus in termini})
 
-            best_stops_e2w, route_value_e2w = self._best_stops(train, route_stop_values_e2w, station_cities, termini)
+            best_stops_e2w, route_value_e2w = self._best_stops(game, train, route_stop_values_e2w, station_cities, termini)
 
             return best_stops_e2w if route_value_e2w >= route_value else best_stops
         else:

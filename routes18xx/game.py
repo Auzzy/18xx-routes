@@ -7,6 +7,15 @@ _DATA_ROOT_DIR = os.path.abspath(os.path.normpath(os.path.join(os.path.dirname(_
 
 _GAME_FILENAME = "game.json"
 
+class Rules:
+    @staticmethod
+    def load(rules):
+        town_rules = rules.get("towns", {})
+        return Rules(town_rules)
+
+    def __init__(self, town_rules):
+        self.towns_omit_from_limit = town_rules.get("omit_from_limit", False)
+
 class Game:
     @staticmethod
     def _get_data_file(game, filename):
@@ -17,12 +26,16 @@ class Game:
         with open(Game._get_data_file(game, _GAME_FILENAME)) as game_file:
             game_json = json.load(game_file)
 
-        return Game(game, game_json["phases"], game_json.get("privates_close", {}))
+        rules = Rules.load(game_json.get("rules", {}))
 
-    def __init__(self, game, phases, privates_close):
+        return Game(game, game_json["phases"], game_json.get("privates_close", {}), rules)
+
+    def __init__(self, game, phases, privates_close, rules):
         self.game = game
         self.phases = phases
         self.privates_close = privates_close
+        self.rules = rules
+
         self.current_phase = None
 
     def get_data_file(self, filename):
