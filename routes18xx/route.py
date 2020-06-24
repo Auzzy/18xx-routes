@@ -42,7 +42,7 @@ class Route(object):
 
         return best_cities, sum(best_cities.values())
 
-    def value(self, game, board, train, railroad):
+    def value(self, game, board, railroad, train):
         route_city_values = {tile: tile.value(game, railroad) for tile in self if tile.is_city}
         station_cells = {station.cell for station in board.stations(railroad.name)}
         station_cities = {tile: value for tile, value in route_city_values.items() if tile.cell in station_cells}
@@ -109,7 +109,7 @@ class Route(object):
         if railroad.is_removed:
             raise ValueError("Cannot run routes for a removed railroad: {}".format(railroad.name))
 
-        visited_cities = self.value(game, board, train, railroad)
+        visited_cities = self.value(game, board, railroad, train)
         return _RunRoute(self, visited_cities, train)
 
 class _RunRoute(object):
