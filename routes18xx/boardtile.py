@@ -202,7 +202,7 @@ def load(game):
     board_tiles = []
     with open(get_data_file(game, BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
-        board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json["tracks"].items()])
-        board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json["cities"].items()])
-        board_tiles.extend([TerminalCity.create(coord, **board_edge_args) for coord, board_edge_args in board_json["edges"].items()])
+        board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
+        board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json.get("cities", {}).items()])
+        board_tiles.extend([TerminalCity.create(coord, **board_edge_args) for coord, board_edge_args in board_json.get("edges", {}).items()])
     return board_tiles
