@@ -31,19 +31,23 @@
             "edges": [0, 3, 4, 5],
             "upgrade_level": 1,
             "value": 10,
-            "meat_value": 30,
             "capacity": {
                 "[0]": 1,
                 "[3]": 1,
                 "[4]": 1,
                 "[5]": 1
             },
-            "upgrade_attrs": ["chicago"]
+            "upgrade_attrs": ["chicago"],
+            "properties": {
+                "meat_value": 30
+            }
         },
         "D14": {
             "name": "Toledo",
             "capacity": 1,
-            "port_value": 20
+            "properties": {
+                "port_value": 20
+            }
         },
         "D20": {
             "name": "Erie",
@@ -101,7 +105,9 @@
             "upgrade_level": 1,
             "value": 10,
             "capacity": 1,
-            "port_value": 40
+            "properties": {
+                "port_value": 40
+            }
         },
         "H12": {
             "name": "Cinncinati",
@@ -138,7 +144,9 @@
                 "phase1": 40,
                 "phase3": 10
             },
-            "port_value": 40
+            "properties": {
+                "port_value": 40
+            }
         },
         "B18": {
             "name": "Sarnia",
@@ -158,7 +166,9 @@
                 "phase3": 40,
                 "bonus": 50
             },
-            "port_value": 20,
+            "properties": {
+                "port_value": 20
+            },
             "is_west": true
         },
         "C17": {
@@ -239,8 +249,10 @@
                 "phase3": 70,
                 "bonus": 20
             },
-            "port_value": 20,
-            "meat_value": 30,
+            "properties": {
+                "port_value": 20,
+                "meat_value": 30
+            },
             "is_west": true
         },
         "I17": {

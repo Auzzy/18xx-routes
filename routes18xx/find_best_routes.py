@@ -111,13 +111,10 @@ def _get_route_sets(railroad, route_by_train):
 
     return best_route_sets
 
-def _find_best_routes_by_train(route_by_train, railroad):
+def _find_best_routes_by_train(game, route_by_train, railroad):
     route_sets = _get_route_sets(railroad, route_by_train)
 
-    if railroad.has_mail_contract:
-        for route_set in route_sets:
-            route = max(route_set, key=lambda run_route: len(run_route.cities))
-            route.add_mail_contract()
+    game.hook_after_route_sets(route_sets, railroad)
 
     LOG.debug("Found %d route sets.", len(route_sets))
     for route_set in route_sets:
@@ -164,20 +161,18 @@ def _walk_routes(board, railroad, enter_from, cell, length, visited=None):
 
     return tuple(set(routes))
 
-def _filter_invalid_routes(routes, board, railroad):
+def _filter_invalid_routes(game, routes, board, railroad):
     """
     Given a collection of routes, returns a new set containing only valid routes. Invalid routes removed:
     - contain less than 2 cities, or
-    - go through Chicago using an impassable exit
-    - only contain Chicago as a station, but don't use the correct exit path
+    - do not contain the railroad's station
+
+    It also invokes a hook to allow each game specify its own filtering.
 
     This fltering after the fact keeps the path finding algorithm simpler. It allows groups of 3 cells to be considered
     (important for the Chicago checks), which would be tricky, since the algorithm operates on pairs of cells (at the
     time of writing).
     """
-    chicago_space = board.get_space(get_chicago_cell())
-
-    chicago_neighbor_cells = [cell for cell in get_chicago_cell().neighbors.values() if cell != get_chicago_connections_cell()]
     stations = board.stations(railroad.name)
 
     # A sieve style filter. If a condition isn't met, iteration continues to the next item. Items meeting all conditions
@@ -188,40 +183,14 @@ def _filter_invalid_routes(routes, board, railroad):
         if len(route.cities) < 2:
             continue
 
-        # A route cannot run from east to east
-        if isinstance(route.cities[0], EastTerminalCity) and isinstance(route.cities[-1], EastTerminalCity):
-            continue
-
-        # If the route goes through Chicago and isn't [C5, D6], ensure the path it took either contains its station or is unblocked
-        if route.contains_cell(get_chicago_connections_cell()) and len(route.cities) != 2:
-            # Finds the subroute which starts at Chicago and is 3 tiles long. That is, it will go [C5, D6, chicago exit]
-            all_chicago_subroutes = [subroute for subroute in route.subroutes(get_chicago_connections_cell()) if len(subroute) == 3]
-            chicago_subroute = all_chicago_subroutes[0] if all_chicago_subroutes else None
-            for cell in chicago_neighbor_cells:
-                chicago_exit = chicago_subroute and chicago_subroute.contains_cell(cell)
-                if chicago_exit and chicago_space.passable(cell, railroad):
-                    break
-            else:
-                continue
-
         # Each route must contain at least 1 station
         stations_on_route = [station for station in stations if route.contains_cell(station.cell)]
         if not stations_on_route:
             continue
-        # If the only station is Chicago, the path must be [D6, C5], or exit through the appropriate side.
-        elif [get_chicago_cell()] == [station.cell for station in stations_on_route]:
-            station_branch = board.get_space(get_chicago_cell()).get_station_branch(stations_on_route[0])
-            chicago_exit_routes = []
-            for paths in station_branch:
-                exit_cell = paths[0] if paths[0] != get_chicago_connections_cell() else paths[1]
-                chicago_exit_routes.append(Route.create([chicago_space, board.get_space(exit_cell)]))
-            if not (len(route) == 2 and route.contains_cell(get_chicago_connections_cell())) \
-                    and not any(route.overlap(chicago_exit_route) for chicago_exit_route in chicago_exit_routes):
-                continue
 
         valid_routes.add(route)
 
-    return valid_routes
+    return game.filter_invalid_routes(valid_routes, board, railroad)
 
 def _find_routes_from_cell(board, railroad, cell, train):
     tile = board.get_space(cell)
@@ -266,7 +235,7 @@ def _find_all_routes(game, board, railroad):
             routes.update(_get_subroutes(routes, stations))
 
             LOG.debug("Filtering out invalid routes")
-            routes_by_train[train] = filter_invalid_routes(routes, board, railroad)
+            routes_by_train[train] = _filter_invalid_routes(game, routes, board, railroad)
 
     LOG.info("Found %d routes.", sum(len(route) for route in routes_by_train.values()))
     for train, routes in routes_by_train.items():
@@ -294,4 +263,4 @@ def find_best_routes(game, board, railroads, active_railroad):
     for train in routes:
         route_value_by_train[train] = [route.run(board, train, active_railroad, phase) for route in routes[train]]
 
-    return _find_best_routes_by_train(route_value_by_train, active_railroad)
+    return _find_best_routes_by_train(game, route_value_by_train, active_railroad)

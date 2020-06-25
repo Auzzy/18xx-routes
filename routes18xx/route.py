@@ -120,16 +120,11 @@ class _RunRoute(object):
         self.value = sum(self.city_values.values())
         self.train = train
 
-        self._mail_contract = False
-
     def overlap(self, other):
         return self._route.overlap(other._route)
 
-    def add_mail_contract(self):
-        if not self._mail_contract:
-            self.value += len(self._route.cities) * 10
-
-            self._mail_contract = True
+    def adjust_value(self, value_add):
+        self.value += value_add
 
     @property
     def cities(self):

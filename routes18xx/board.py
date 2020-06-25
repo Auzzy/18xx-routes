@@ -30,9 +30,9 @@ class Board(object):
             self._validate_place_tile_upgrade(old_tile, cell, tile, orientation)
 
             if isinstance(old_tile, (boardtile.SplitCity, SplitCity)):
-                self._placed_tiles[cell] = SplitCity.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+                self._placed_tiles[cell] = SplitCity.place(old_tile.name, cell, tile, orientation, old_tile.properties)
             else:
-                self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, port_value=old_tile.port_value, meat_value=old_tile.meat_value)
+                self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, old_tile.properties)
         else:
             self._placed_tiles[cell] = PlacedTile.place(None, cell, tile, orientation)
 
@@ -53,29 +53,12 @@ class Board(object):
         path = tuple([Cell.from_coord(coord) for coord in branch])
         space.add_station(railroad, path)
 
-    def place_seaport_token(self, coord, railroad):
+    def place_token(self, coord, railroad, TokenType):
         if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Steamboat Company's token: {}".format(railroad.name))
+            raise ValueError("A removed railroad cannot place a token: {}".format(railroad.name))
 
         current_cell = Cell.from_coord(coord)
-        for cell in board_cells():
-            space = self.get_space(cell)
-            if space and space.port_token and cell != current_cell:
-                raise ValueError("Cannot place the seaport token on {}. It's already been placed on {}.".format(current_cell, cell))
-
-        self.get_space(current_cell).place_seaport_token(railroad)
-
-    def place_meat_packing_token(self, coord, railroad):
-        if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Meat Packing Company's token: {}".format(railroad.name))
-
-        current_cell = Cell.from_coord(coord)
-        for cell in board_cells():
-            space = self.get_space(cell)
-            if space and space.meat_token and cell != current_cell:
-                raise ValueError("Cannot place the meat packing token on {}. It's already been placed on {}.".format(current_cell, cell))
-
-        self.get_space(current_cell).place_meat_packing_token(railroad)
+        self.get_space(current_cell).place_token(railroad, TokenType)
 
     def stations(self, railroad_name=None):
         all_tiles = list(self._placed_tiles.values()) + list(self._board_tiles.values())

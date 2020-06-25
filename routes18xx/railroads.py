@@ -22,10 +22,13 @@ class Railroad(object):
     def __init__(self, name, railroad_trains):
         self.name = name
         self.trains = railroad_trains
-        self.has_mail_contract = False
+        self._private_companies = []
 
-    def assign_mail_contract(self):
-        self.has_mail_contract = True
+    def add_private_company(self, name):
+        self._private_companies.append(name)
+
+    def has_private_company(self, name):
+        return name in self._private_companies
 
     @property
     def is_removed(self):
@@ -34,15 +37,13 @@ class Railroad(object):
 class RemovedRailroad(Railroad):
     @staticmethod
     def create(name):
-        return RemovedRailroad(name)
+        return RemovedRailroad(name, [])
 
-    def __init__(self, name):
-        super().__init__(name, [])
+    def add_private_company(self, name):
+        raise ValueError("Cannot assign a private company to a removed railroad: {}".format(self.name))
 
-        self.has_mail_contract = False
-
-    def assign_mail_contract(self):
-        raise ValueError("Cannot assign Mail Contract to a removed railroad: {}".format(self.name))
+    def has_private_company(self, name):
+        raise ValueError("A removed failroad cannot hold any private companies: {}".format(self.name))
 
     @property
     def is_removed(self):
