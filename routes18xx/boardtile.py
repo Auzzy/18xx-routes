@@ -2,25 +2,23 @@ import collections
 import json
 
 from routes18xx.cell import Cell
-from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
+from routes18xx.tokens import Station
 import itertools
 
 BASE_BOARD_FILENAME = "base-board.json"
 
 class BoardSpace(object):
-    def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(), is_terminal_city=False,
-            port_value=0, meat_value=0):
+    def __init__(self, name, cell, upgrade_level, paths, is_city=False, upgrade_attrs=set(),
+            properties={}, is_terminal_city=False):
         self.name = name or str(cell)
         self.cell = cell
         self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminal city
         self._paths = paths
-        self.port_value = port_value
-        self.port_token = None
-        self.meat_value = meat_value
-        self.meat_token = None
+        self.tokens = []
 
         self.is_city = is_city
         self.upgrade_attrs = set(upgrade_attrs)
+        self.properties = properties
         self.is_terminal_city = is_terminal_city
 
     def paths(self, enter_from=None, railroad=None):
@@ -32,29 +30,8 @@ class BoardSpace(object):
         else:
             return tuple(self._paths.keys())
 
-    def place_seaport_token(self, railroad):
-        if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Steamboat Company's token: {}".format(railroad.name))
-
-        if self.port_value == 0:
-            raise ValueError("It is not legal to place the seaport token on this space ({}).".format(self.cell))
-
-        self.port_token = SeaportToken(self.cell, railroad)
-
-    def place_meat_packing_token(self, railroad):
-        if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Meat Packing Company's token: {}".format(railroad.name))
-
-        if self.meat_value == 0:
-            raise ValueError("It is not legal to place the meat packing token on this space ({}).".format(self.cell))
-
-        self.meat_token = MeatPackingToken(self.cell, railroad)
-
-    def port_bonus(self, railroad, phase):
-        return self.port_value if phase != 4 and self.port_token and self.port_token.railroad == railroad else 0
-
-    def meat_bonus(self, railroad, phase):
-        return self.meat_value if phase != 4 and self.meat_token and self.meat_token.railroad == railroad else 0
+    def place_token(self, railroad, TokenType):
+        self.tokens.append(TokenType.place(self.cell, railroad, self.properties))
 
 class Track(BoardSpace):
     @staticmethod
@@ -90,7 +67,7 @@ class City(BoardSpace):
         return paths
 
     @staticmethod
-    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), port_value=0, meat_value=0):
+    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
         cell = Cell.from_coord(coord)
 
         neighbors = set()
@@ -115,12 +92,12 @@ class City(BoardSpace):
                     branch_path_list.extend(tuple(branch_paths))
 
                 split_city_capacity[tuple(branch_path_list)] = branch_capacity
-            return SplitCity(name, cell, upgrade_level, paths, neighbors, value, split_city_capacity, upgrade_attrs, port_value=port_value, meat_value=meat_value)
+            return SplitCity(name, cell, upgrade_level, paths, neighbors, value, split_city_capacity, upgrade_attrs, properties=properties)
         else:
-            return City(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, port_value=port_value, meat_value=meat_value)
+            return City(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, properties=properties)
 
-    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs=set(), port_value=0, meat_value=0):
-        super(City, self).__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, port_value=port_value, meat_value=meat_value)
+    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs=set(), properties={}):
+        super(City, self).__init__(name, cell, upgrade_level, paths, True, upgrade_attrs, properties)
 
         self.neighbors = neighbors
         self._value = value
@@ -132,7 +109,7 @@ class City(BoardSpace):
         return tuple(self._stations)
 
     def value(self, railroad, phase):
-        return self._value + self.port_bonus(railroad, phase) + self.meat_bonus(railroad, phase)
+        return self._value + sum(token.value(railroad, phase) for token in self.tokens)
 
     def add_station(self, railroad):
         if self.has_station(railroad.name):
@@ -158,9 +135,8 @@ class City(BoardSpace):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
 class SplitCity(City):
-    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, port_value, meat_value):
-        super(SplitCity, self).__init__(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs,
-                port_value=port_value, meat_value=meat_value)
+    def __init__(self, name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, properties):
+        super(SplitCity, self).__init__(name, cell, upgrade_level, paths, neighbors, value, capacity, upgrade_attrs, properties)
 
         self.branch_to_station = {key: [] for key in self.capacity.keys()}
 
@@ -204,21 +180,21 @@ class SplitCity(City):
 
 class TerminalCity(BoardSpace):
     @staticmethod
-    def create(coord, name, edges, values, is_east=False, is_west=False, port_value=0, meat_value=0):
+    def create(coord, name, edges, values, is_east=False, is_west=False, properties={}):
         cell = Cell.from_coord(coord)
 
         paths = {cell.neighbors[side]: [] for side in edges}
         neighbors = set(paths.keys())
 
         if is_east:
-            return EastTerminalCity(name, cell, paths, neighbors, values, port_value=port_value, meat_value=meat_value)
+            return EastTerminalCity(name, cell, paths, neighbors, values, properties)
         elif is_west:
-            return WestTerminalCity(name, cell, paths, neighbors, values, port_value=port_value, meat_value=meat_value)
+            return WestTerminalCity(name, cell, paths, neighbors, values, properties)
         else:
-            return TerminalCity(name, cell, paths, neighbors, values, port_value=port_value, meat_value=meat_value)
+            return TerminalCity(name, cell, paths, neighbors, values, properties)
 
-    def __init__(self, name, cell, paths, neighbors, value_dict, port_value, meat_value):
-        super(TerminalCity, self).__init__(name, cell, None, paths, True, is_terminal_city=True, port_value=port_value, meat_value=meat_value)
+    def __init__(self, name, cell, paths, neighbors, value_dict, properties):
+        super(TerminalCity, self).__init__(name, cell, None, paths, True, is_terminal_city=True, properties=properties)
 
         self.neighbors = neighbors
         self.phase1_value = value_dict["phase1"]
@@ -226,14 +202,14 @@ class TerminalCity(BoardSpace):
 
     def value(self, railroad, phase):
         value = self.phase1_value if phase in (1, 2) else self.phase3_value
-        return value + self.port_bonus(railroad, phase) + self.meat_bonus(railroad, phase)
+        return value + sum(token.value(railroad, phase) for token in self.tokens)
 
     def passable(self, enter_cell, railroad):
         return False
 
 class EastTerminalCity(TerminalCity):
-    def __init__(self, name, cell, paths, neighbors, value_dict, port_value, meat_value):
-        super(EastTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, port_value, meat_value)
+    def __init__(self, name, cell, paths, neighbors, value_dict, properties):
+        super(EastTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, properties)
         
         self.bonus = value_dict["bonus"]
 
@@ -241,8 +217,8 @@ class EastTerminalCity(TerminalCity):
         return super(EastTerminalCity, self).value(railroad, phase) + (self.bonus if east_to_west else 0)
 
 class WestTerminalCity(TerminalCity):
-    def __init__(self, name, cell, paths, neighbors, value_dict, port_value, meat_value):
-        super(WestTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, port_value, meat_value)
+    def __init__(self, name, cell, paths, neighbors, value_dict, properties):
+        super(WestTerminalCity, self).__init__(name, cell, paths, neighbors, value_dict, properties)
         
         self.bonus = value_dict["bonus"]
 

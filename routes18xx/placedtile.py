@@ -1,7 +1,7 @@
 import collections
 
 from routes18xx.cell import Cell
-from routes18xx.tokens import MeatPackingToken, SeaportToken, Station
+from routes18xx.tokens import Station
 
 class PlacedTile(object):
     @staticmethod
@@ -22,29 +22,27 @@ class PlacedTile(object):
         return paths
 
     @staticmethod
-    def place(name, cell, tile, orientation, port_value=None, meat_value=None):
+    def place(name, cell, tile, orientation, properties={}):
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return PlacedTile(name, cell, tile, paths, port_value, meat_value)
+        return PlacedTile(name, cell, tile, paths, properties)
 
-    def __init__(self, name, cell, tile, paths={}, port_value=None, meat_value=None):
+    def __init__(self, name, cell, tile, paths={}, properties={}):
         self.name = name or str(cell)
         self.cell = cell
         self.tile = tile
         self.capacity = tile.capacity
         self._paths = paths
-        self.port_value = port_value
-        self.port_token = None
-        self.meat_value = meat_value
-        self.meat_token = None
-        
+        self.properties = properties
+
         self._stations = []
+        self.tokens = []
         self.upgrade_level = self.tile.upgrade_level
         self.is_city = self.tile.is_city
         self.upgrade_attrs = self.tile.upgrade_attrs
         self.is_terminal_city = False
 
     def value(self, railroad, phase):
-        return self.tile.value + self.port_bonus(railroad, phase) + self.meat_bonus(railroad, phase)
+        return self.tile.value + sum(token.value(railroad, phase) for token in self.tokens)
 
     def passable(self, enter_cell, railroad):
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
@@ -73,29 +71,8 @@ class PlacedTile(object):
     def has_station(self, railroad_name):
         return bool(self.get_station(railroad_name))
 
-    def place_seaport_token(self, railroad):
-        if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Steamboat Company's token: {}".format(railroad.name))
-
-        if self.port_value == 0:
-            raise ValueError("It is not legal to place the seaport token on this space ({}).".format(self.cell))
-
-        self.port_token = SeaportToken(self.cell, railroad)
-
-    def place_meat_packing_token(self, railroad):
-        if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place Meat Packing Company's token: {}".format(railroad.name))
-
-        if self.meat_value == 0:
-            raise ValueError("It is not legal to place the meat packing token on this space ({}).".format(self.cell))
-
-        self.meat_token = MeatPackingToken(self.cell, railroad)
-
-    def port_bonus(self, railroad, phase):
-        return self.port_value if phase != 4 and self.port_token and self.port_token.railroad == railroad else 0
-
-    def meat_bonus(self, railroad, phase):
-        return self.meat_value if phase != 4 and self.meat_token and self.meat_token.railroad == railroad else 0
+    def place_token(self, railroad, TokenType):
+        self.tokens.append(TokenType.place(self.cell, railroad, self.properties))
 
     def paths(self, enter_from=None, railroad=None):
         if railroad and railroad.is_removed:
@@ -122,12 +99,12 @@ class SplitCity(PlacedTile):
         return branches_to_cells
 
     @staticmethod
-    def place(name, cell, tile, orientation, port_value=None, meat_value=None):
+    def place(name, cell, tile, orientation, properties={}):
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return SplitCity(name, cell, tile, orientation, paths, port_value, meat_value)
+        return SplitCity(name, cell, tile, orientation, paths, properties)
 
-    def __init__(self, name, cell, tile, orientation, paths={}, port_value=None, meat_value=None):
-        super(SplitCity, self).__init__(name, cell, tile, paths, port_value, meat_value)
+    def __init__(self, name, cell, tile, orientation, paths={}, properties={}):
+        super(SplitCity, self).__init__(name, cell, tile, paths, properties)
 
         self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
         self.branch_to_station = {key: [] for key in self.capacity.keys()}

@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from routes18xx import boardstate, find_best_routes, game, railroads, private_companies
+from routes18xx import boardstate, find_best_routes, game, railroads
 
 
 def parse_args():
@@ -36,7 +36,9 @@ if __name__ == "__main__":
     game = game.Game.load(args["game"])
     board = boardstate.load_from_csv(game, args["board-state-file"])
     railroads = railroads.load_from_csv(game, board, args["railroads-file"])
-    private_companies.load_from_csv(game, board, railroads, args.get("private_companies_file"))
+    private_companies_module = game.get_game_submodule("private_companies")
+    if private_companies_module:
+        private_companies_module.load_from_csv(game, board, railroads, args.get("private_companies_file"))
     board.validate()
 
     active_railroad = railroads[args["active-railroad"]]
