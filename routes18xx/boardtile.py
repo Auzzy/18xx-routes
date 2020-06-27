@@ -206,8 +206,8 @@ class Terminus(BoardSpace):
     def __init__(self, name, cell, paths, value_dict, properties):
         super().__init__(name, cell, None, paths, properties=properties)
 
-        self.phase_value = {phase: val for phase, val in value_dict["phase"].items()}
-        self.train_value = {train: val for train, val in value_dict["train"].items()}
+        self.phase_value = {phase: val for phase, val in value_dict.get("phase", {}).items()}
+        self.train_value = {train: val for train, val in value_dict.get("train", {}).items()}
 
     def value(self, game, railroad, train):
         if train.name in self.train_value:
