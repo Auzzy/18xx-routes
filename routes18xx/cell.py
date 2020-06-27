@@ -80,9 +80,3 @@ def board_cells():
     for row, columns in _CELL_DB.items():
         for column, cell in columns.items():
             yield cell
-
-def get_chicago_cell():
-    return Cell.from_coord("D6")
-
-def get_chicago_connections_cell():
-    return Cell.from_coord("C5")
