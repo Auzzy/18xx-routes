@@ -1,3 +1,4 @@
+import argparse
 import functools
 import itertools
 import logging
@@ -5,12 +6,14 @@ import math
 import multiprocessing
 import os
 import queue
+import sys
 
+from routes18xx import boardstate, railroads
 from routes18xx.board import Board
+from routes18xx.game import Game
 from routes18xx.route import Route
 
-LOG = logging.getLogger(__name__)
-
+LOG = logging.getLogger("routes18xx")
 
 def route_set_value(route_set):
     return sum(route.value for route in route_set)
@@ -255,3 +258,53 @@ def find_best_routes(game, board, railroads, active_railroad):
         route_value_by_train[train] = [route.run(game, board, train, active_railroad) for route in routes[train]]
 
     return _find_best_routes_by_train(game, route_value_by_train, active_railroad)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("game",
+            help="The name of the game to use. Usually just the \"year\" (e.g. 1846, 18AL, etc).")
+    parser.add_argument("active-railroad",
+            help="The name of the railroad for whom to find the route. Must be present in the railroads file.")
+    parser.add_argument("board-state-file",
+            help=("CSV file containing the board state. Semi-colon is the column separator. The columns are: "
+                  "coord; tile_id; orientation"))
+    parser.add_argument("railroads-file",
+            help=("CSV file containing railroads. Semi-colon is the column separator. The columns are: "
+                  "name; trains (comma-separated); stations (comma-separated); station_branch_map (optional, repeating)"))
+    parser.add_argument("-p", "--private-companies-file",
+            help=("CSV file containing private company info. Semi-colon is the column separator. A column's precise "
+                  "meaning depends on the company. The columns are: "
+                  "name; owner; coordinate (optional)."))
+    parser.add_argument("-v", "--verbose", action="store_true")
+    return vars(parser.parse_args())
+
+def main():
+    args = parse_args()
+
+    logger = logging.getLogger("routes18xx")
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
+
+    game = Game.load(args["game"])
+    board = boardstate.load_from_csv(game, args["board-state-file"])
+    railroads_in_play = railroads.load_from_csv(game, board, args["railroads-file"])
+    game.capture_phase(railroads_in_play)
+
+    private_companies_module = game.get_game_submodule("private_companies")
+    if private_companies_module:
+        private_companies_module.load_from_csv(game, board, railroads_in_play, args.get("private_companies_file"))
+    board.validate()
+
+    active_railroad = railroads_in_play[args["active-railroad"]]
+    if active_railroad.is_removed:
+        raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
+
+    best_routes = find_best_routes(game, board, railroads_in_play, active_railroad)
+    print("RESULT")
+    for route in best_routes:
+        stop_path = " -> ".join("{} [{}]".format(stop.name, route.stop_values[stop]) for stop in route.visited_stops)
+        print("{}: {} = {} ({})".format(route.train, route, route.value, stop_path))
+
+if __name__ == "__main__":
+    main()
