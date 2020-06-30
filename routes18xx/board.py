@@ -1,24 +1,41 @@
 import itertools
 
-from routes18xx import boardtile, games
-from routes18xx.cell import Cell, board_cells, initialize_cells
+from routes18xx import boardtile, cell, games
 from routes18xx.placedtile import PlacedTile, SplitCity
 from routes18xx.tokens import Station
 
 class Board(object):
     @staticmethod
     def load(game):
-        initialize_cells(game)
+        cells = cell.load(game)
+        board = Board(cells)
+        board._board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load(game, board)}
+        return board
 
-        board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load(game)}
-        return Board(board_tiles)
+    def __init__(self, cells):
+        self._cells = cells
 
-    def __init__(self, board_tiles):
-        self._board_tiles = board_tiles
+        self._board_tiles = {}
         self._placed_tiles = {}
 
+    def cell(self, coord):
+        if len(coord) < 2 or len(coord) > 3:
+            raise ValueError("Provided invalid coord: {}".format(coord))
+
+        row, col = coord[0], int(coord[1:])
+        if row not in self._cells or col not in self._cells[row]:
+            raise ValueError("The coordinate provided is not legal: {}".format(coord))
+
+        return self._cells[row][col]
+
+    @property
+    def cells(self):
+        for row, columns in self._cells.items():
+            for column, cell in columns.items():
+                yield cell
+
     def place_tile(self, coord, tile, orientation):
-        cell = Cell.from_coord(coord)
+        cell = self.cell(coord)
 
         if int(orientation) not in range(0, 6):
             raise ValueError("Orientation out of range. Expected between 0 and 5, inclusive. Got {}.".format(orientation))
@@ -37,7 +54,7 @@ class Board(object):
             self._placed_tiles[cell] = PlacedTile.place(None, cell, tile, orientation)
 
     def place_station(self, coord, railroad):
-        cell = Cell.from_coord(coord)
+        cell = self.cell(coord)
         tile = self.get_space(cell)
         if not tile.is_city:
             raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
@@ -48,19 +65,19 @@ class Board(object):
         tile.add_station(railroad)
 
     def place_split_station(self, coord, railroad, branch):
-        cell = Cell.from_coord(coord)
+        cell = self.cell(coord)
         space = self.get_space(cell)
         if not space.is_city:
             raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
 
-        path = tuple([Cell.from_coord(coord) for coord in branch])
+        path = tuple([self.cell(coord) for coord in branch])
         space.add_station(railroad, path)
 
     def place_token(self, coord, railroad, TokenType):
         if railroad.is_removed:
             raise ValueError("A removed railroad cannot place a token: {}".format(railroad.name))
 
-        current_cell = Cell.from_coord(coord)
+        current_cell = self.cell(coord)
         self.get_space(current_cell).place_token(railroad, TokenType)
 
     def stations(self, railroad_name=None):

@@ -50,9 +50,7 @@ class BoardSpace(object):
 
 class Track(BoardSpace):
     @staticmethod
-    def create(coord, edges, upgrade_level=None):
-        cell = Cell.from_coord(coord)
-
+    def create(cell, edges, upgrade_level=None):
         paths = BoardSpace._calc_paths(cell, edges)
 
         return Track(cell, upgrade_level, paths)
@@ -65,9 +63,7 @@ class Track(BoardSpace):
 
 class Town(BoardSpace):
     @staticmethod
-    def create(coord, name, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
-        cell = Cell.from_coord(coord)
-
+    def create(cell, name, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         return Town(name, cell, upgrade_level, paths, value, upgrade_attrs, properties)
@@ -82,9 +78,7 @@ class Town(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
-    def create(coord, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
-        cell = Cell.from_coord(coord)
-
+    def create(cell, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
@@ -191,9 +185,7 @@ class SplitCity(City):
 
 class Terminus(BoardSpace):
     @staticmethod
-    def create(coord, name, edges, values, is_east=False, is_west=False, properties={}):
-        cell = Cell.from_coord(coord)
-
+    def create(cell, name, edges, values, is_east=False, is_west=False, properties={}):
         paths = {cell.neighbors[side]: [] for side in edges}
 
         if is_east:
@@ -243,12 +235,12 @@ class WesternTerminus(Terminus):
     def value(self, game, railroad, train, east_to_west=False):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
-def load(game):
+def load(game, board):
     board_tiles = []
     with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
-        board_tiles.extend([Track.create(coord, **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
-        board_tiles.extend([Town.create(coord, **town_args) for coord, town_args in board_json.get("towns", {}).items()])
-        board_tiles.extend([City.create(coord, **city_args) for coord, city_args in board_json.get("cities", {}).items()])
-        board_tiles.extend([Terminus.create(coord, **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
+        board_tiles.extend([Track.create(board.cell(coord), **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
+        board_tiles.extend([Town.create(board.cell(coord), **town_args) for coord, town_args in board_json.get("towns", {}).items()])
+        board_tiles.extend([City.create(board.cell(coord), **city_args) for coord, city_args in board_json.get("cities", {}).items()])
+        board_tiles.extend([Terminus.create(board.cell(coord), **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
     return board_tiles
