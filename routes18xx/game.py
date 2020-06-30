@@ -2,36 +2,29 @@ import importlib
 import json
 import os
 
+from routes18xx.rules import Rules
+
 _DIR_NAME = "data"
 _DATA_ROOT_DIR = os.path.abspath(os.path.normpath(os.path.join(os.path.dirname(__file__), _DIR_NAME)))
 
 _GAME_FILENAME = "game.json"
 
-class Rules:
-    @staticmethod
-    def load(rules):
-        town_rules = rules.get("towns", {})
-        return Rules(town_rules)
-
-    def __init__(self, town_rules):
-        self.towns_omit_from_limit = town_rules.get("omit_from_limit", False)
-
 class Game:
     @staticmethod
-    def _get_data_file(game, filename):
-        return os.path.join(_DATA_ROOT_DIR, game, filename)
+    def get_game_data_file(game_name, filename):
+        return os.path.join(_DATA_ROOT_DIR, game_name, filename)
 
     @staticmethod
-    def load(game):
-        with open(Game._get_data_file(game, _GAME_FILENAME)) as game_file:
+    def load(game_name):
+        with open(Game.get_game_data_file(game_name, _GAME_FILENAME)) as game_file:
             game_json = json.load(game_file)
 
-        rules = Rules.load(game_json.get("rules", {}))
+        rules = Rules.load(game_json)
 
-        return Game(game, game_json["phases"], game_json.get("privates_close", {}), rules)
+        return Game(game_name, game_json["phases"], game_json.get("privates_close", {}), rules)
 
-    def __init__(self, game, phases, privates_close, rules):
-        self.game = game
+    def __init__(self, game_name, phases, privates_close, rules):
+        self.name = game_name
         self.phases = phases
         self.privates_close = privates_close
         self.rules = rules
@@ -39,7 +32,7 @@ class Game:
         self.current_phase = None
 
     def get_data_file(self, filename):
-        return os.path.join(_DATA_ROOT_DIR, self.game, filename)
+        return Game.get_game_data_file(self.name, filename)
 
     def capture_phase(self, railroads):
         self.current_phase = self.detect_phase(railroads)
@@ -82,7 +75,7 @@ class Game:
             return None
 
     def _get_game_module_name(self):
-        return "routes18xx.games.routes{}".format(self.game)
+        return "routes18xx.games.routes{}".format(self.name)
 
     def _get_game_module(self):
         try:

@@ -105,7 +105,7 @@ def load(game, board, railroads_rows):
             for entry in station_entries:
                 coord, branch = _split_station_entry(entry)
                 if coord and coord != info["home"]:
-                    if isinstance(board.get_space(Cell.from_coord(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
+                    if isinstance(board.get_space(board.cell(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
                         if not branch:
                             raise ValueError("A split city ({}) is listed as a station for {}, but no station branch was specified.".format(coord, railroad.name))
 
