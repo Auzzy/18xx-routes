@@ -58,11 +58,11 @@ def _load_all(game):
     with open(game.get_data_file(_TILE_FILENAME)) as tiles_file:
         tiles_json = json.load(tiles_file)
 
-    return {int(id): Tile.create(int(id), **args) for id, args in tiles_json.items()}
+    return {id: Tile.create(id, **args) for id, args in tiles_json.items()}
 
 def get_tile(game, tile_id):
     global _TILES
     if not _TILES:
         _TILES = _load_all(game)
 
-    return _TILES.get(int(tile_id))
+    return _TILES.get(tile_id)
