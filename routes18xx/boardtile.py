@@ -1,9 +1,9 @@
 import collections
+import itertools
 import json
 
 from routes18xx.cell import Cell
 from routes18xx.tokens import Station
-import itertools
 
 BASE_BOARD_FILENAME = "base-board.json"
 
@@ -125,6 +125,27 @@ class City(BoardSpace):
 
 class SplitCity(City):
     @staticmethod
+    def _branches_with_unique_exits(branch_dict):
+        # Indicating a branch on a split city can be done by a single unqiue
+        # neighbor, if such a neighbor exists. This determines what they are,
+        # then add them to the branch keys.
+        branch_to_sides = {branch_key: tuple(set(itertools.chain.from_iterable(branch_key))) for branch_key in branch_dict}
+        unique_exit_sides = {}
+        for key, sides in branch_to_sides.items():
+            # Get all the neighbors that appear in branches other than the
+            # current one, and remove them from the current branch. If any
+            # remain, they must be unique.
+            unique_exits = set(sides) - set(itertools.chain.from_iterable(set(branch_to_sides.values()) - {sides}))
+            unique_exit_sides[key] = {(side, ) for side in unique_exits}
+
+        new_branch_dict = {}
+        for old_key, value in branch_dict.items():
+            new_key = tuple(set(old_key).union(unique_exit_sides[old_key]))
+            new_branch_dict[new_key] = value
+
+        return new_branch_dict
+
+    @staticmethod
     def create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
         split_city_capacity = {}
         for branch_paths_str, branch_capacity in capacity.items():
@@ -138,6 +159,9 @@ class SplitCity(City):
                 branch_path_list.extend(tuple(branch_paths))
 
             split_city_capacity[tuple(branch_path_list)] = branch_capacity
+
+        split_city_capacity = SplitCity._branches_with_unique_exits(split_city_capacity)
+
         return SplitCity(name, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
 
     def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):

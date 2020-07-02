@@ -1,4 +1,5 @@
 import collections
+import itertools
 
 from routes18xx.cell import Cell
 from routes18xx.tokens import Station
@@ -92,18 +93,44 @@ class PlacedTile(object):
 
 class SplitCity(PlacedTile):
     @staticmethod
-    def _map_branches_to_cells(cell, orientation, branch_to_station):
-        branches_to_cells = {}
-        for branch, value in branch_to_station.items():
-            branch_to_cells = []
-            for path in branch:
-                path_to_cells = []
+    def _branches_with_unique_exits(branch_dict):
+        # Indicating a branch on a split city can be done by a single unqiue
+        # neighbor, if such a neighbor exists. This determines what they are,
+        # then add them to the branch keys.
+        branch_to_cells = {branch_key: tuple(set(itertools.chain.from_iterable(branch_key))) for branch_key in branch_dict}
+        unique_exit_cells = {}
+        for key, cells in branch_to_cells.items():
+            # Get all the neighbors that appear in branches other than the
+            # current one, and remove them from the current branch. If any
+            # remain, they must be unique.
+            # unique_exit_cells[key] = set(cells) - set(itertools.chain.from_iterable(set(branch_to_cells.values()) - {cells}))
+            unique_exits = set(cells) - set(itertools.chain.from_iterable(set(branch_to_cells.values()) - {cells}))
+            unique_exit_cells[key] = {(cell, ) for cell in unique_exits}
+
+        new_branch_dict = {}
+        for old_key, value in branch_dict.items():
+            new_key = tuple(set(old_key).union(unique_exit_cells[old_key]))
+            new_branch_dict[new_key] = value
+
+        return new_branch_dict
+
+    @staticmethod
+    def _map_branches_to_cells(cell, orientation, raw_branch_dict):
+        branch_dict = {}
+        # Tiles indicate their neighbors by side number relative to upright.
+        # Once placed, given the placement orientation, we need to know their
+        # neighboring coordinates.
+        for raw_branch, value in raw_branch_dict.items():
+            branch_paths = []
+            for path in raw_branch:
+                path_cells = []
                 for side in path:
                     rotated_side = int(orientation) if isinstance(side, Cell) else PlacedTile._rotate(side, orientation)
-                    path_to_cells.append(cell.neighbors[rotated_side])
-                branch_to_cells.append(tuple(path_to_cells))
-            branches_to_cells[tuple(branch_to_cells)] = value
-        return branches_to_cells
+                    path_cells.append(cell.neighbors[rotated_side])
+                branch_paths.append(tuple(path_cells))
+            branch_dict[tuple(branch_paths)] = value
+
+        return SplitCity._branches_with_unique_exits(branch_dict)
 
     @staticmethod
     def place(name, cell, tile, orientation, properties={}):
