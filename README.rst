@@ -37,13 +37,13 @@ RAILROAD STATES is the filepath to a CSV containing which railroads are "in play
 
 Each row can take 2 formats. The less common (and simpler) one is "name; removed". For example, ``Pennsylania Railroad; removed``. In some games, home stations are treated differently whether a railroad was removed from the game (e.g. due to player counts) or if it just hasn't floated yet. This allows that distinction to be made.
 
-The format of each row is "name; trains; stations". For example, ``Baltimore & Ohio; 4 / 6, 6; C15, D6: [E5 C5], G7``. Note the use of semi-colons as column separators.
+The format of each row is "name; trains; stations". For example, ``Baltimore & Ohio; 4 / 6, 6; C15, D6: E5, G7``. Note the use of semi-colons as column separators.
 
 ``name`` is the full name of the railroad. This must match one of the railroads in the railroads.json file, which will be the same as in the game. Any railroad which doesn't show up in this file is assumed to have not yet placed its home station.
 
 ``trains`` is a comma-separated list of trains. This must match on of the trains in the trains.json file (whitespace is removed before comparison). There is no limit on the numbed of trains per railroad.
 
-``stations`` is a command-separated list of coordinates. These are checked to ensure they are cities, and that they have not gone over capacity. For each station in a split city (i.e. a city whose slots are not clustered), its branch must be indicated. The branch is made up of the coorindates of each neighbor of the station slot, surrounded by square brackets and separated by spaces. In the example above, Baltimore & Ohio has a station on D6 (Chicago), on the branch that connects C5 to E5.
+``stations`` is a command-separated list of coordinates. These are checked to ensure they are cities, and that they have not gone over capacity. For each station in a split city (i.e. a city whose slots are not clustered), either its branch or a unqiue exit must be indicated. A branch is made up of the coorindates of each neighbor of the station slot, surrounded by square brackets and separated by spaces. A unique exit is just the coordinate of the unique exit. In the example above, Baltimore & Ohio has a station on D6 (Chicago), on the branch which runs through unqiue exit E5.
 
 Private Company State (-p | --private-companies-file)
 -----------------------------------------------------

@@ -54,11 +54,12 @@ def _split_station_entry(station_entry):
 
     coord, branch_str = station_entry.split(':')
     branch_str = branch_str.strip()
-    if not branch_str.startswith('[') or not branch_str.endswith(']'):
-        raise ValueError("Malformed station branch.")
+    if branch_str.startswith('[') and branch_str.endswith(']'):
+        branch_str = branch_str[1:-1]
+        branch = tuple([coord.strip() for coord in branch_str.split()])
+    else:
+        branch = (branch_str.strip(), )
 
-    branch_str = branch_str[1:-1]
-    branch = tuple([coord.strip() for coord in branch_str.split()])
     return coord.strip(), branch
 
 def _load_railroad_info(game):
