@@ -2,6 +2,7 @@ import importlib
 import json
 import os
 
+from routes18xx import tiles
 from routes18xx.rules import Rules
 
 _DIR_NAME = "data"
@@ -21,13 +22,18 @@ class Game:
 
         rules = Rules.load(game_json)
 
-        return Game(game_name, game_json["phases"], game_json.get("privates_close", {}), rules)
+        game = Game(game_name, game_json["phases"], game_json.get("privates_close", {}), rules)
 
-    def __init__(self, game_name, phases, privates_close, rules):
+        game.tiles = tiles.load_all(game)
+
+        return game
+
+    def __init__(self, game_name, phases, privates_close, rules, tiles={}):
         self.name = game_name
         self.phases = phases
         self.privates_close = privates_close
         self.rules = rules
+        self.tiles = tiles
 
         self.current_phase = None
 
