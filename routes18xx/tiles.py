@@ -4,7 +4,6 @@ import json
 
 
 _TILE_FILENAME = "tiles.json"
-_TILES = {}
 
 class Tile(object):
     @staticmethod
@@ -54,15 +53,8 @@ class Tile(object):
         self.is_stop = self.is_city or self.is_town or self.is_terminus
 
 
-def _load_all(game):
+def load_all(game):
     with open(game.get_data_file(_TILE_FILENAME)) as tiles_file:
         tiles_json = json.load(tiles_file)
 
     return {id: Tile.create(id, **args) for id, args in tiles_json.items()}
-
-def get_tile(game, tile_id):
-    global _TILES
-    if not _TILES:
-        _TILES = _load_all(game)
-
-    return _TILES.get(tile_id)
