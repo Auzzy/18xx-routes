@@ -164,6 +164,7 @@
         },
         "C5": {
             "name": "Chicago Connections",
+            "nickname": "Chicago Conn.",
             "edges": [5],
             "values": {
                 "phase": {

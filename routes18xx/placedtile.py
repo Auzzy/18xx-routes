@@ -23,12 +23,13 @@ class PlacedTile(object):
         return paths
 
     @staticmethod
-    def place(name, cell, tile, orientation, properties={}):
+    def place(name, nickname, cell, tile, orientation, properties={}):
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return PlacedTile(name, cell, tile, paths, properties)
+        return PlacedTile(name, nickname, cell, tile, paths, properties)
 
-    def __init__(self, name, cell, tile, paths={}, properties={}):
+    def __init__(self, name, nickname, cell, tile, paths={}, properties={}):
         self.name = name or str(cell)
+        self.nickname = nickname or self.name
         self.cell = cell
         self.tile = tile
         self.capacity = tile.capacity
@@ -133,12 +134,12 @@ class SplitCity(PlacedTile):
         return SplitCity._branches_with_unique_exits(branch_dict)
 
     @staticmethod
-    def place(name, cell, tile, orientation, properties={}):
+    def place(name, nickname, cell, tile, orientation, properties={}):
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return SplitCity(name, cell, tile, orientation, paths, properties)
+        return SplitCity(name, nickname, cell, tile, orientation, paths, properties)
 
-    def __init__(self, name, cell, tile, orientation, paths={}, properties={}):
-        super().__init__(name, cell, tile, paths, properties)
+    def __init__(self, name, nickname, cell, tile, orientation, paths={}, properties={}):
+        super().__init__(name, nickname, cell, tile, paths, properties)
 
         self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
         self.branch_to_station = {key: [] for key in self.capacity.keys()}

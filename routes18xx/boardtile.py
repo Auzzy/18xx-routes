@@ -19,8 +19,9 @@ class BoardSpace(object):
                 paths[cell.neighbors[exits]] = []
         return paths
 
-    def __init__(self, name, cell, upgrade_level, paths, upgrade_attrs=set(), properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, upgrade_attrs=set(), properties={}):
         self.name = name or str(cell)
+        self.nickname = nickname or self.name
         self.cell = cell
         self.upgrade_level = None if upgrade_level == 4 else upgrade_level  # A built-in upgrade_level 4 tile is similar to a terminus
         self._paths = paths
@@ -56,20 +57,20 @@ class Track(BoardSpace):
         return Track(cell, upgrade_level, paths)
 
     def __init__(self, cell, upgrade_level, paths):
-        super().__init__(None, cell, upgrade_level, paths)
+        super().__init__(None, None, cell, upgrade_level, paths)
 
     def value(self, game, railroad, train):
         return 0
 
 class Town(BoardSpace):
     @staticmethod
-    def create(cell, name, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
-        return Town(name, cell, upgrade_level, paths, value, upgrade_attrs, properties)
+        return Town(name, nickname, cell, upgrade_level, paths, value, upgrade_attrs, properties)
 
-    def __init__(self, name, cell, upgrade_level, paths, value, upgrade_attrs=set(), properties={}):
-        super().__init__(name, cell, upgrade_level, paths, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, upgrade_attrs=set(), properties={}):
+        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
 
@@ -78,16 +79,16 @@ class Town(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
-    def create(cell, name, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
-            return SplitCity.create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
         else:
-            return City(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return City(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
-    def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
-        super().__init__(name, cell, upgrade_level, paths, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
+        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
         self.capacity = capacity
@@ -146,7 +147,7 @@ class SplitCity(City):
         return new_branch_dict
 
     @staticmethod
-    def create(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
         split_city_capacity = {}
         for branch_paths_str, branch_capacity in capacity.items():
             branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
@@ -162,10 +163,10 @@ class SplitCity(City):
 
         split_city_capacity = SplitCity._branches_with_unique_exits(split_city_capacity)
 
-        return SplitCity(name, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
+        return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
 
-    def __init__(self, name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
-        super().__init__(name, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
         self.branch_to_station = {key: [] for key in self.capacity.keys()}
 
@@ -209,18 +210,18 @@ class SplitCity(City):
 
 class Terminus(BoardSpace):
     @staticmethod
-    def create(cell, name, edges, values, is_east=False, is_west=False, properties={}):
+    def create(cell, name, edges, values, nickname=None, is_east=False, is_west=False, properties={}):
         paths = {cell.neighbors[side]: [] for side in edges}
 
         if is_east:
-            return EasternTerminus(name, cell, paths, values, properties)
+            return EasternTerminus(name, nickname, cell, paths, values, properties)
         elif is_west:
-            return WesternTerminus(name, cell, paths, values, properties)
+            return WesternTerminus(name, nickname, cell, paths, values, properties)
         else:
-            return Terminus(name, cell, paths, values, properties)
+            return Terminus(name, nickname, cell, paths, values, properties)
 
-    def __init__(self, name, cell, paths, value_dict, properties):
-        super().__init__(name, cell, None, paths, properties=properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, properties):
+        super().__init__(name, nickname, cell, None, paths, properties=properties)
 
         self.phase_value = {phase: val for phase, val in value_dict.get("phase", {}).items()}
         self.train_value = {train: val for train, val in value_dict.get("train", {}).items()}
@@ -242,8 +243,8 @@ class Terminus(BoardSpace):
         return False
 
 class EasternTerminus(Terminus):
-    def __init__(self, name, cell, paths, value_dict, properties):
-        super().__init__(name, cell, paths, value_dict, properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, properties):
+        super().__init__(name, nickname, cell, paths, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
@@ -251,8 +252,8 @@ class EasternTerminus(Terminus):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
-    def __init__(self, name, cell, paths, value_dict, properties):
-        super().__init__(name, cell, paths, value_dict, properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, properties):
+        super().__init__(name, nickname, cell, paths, value_dict, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 

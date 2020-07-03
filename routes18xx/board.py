@@ -47,11 +47,11 @@ class Board(object):
             self._validate_place_tile_upgrade(old_tile, cell, tile, orientation)
 
             if isinstance(old_tile, (boardtile.SplitCity, SplitCity)):
-                self._placed_tiles[cell] = SplitCity.place(old_tile.name, cell, tile, orientation, old_tile.properties)
+                self._placed_tiles[cell] = SplitCity.place(old_tile.name, old_tile.nickname, cell, tile, orientation, old_tile.properties)
             else:
-                self._placed_tiles[cell] = PlacedTile.place(old_tile.name, cell, tile, orientation, old_tile.properties)
+                self._placed_tiles[cell] = PlacedTile.place(old_tile.name, old_tile.nickname, cell, tile, orientation, old_tile.properties)
         else:
-            self._placed_tiles[cell] = PlacedTile.place(None, cell, tile, orientation)
+            self._placed_tiles[cell] = PlacedTile.place(None, None, cell, tile, orientation)
 
     def place_station(self, coord, railroad):
         cell = self.cell(coord)
