@@ -18,6 +18,18 @@ HOME_CITIES = {
     "Michigan Southern": "C15"
 }
 
+PRIVATE_COMPANY_COORDS = {
+    "Steamboat Company": SteamboatToken.COORDS,
+    "Meat Packing Company": MeatPackingToken.COORDS,
+    "Big 4": [HOME_CITIES["Big 4"]],
+    "Michigan Southern": [HOME_CITIES["Michigan Southern"]]
+}
+
+PRIVATE_COMPANY_DEFAULT_COORDS = {
+    "Big 4": HOME_CITIES["Big 4"],
+    "Michigan Southern": HOME_CITIES["Michigan Southern"]
+}
+
 def _handle_steamboat_company(game, board, railroads, kwargs):
     owner = kwargs.get("owner")
     coord = kwargs["coord"]
