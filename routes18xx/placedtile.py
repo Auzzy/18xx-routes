@@ -1,6 +1,7 @@
 import collections
 import itertools
 
+from routes18xx import boardtile
 from routes18xx.cell import Cell
 from routes18xx.tokens import Station
 
@@ -23,7 +24,14 @@ class PlacedTile(object):
         return paths
 
     @staticmethod
-    def place(name, nickname, cell, tile, orientation, properties={}):
+    def place(cell, tile, orientation, old_space=None):
+        if isinstance(old_space, (boardtile.SplitCity, SplitCity)):
+            return SplitCity.place(cell, tile, orientation, old_space)
+
+        name = old_space.name if old_space else None
+        nickname = old_space.nickname if old_space else None
+        properties = old_space.properties if old_space else {}
+
         paths = PlacedTile.get_paths(cell, tile, orientation)
         return PlacedTile(name, nickname, cell, tile, paths, properties)
 
@@ -134,7 +142,11 @@ class SplitCity(PlacedTile):
         return SplitCity._branches_with_unique_exits(branch_dict)
 
     @staticmethod
-    def place(name, nickname, cell, tile, orientation, properties={}):
+    def place(cell, tile, orientation, old_space=None):
+        name = old_space.name if old_space else None
+        nickname = old_space.nickname if old_space else None
+        properties = old_space.properties if old_space else {}
+
         paths = PlacedTile.get_paths(cell, tile, orientation)
         return SplitCity(name, nickname, cell, tile, orientation, paths, properties)
 
