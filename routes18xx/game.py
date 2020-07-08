@@ -62,11 +62,11 @@ class Game:
         else:
             return 0
 
-    def private_is_closed(self, name):
+    def private_is_closed(self, name, phase=None):
         close_phase = self.privates_close.get(name)
         if not close_phase:
             return False
-        return self.compare_phases(close_phase) >= 0
+        return self.compare_phases(close_phase, phase) >= 0
 
     def filter_invalid_routes(self, routes, board, railroad):
         return self._hook("filter_invalid_routes", routes, routes, board, railroad)
