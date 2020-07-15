@@ -71,8 +71,9 @@ class Game:
     def filter_invalid_routes(self, routes, board, railroad):
         return self._hook("filter_invalid_routes", routes, routes, board, railroad)
 
-    def hook_after_route_sets(self, route_sets, railroad):
-        return self._hook("hook_after_route_sets", route_sets, route_sets, railroad)
+    def hook_route_set_values(self, route_set, railroad):
+        default_values = {route: route.value for route in route_set}
+        return self._hook("hook_route_set_values", default_values, route_set, railroad)
 
     def get_game_submodule(self, name):
         try:

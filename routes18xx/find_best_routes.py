@@ -11,52 +11,44 @@ import sys
 from routes18xx import boardstate, railroads
 from routes18xx.board import Board
 from routes18xx.game import Game
-from routes18xx.route import Route
+from routes18xx.route import RouteSet, Route
 
 LOG = logging.getLogger("routes18xx")
-
-def route_set_value(route_set):
-    return sum(route.value for route in route_set)
 
 def _is_overlapping(active_route, routes_to_check):
     return any(True for route in routes_to_check if active_route.overlap(route)) if routes_to_check else False
 
-def _find_best_sub_route_set(global_best_value, sorted_routes, selected_routes=None):
+def _find_best_sub_route_set(game, railroad, global_best_value, sorted_routes, selected_routes=None):
     selected_routes = selected_routes or []
 
     minor_routes = []
-    best_route_set = selected_routes
-    best_route_set_value = route_set_value(selected_routes)
-    if best_route_set_value > global_best_value.value:
-        global_best_value.value = best_route_set_value
+    best_route_set = RouteSet.create(game, railroad, selected_routes)
+    if best_route_set > global_best_value.value:
+        global_best_value.value = best_route_set.value
 
     for minor_route in sorted_routes[0]:
         if not _is_overlapping(minor_route, selected_routes):
             if sorted_routes[1:]:
                 # Already selected routes + the current route + the maximum possible value of the remaining train routes.
-                max_possible_route_set = selected_routes + [minor_route] + [routes[0] for routes in sorted_routes[1:]]
-                max_possible_value = route_set_value(max_possible_route_set)
+                max_possible_route_set = RouteSet.create(game, railroad, selected_routes + [minor_route] + [routes[0] for routes in sorted_routes[1:]])
                 # That must be more than the current best route set value, or we bail from this iteration.
-                if max_possible_value <= global_best_value.value:
+                if max_possible_route_set <= global_best_value.value:
                     return best_route_set
 
-                sub_route_set = _find_best_sub_route_set(global_best_value, sorted_routes[1:], selected_routes + [minor_route])
-                sub_route_set_value = route_set_value(sub_route_set)
-                if sub_route_set_value >= global_best_value.value:
+                sub_route_set = _find_best_sub_route_set(game, railroad, global_best_value, sorted_routes[1:], selected_routes + [minor_route])
+                if sub_route_set >= global_best_value.value:
                     best_route_set = sub_route_set
-                    best_route_set_value = sub_route_set_value
-                    global_best_value.value = sub_route_set_value
+                    global_best_value.value = sub_route_set.value
             else:
-                return selected_routes + [minor_route]
+                return RouteSet.create(game, railroad, selected_routes + [minor_route])
     return best_route_set
 
-def _find_best_sub_route_set_worker(input_queue, global_best_value):
+def _find_best_sub_route_set_worker(game, railroad, input_queue, global_best_value):
     best_route_sets = []
     while True:
         try:
             sorted_routes = input_queue.get_nowait()
-            best_route_set = _find_best_sub_route_set(global_best_value, sorted_routes)
-
+            best_route_set = _find_best_sub_route_set(game, railroad, global_best_value, sorted_routes)
             if best_route_set:
                 best_route_sets.append(best_route_set)
         except queue.Empty:
@@ -76,7 +68,7 @@ def chunk_sequence(sequence, chunk_length):
         yield sequence[index:index + chunk_length]
 
 
-def _get_route_sets(railroad, route_by_train):
+def _get_route_sets(game, railroad, route_by_train):
     manager = multiprocessing.Manager()
     input_queue = manager.Queue()
 
@@ -102,20 +94,17 @@ def _get_route_sets(railroad, route_by_train):
                 # Give each worker the input queue and the best value reference
                 worker_promises = []
                 for k in range(math.ceil(worker_count)):
-                    promise = pool.apply_async(_find_best_sub_route_set_worker, (input_queue, global_best_value))
+                    promise = pool.apply_async(_find_best_sub_route_set_worker, (game, railroad, input_queue, global_best_value))
                     worker_promises.append(promise)
         
                 # Add the results to the list
                 for promise in worker_promises:
-                    values = promise.get()
-                    best_route_sets.extend(values)
+                    best_route_sets.extend(promise.get())
 
     return best_route_sets
 
 def _find_best_routes_by_train(game, route_by_train, railroad):
-    route_sets = _get_route_sets(railroad, route_by_train)
-
-    game.hook_after_route_sets(route_sets, railroad)
+    route_sets = _get_route_sets(game, railroad, route_by_train)
 
     LOG.debug("Found %d route sets.", len(route_sets))
     for route_set in route_sets:
@@ -123,7 +112,7 @@ def _find_best_routes_by_train(game, route_by_train, railroad):
             LOG.debug("{}: {} ({})".format(run_route.train, str(run_route), run_route.value))
         LOG.debug("")
 
-    return max(route_sets, key=lambda route_set: sum(route.value for route in route_set)) if route_sets else {}
+    return max(route_sets, default=RouteSet.create(game, railroad, []))
 
 def _get_subroutes(routes, stations):
     subroutes = [route.subroutes(station.cell) for station in stations for route in routes]
@@ -302,10 +291,11 @@ def main():
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
 
-    best_routes = find_best_routes_from_files(args["game"], args["active-railroad"],
+    best_route_set = find_best_routes_from_files(args["game"], args["active-railroad"],
             args["board-state-file"], args["railroads-file"], args.get("private_companies_file"))
+
     print("RESULT")
-    for route in best_routes:
+    for route in best_route_set:
         stop_path = " -> ".join("{} [{}]".format(stop.name, route.stop_values[stop]) for stop in route.visited_stops)
         print("{}: {} = {} ({})".format(route.train, route, route.value, stop_path))
 

@@ -30,9 +30,8 @@ def _run_tests(suite_filename):
             for active_name, expected_value in test_data["active"].items():
                 best_route_set = find_best_routes_from_files(game, active_name,
                         board_state_filename, railroads_filename, private_companies_filename)
-                actual_value = sum(route.value for route in best_route_set)
-                if expected_value != actual_value:
-                    print(f"{active_name}: FAIL - expected: {expected_value}. actual: {actual_value}")
+                if expected_value != best_route_set.value:
+                    print(f"{active_name}: FAIL - expected: {expected_value}. actual: {best_route_set.value}")
                     failed_tests.append(active_name)
             if failed_tests:
                 print(f"{game} - {test_data['name']}: FAILED - {', '.join(failed_tests)}")
