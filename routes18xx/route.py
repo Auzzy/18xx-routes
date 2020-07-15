@@ -1,5 +1,7 @@
+import functools
 import heapq
 import math
+import numbers
 
 from routes18xx.boardtile import EasternTerminus, WesternTerminus
 
@@ -158,3 +160,58 @@ class _RunRoute(object):
 
     def __iter__(self):
         return iter(self._route)
+
+@functools.total_ordering
+class RouteSet:
+    @staticmethod
+    def create(game, railroad, routes):
+        route_values = game.hook_route_set_values(routes, railroad)
+        route_proxies = [_RouteProxy(route, value) for route, value in route_values.items()]
+        return RouteSet(route_proxies)
+
+    def __init__(self, routes):
+        self.routes = routes
+        self.value = sum(route.value for route in self.routes)
+
+    def __iter__(self):
+        return iter(self.routes)
+
+    def __bool__(self):
+        return bool(self.routes)
+
+    def __gt__(self, other):
+        if isinstance(other, numbers.Integral):
+            return self.value > other
+        elif isinstance(other, RouteSet):
+            return self.value > other.value
+        return NotImplemented
+
+    def __eq__(self, other):
+        if isinstance(other, numbers.Integral):
+            return self.value == other
+        elif isinstance(other, RouteSet):
+            return self.value == other.value
+        return NotImplemented
+
+class _RouteProxy:
+    def __init__(self, route, value):
+        self.route = route
+        self.value = value
+
+    def __getattribute__(self, name):
+        # The special attributes allow Python to pickle the class correctly,
+        # for returning it through a promise. And __dict__ is needed for the
+        # class to work properly.
+        if name == "value" or \
+                name in ("__dict__", "__setstate__", "__getstate__",
+                        "__class__", "__reduce__", "__reduce_ex__",
+                        "__getnewargs__", "__getnewargs_ex__"):
+            return super().__getattribute__(name)
+        else:
+            return super().__getattribute__("route").__getattribute__(name)
+
+    def __str__(self):
+        return str(self.__dict__["route"])
+    
+    def __iter__(self):
+        return iter(self.__dict__["route"])

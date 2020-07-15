@@ -56,8 +56,9 @@ def filter_invalid_routes(routes, board, railroad):
 
     return valid_routes
 
-def hook_after_route_sets(route_sets, railroad):
-    if railroad.has_private_company("Mail Contract"):
-        for route_set in route_sets:
-            route = max(route_set, key=lambda run_route: len(run_route.stops))
-            route.adjust_value(len(route.stops) * 10)
+def hook_route_set_values(route_set, railroad):
+    raw_values = {route: route.value for route in route_set}
+    if railroad.has_private_company("Mail Contract") and route_set:
+        longest_route = max(route_set, key=lambda run_route: len(run_route.stops))
+        raw_values[longest_route] += len(longest_route.stops) * 10
+    return raw_values
