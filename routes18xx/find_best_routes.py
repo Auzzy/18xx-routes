@@ -18,10 +18,31 @@ LOG = logging.getLogger("routes18xx")
 def _is_overlapping(active_route, routes_to_check):
     return any(True for route in routes_to_check if active_route.overlap(route)) if routes_to_check else False
 
+def _find_high_potential_route_sets(game, railroad, threshhold_value, sorted_routes, selected_routes=None):
+    selected_routes = selected_routes or []
+
+    high_potential_route_sets = []
+    for minor_route in sorted_routes[0]:
+        if not _is_overlapping(minor_route, selected_routes):
+            if sorted_routes[1:]:
+                max_possible_route_set = selected_routes + [minor_route] + [routes[0] for routes in sorted_routes[1:]]
+                max_possible_route_set_value = sum(game.hook_route_max_value(route, railroad) for route in max_possible_route_set)
+                if max_possible_route_set_value <= threshhold_value:
+                    return high_potential_route_sets
+
+                high_potential_route_sets.extend(_find_high_potential_route_sets(game, railroad, threshhold_value, sorted_routes[1:], selected_routes + [minor_route]))
+            else:
+                route_set = selected_routes + [minor_route]
+                route_set_value = sum(game.hook_route_max_value(route, railroad) for route in route_set)
+                if route_set_value >= threshhold_value:
+                    high_potential_route_sets.append(RouteSet.create(game, railroad, route_set))
+                else:
+                    return high_potential_route_sets
+    return high_potential_route_sets
+
 def _find_best_sub_route_set(game, railroad, global_best_value, sorted_routes, selected_routes=None):
     selected_routes = selected_routes or []
 
-    minor_routes = []
     best_route_set = RouteSet.create(game, railroad, selected_routes)
     if best_route_set > global_best_value.value:
         global_best_value.value = best_route_set.value
@@ -101,7 +122,25 @@ def _get_route_sets(game, railroad, route_by_train):
                 for promise in worker_promises:
                     best_route_sets.extend(promise.get())
 
-    return best_route_sets
+    best_route_set = max(best_route_sets, default=RouteSet.create(game, railroad, []))
+
+    LOG.debug("Threshold route set:")
+    for run_route in best_route_set:
+        LOG.debug("{}: {} ({})".format(run_route.train, run_route, run_route.value))
+
+    # Some games have adjustments that get applied to some routes in a route set.
+    # Ideally, we'd determine the correct value of every possible route set
+    # before finding the route sets through _find_best_sub_route_set_worker.
+    # However, in many late-game cases, that would take an incredible amount of
+    # time and memory. The follow lines implement a much faster version. They apply
+    # any possible adjustment to every route in the route set, then check if
+    # that exceeds (or matches) the threshhold value (the value of best_route_set),
+    # and if it does, capture its actual value. All route sets whose max value
+    # meets this threshhold are returned.
+    key_func = lambda route: game.hook_route_max_value(route, railroad)
+    sorted_routes_by_stops = [sorted(sorted_route_column, key=key_func, reverse=True) for sorted_route_column in sorted_routes]
+    high_potential_route_sets = _find_high_potential_route_sets(game, railroad, best_route_set.value, sorted_routes_by_stops)
+    return [best_route_set] + high_potential_route_sets
 
 def _find_best_routes_by_train(game, route_by_train, railroad):
     route_sets = _get_route_sets(game, railroad, route_by_train)

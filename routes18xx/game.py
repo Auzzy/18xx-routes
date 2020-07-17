@@ -75,6 +75,9 @@ class Game:
         default_values = {route: route.value for route in route_set}
         return self._hook("hook_route_set_values", default_values, route_set, railroad)
 
+    def hook_route_max_value(self, route, railroad):
+        return self._hook("hook_route_max_value", route.value, route, railroad)
+
     def get_game_submodule(self, name):
         try:
             return importlib.import_module("{}.{}".format(self._get_game_module_name(), name))
