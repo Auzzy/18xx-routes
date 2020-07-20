@@ -259,6 +259,22 @@ def find_best_routes(game, board, railroads, active_railroad):
 
     return _find_best_routes_by_train(game, route_value_by_train, active_railroad)
 
+def find_best_routes_from_files(game, active_railroad_name, board_state_filename, railroads_filename, private_companies_filename=None):
+    game = Game.load(game)
+    board = boardstate.load_from_csv(game, board_state_filename)
+    railroads_in_play = railroads.load_from_csv(game, board, railroads_filename)
+    game.capture_phase(railroads_in_play)
+
+    private_companies_module = game.get_game_submodule("private_companies")
+    if private_companies_module:
+        private_companies_module.load_from_csv(game, board, railroads_in_play, private_companies_filename)
+    board.validate()
+
+    active_railroad = railroads_in_play[active_railroad_name]
+    if active_railroad.is_removed:
+        raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
+
+    return find_best_routes(game, board, railroads_in_play, active_railroad)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -286,21 +302,8 @@ def main():
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG if args["verbose"] else logging.INFO)
 
-    game = Game.load(args["game"])
-    board = boardstate.load_from_csv(game, args["board-state-file"])
-    railroads_in_play = railroads.load_from_csv(game, board, args["railroads-file"])
-    game.capture_phase(railroads_in_play)
-
-    private_companies_module = game.get_game_submodule("private_companies")
-    if private_companies_module:
-        private_companies_module.load_from_csv(game, board, railroads_in_play, args.get("private_companies_file"))
-    board.validate()
-
-    active_railroad = railroads_in_play[args["active-railroad"]]
-    if active_railroad.is_removed:
-        raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
-
-    best_routes = find_best_routes(game, board, railroads_in_play, active_railroad)
+    best_routes = find_best_routes_from_files(args["game"], args["active-railroad"],
+            args["board-state-file"], args["railroads-file"], args.get("private_companies_file"))
     print("RESULT")
     for route in best_routes:
         stop_path = " -> ".join("{} [{}]".format(stop.name, route.stop_values[stop]) for stop in route.visited_stops)

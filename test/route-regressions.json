@@ -1,0 +1,79 @@
+{
+    "tests": {
+        "1846": [
+            {
+                "name": "full game",
+                "board-state": "board-state-final.csv",
+                "railroads": "railroads-final.csv",
+                "active": {
+                    "Baltimore & Ohio": 690,
+                    "Chesapeake & Ohio": 700,
+                    "Erie": 620,
+                    "Grand Trunk": 610,
+                    "Illinois Central": 650,
+                    "New York Central": 680,
+                    "Pennsylvania": 410
+                }
+            },
+            {
+                "name": "Mail Contract best route",
+                "board-state": "board-state-mail-contract-best.csv",
+                "railroads": "railroads-mail-contract-best.csv",
+                "private-companies": "companies-mail-contract-best.csv",
+                "active": {"Grand Trunk": 120}
+            },
+            {
+                "name": "sparse",
+                "board-state": "board-state-sparse.csv",
+                "railroads": "railroads-sparse.csv",
+                "active": {
+                    "Chesapeake & Ohio": 550,
+                    "Grand Trunk": 510,
+                    "Illinois Central": 480,
+                    "New York Central": 620
+                }
+            },
+            {
+                "name": "mid-game",
+                "board-state": "board-state-mid-game.csv",
+                "railroads": "railroads-mid-game.csv",
+                "active": {
+                    "Baltimore & Ohio": 240,
+                    "Grand Trunk": 150,
+                    "Illinois Central": 170,
+                    "Pennsylvania": 80
+                }
+            }
+        ],
+        "1889": [
+            {
+                "name": "31 May 2020",
+                "board-state": "board-state-20-05-31.csv",
+                "railroads": "railroads-20-05-31.csv",
+                "active": {
+                    "Awa Railroad": 640,
+                    "Iyo Railroad": 250,
+                    "Sanuki Railways": 250,
+                    "Takamatsu-Kotohira Electric Rail": 310,
+                    "Tosa Electric Rail": 260,
+                    "Tosa Kuroshio Railroad": 640,
+                    "Uwajima Railroad": 310
+                }
+            },
+            {
+                "name": "14 Jun 2020",
+                "board-state": "board-state-20-06-14.csv",
+                "railroads": "railroads-20-06-14.csv",
+                "active": {
+                    "Awa Railroad": 490,
+                    "Iyo Railroad": 220,
+                    "Sanuki Railways": 750,
+                    "Takamatsu-Kotohira Electric Rail": 970,
+                    "Tosa Electric Rail": 300,
+                    "Tosa Kuroshio Railroad": 750,
+                    "Uwajima Railroad": 250
+                }
+            }
+        ]
+    }
+}
