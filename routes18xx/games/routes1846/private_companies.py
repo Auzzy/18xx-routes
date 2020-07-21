@@ -37,7 +37,7 @@ def _handle_steamboat_company(game, board, railroads, kwargs):
         return
 
     if owner not in railroads:
-        raise ValueError("Assigned the Steamboat Company to an unrecognized or unfounded railroad: {}".format(owner))
+        raise ValueError(f"Assigned the Steamboat Company to an unrecognized or unfounded railroad: {owner}")
 
     board.place_token(coord, railroads[owner], SteamboatToken)
     railroads[owner].add_private_company("Steamboat Company")
@@ -49,7 +49,7 @@ def _handle_meat_packing_company(game, board, railroads, kwargs):
         return
 
     if owner not in railroads:
-        raise ValueError("Assigned the Meat Packing Company to an unrecognized or unfounded railroad: {}".format(owner))
+        raise ValueError(f"Assigned the Meat Packing Company to an unrecognized or unfounded railroad: {owner}")
 
     board.place_token(coord, railroads[owner], MeatPackingToken)
     railroads[owner].add_private_company("Meat Packing Company")
@@ -60,7 +60,7 @@ def _handle_mail_contract(game, board, railroads, kwargs):
         return
 
     if owner not in railroads:
-        raise ValueError("Assigned the Mail Contract to an unrecognized or unfounded railroad: {}".format(owner))
+        raise ValueError(f"Assigned the Mail Contract to an unrecognized or unfounded railroad: {owner}")
 
     railroads[owner].add_private_company("Mail Contract")
 
@@ -69,11 +69,11 @@ def _handle_independent_railroad(game, board, railroads, name, kwargs):
     owner = kwargs.get("owner")
     if owner:
         if owner not in railroads:
-            raise ValueError("Assigned {} to an unrecognized or unfounded railroad: {}".format(name, owner))
+            raise ValueError(f"Assigned {name} to an unrecognized or unfounded railroad: {owner}")
 
         owner_railroad = railroads[owner]
         if owner_railroad.is_removed:
-            raise ValueError("Cannot assign {} to a removed railroad: {}".format(name, owner_railroad.name))
+            raise ValueError(f"Cannot assign {name} to a removed railroad: {owner_railroad.name}")
 
         railroad_station_coords = [str(station.cell) for station in board.stations(owner)]
         if home_city in railroad_station_coords:
@@ -102,6 +102,6 @@ def load(game, board, railroads, companies_rows):
     for company_kwargs in companies_rows:
         name = company_kwargs.get("name")
         if name not in COMPANIES:
-            raise ValueError("An unrecognized private company was provided: {}".format(name))
+            raise ValueError(f"An unrecognized private company was provided: {name}")
 
         COMPANIES[name](game, board, railroads, company_kwargs)

@@ -20,11 +20,11 @@ class Board(object):
 
     def cell(self, coord):
         if len(coord) < 2 or len(coord) > 3:
-            raise ValueError("Provided invalid coord: {}".format(coord))
+            raise ValueError(f"Provided invalid coord: {coord}")
 
         row, col = coord[0], int(coord[1:])
         if row not in self._cells or col not in self._cells[row]:
-            raise ValueError("The coordinate provided is not legal: {}".format(coord))
+            raise ValueError(f"The coordinate provided is not legal: {coord}")
 
         return self._cells[row][col]
 
@@ -38,7 +38,7 @@ class Board(object):
         cell = self.cell(coord)
 
         if int(orientation) not in range(0, 6):
-            raise ValueError("Orientation out of range. Expected between 0 and 5, inclusive. Got {}.".format(orientation))
+            raise ValueError(f"Orientation out of range. Expected between 0 and 5, inclusive. Got {orientation}.")
 
         old_tile = self.get_space(cell)
         self._validate_place_tile_space_type(tile, old_tile)
@@ -52,10 +52,10 @@ class Board(object):
         cell = self.cell(coord)
         tile = self.get_space(cell)
         if not tile.is_city:
-            raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
+            raise ValueError(f"{cell} is not a city, so it cannot have a station.")
 
         if isinstance(tile, (boardtile.SplitCity, SplitCity)):
-            raise ValueError("Since {} is a split city tile, please use Board.place_split_station().".format(coord))
+            raise ValueError(f"Since {coord} is a split city tile, please use Board.place_split_station().")
 
         tile.add_station(railroad)
 
@@ -63,14 +63,14 @@ class Board(object):
         cell = self.cell(coord)
         space = self.get_space(cell)
         if not space.is_city:
-            raise ValueError("{} is not a city, so it cannot have a station.".format(cell))
+            raise ValueError(f"{cell} is not a city, so it cannot have a station.")
 
         branch_cells = tuple([self.cell(coord) for coord in branch])
         space.add_station(railroad, branch_cells)
 
     def place_token(self, coord, railroad, TokenType):
         if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place a token: {}".format(railroad.name))
+            raise ValueError(f"A removed railroad cannot place a token: {railroad.name}")
 
         current_cell = self.cell(coord)
         self.get_space(current_cell).place_token(railroad, TokenType)
@@ -99,7 +99,7 @@ class Board(object):
 
         if invalid:
             invalid_str = ", ".join([str(cell) for cell in invalid])
-            raise ValueError("Tiles at the following spots have no neighbors and no stations: {}".format(invalid_str))
+            raise ValueError(f"Tiles at the following spots have no neighbors and no stations: {invalid_str}")
 
     def _validate_place_tile_space_type(self, tile, old_tile):
         if old_tile and old_tile.is_terminus:
@@ -110,7 +110,7 @@ class Board(object):
                 if old_tile.upgrade_attrs != tile.upgrade_attrs:
                     old_tile_type = ", ".join(old_tile.upgrade_attrs)
                     tile_type = ", ".join(tile.upgrade_attrs)
-                    raise ValueError("Tried to mix a {} tile and a {} tile.".format(old_tile_type, tile_type))
+                    raise ValueError(f"Tried to mix a {old_tile_type} tile and a {tile_type} tile.")
         else:
             if tile.is_stop:
                 raise ValueError("Tried to place a non-track tile on a track space.")
@@ -120,18 +120,18 @@ class Board(object):
             neighbor_space = self.get_space(neighbor)
             if neighbor_space and  neighbor_space.upgrade_level is None and cell not in neighbor_space.paths():
                 tile_type = "terminus" if neighbor_space.is_terminus else "pre-printed gray tile"
-                raise ValueError("Placing tile {} on {} in orientation {} runs into the side of the {} at {}.".format(
-                    tile.id, cell, orientation, tile_type, neighbor_space.cell))
+                raise ValueError(
+                    f"Placing tile {tile.id} on {cell} in orientation {orientation} runs into the side of the {tile_type} at {neighbor_space.cell}.")
 
     def _validate_place_tile_upgrade(self, old_tile, cell, new_tile, orientation):
         if old_tile:
             if old_tile.upgrade_level is None:
-                raise ValueError("{} cannot be upgraded.".format(cell))
+                raise ValueError(f"{cell} cannot be upgraded.")
             elif old_tile.upgrade_level >= new_tile.upgrade_level:
-                raise ValueError("{}: Going from upgrade level {} to {} is not an upgrade.".format(cell, old_tile.upgrade_level, new_tile.upgrade_level))
+                raise ValueError(f"{cell}: Going from upgrade level {old_tile.upgrade_level} to {new_tile.upgrade_level} is not an upgrade.")
 
             for old_start, old_ends in old_tile._paths.items():
                 old_paths = tuple([(old_start, end) for end in old_ends])
                 new_paths = tuple([(start, end) for start, ends in PlacedTile.get_paths(cell, new_tile, orientation).items() for end in ends])
                 if not all(old_path in new_paths for old_path in old_paths):
-                    raise ValueError("The new tile placed on {} does not preserve all the old paths.".format(cell))
+                    raise ValueError(f"The new tile placed on {cell} does not preserve all the old paths.")

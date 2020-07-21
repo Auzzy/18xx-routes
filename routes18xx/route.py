@@ -120,7 +120,7 @@ class Route(object):
 
     def run(self, game, board, train, railroad):
         if railroad.is_removed:
-            raise ValueError("Cannot run routes for a removed railroad: {}".format(railroad.name))
+            raise ValueError(f"Cannot run routes for a removed railroad: {railroad.name}")
 
         visited_stops = self.value(game, board, railroad, train)
         return _RunRoute(self, visited_stops, train)

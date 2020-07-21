@@ -10,7 +10,7 @@ class PrivateCompanyToken(Token):
     @staticmethod
     def place(name, cell, railroad, properties):
         if railroad.is_removed:
-            raise ValueError("A removed railroad cannot place a private company's token: {}".format(railroad.name))
+            raise ValueError(f"A removed railroad cannot place a private company's token: {railroad.name}")
 
         return PrivateCompanyToken(cell, railroad)
 
