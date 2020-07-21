@@ -5,7 +5,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name='routes-18xx',
-    version='0.4.1',
+    version='0.5',
     author="Austin Noto-Moniz",
     author_email="mathfreak65@gmail.com",
     description="Library for caluclating routes in 18xx train games.",
