@@ -9,7 +9,7 @@ class Train:
         if collect == visit:
             return str(collect)
         else:
-            return "{} / {}".format(collect, visit)
+            return f"{collect} / {visit}"
 
     @staticmethod
     def create(name, collect, visit, phase):

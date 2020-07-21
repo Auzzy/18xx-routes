@@ -39,10 +39,10 @@ class RemovedRailroad(Railroad):
         return RemovedRailroad(name, [])
 
     def add_private_company(self, name):
-        raise ValueError("Cannot assign a private company to a removed railroad: {}".format(self.name))
+        raise ValueError(f"Cannot assign a private company to a removed railroad: {self.name}")
 
     def has_private_company(self, name):
-        raise ValueError("A removed failroad cannot hold any private companies: {}".format(self.name))
+        raise ValueError(f"A removed failroad cannot hold any private companies: {self.name}")
 
     @property
     def is_removed(self):
@@ -79,7 +79,7 @@ def load(game, board, railroads_rows):
         name = railroad_args["name"]
         info = railroad_info.get(name, {})
         if not info:
-            raise ValueError("Unrecognized railroad name: {}".format(name))
+            raise ValueError(f"Unrecognized railroad name: {name}")
 
         trains_str = railroad_args.get("trains")
         if trains_str and trains_str.lower() == "removed":
@@ -108,7 +108,7 @@ def load(game, board, railroads_rows):
                 if coord and coord != info["home"]:
                     if isinstance(board.get_space(board.cell(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
                         if not branch:
-                            raise ValueError("A split city ({}) is listed as a station for {}, but no station branch was specified.".format(coord, railroad.name))
+                            raise ValueError(f"A split city ({coord}) is listed as a station for {railroad.name}, but no station branch was specified.")
 
                         board.place_split_station(coord, railroad, branch)
                     else:

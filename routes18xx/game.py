@@ -80,12 +80,12 @@ class Game:
 
     def get_game_submodule(self, name):
         try:
-            return importlib.import_module("{}.{}".format(self._get_game_module_name(), name))
+            return importlib.import_module(f"{self._get_game_module_name()}.{name}")
         except ModuleNotFoundError:
             return None
 
     def _get_game_module_name(self):
-        return "routes18xx.games.routes{}".format(self.name)
+        return f"routes18xx.games.routes{self.name}"
 
     def _get_game_module(self):
         try:

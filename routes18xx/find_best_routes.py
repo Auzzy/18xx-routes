@@ -126,7 +126,7 @@ def _get_route_sets(game, railroad, route_by_train):
 
     LOG.debug("Threshold route set:")
     for run_route in best_route_set:
-        LOG.debug("{}: {} ({})".format(run_route.train, run_route, run_route.value))
+        LOG.debug(f"{run_route.train}: {run_route} ({run_route.value})")
 
     # Some games have adjustments that get applied to some routes in a route set.
     # Ideally, we'd determine the correct value of every possible route set
@@ -145,10 +145,10 @@ def _get_route_sets(game, railroad, route_by_train):
 def _find_best_routes_by_train(game, route_by_train, railroad):
     route_sets = _get_route_sets(game, railroad, route_by_train)
 
-    LOG.debug("Found %d route sets.", len(route_sets))
+    LOG.debug(f"Found {len(route_sets)} route sets.")
     for route_set in route_sets:
         for run_route in route_set:
-            LOG.debug("{}: {} ({})".format(run_route.train, str(run_route), run_route.value))
+            LOG.debug(f"{run_route.train}: {str(run_route)} ({run_route.value})")
         LOG.debug("")
 
     return max(route_sets, default=RouteSet.create(game, railroad, []))
@@ -167,7 +167,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited=None):
     if tile.is_stop \
             and (not game.rules.towns_omit_from_limit or not tile.is_town):
         if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
-            LOG.debug("- %s", ", ".join([str(tile.cell) for tile in visited + [tile]]))
+            LOG.debug(f"- {', '.join([str(tile.cell) for tile in visited + [tile]])}")
             return (Route.single(tile), )
 
         remaining_stops = length - 1
@@ -182,7 +182,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited=None):
         routes += [Route.single(tile).merge(neighbor_path) for neighbor_path in neighbor_paths if neighbor_path]
 
     if not routes and tile.is_stop:
-        LOG.debug("- %s", ", ".join([str(tile.cell) for tile in visited + [tile]]))
+        LOG.debug(f"- {', '.join([str(tile.cell) for tile in visited + [tile]])}")
         routes.append(Route.single(tile))
 
     return tuple(set(routes))
@@ -221,7 +221,7 @@ def _filter_invalid_routes(game, routes, board, railroad):
 def _find_routes_from_cell(game, board, railroad, cell, train):
     routes = _walk_routes(game, board, railroad, None, cell, train.visit)
 
-    LOG.debug("Found %d routes starting at %s.", len(routes), cell)
+    LOG.debug(f"Found {len(routes)} routes starting at {cell}.")
     return routes
 
 def _find_connected_cities(game,board, railroad, cell, dist):
@@ -231,17 +231,17 @@ def _find_connected_cities(game,board, railroad, cell, dist):
 def _find_connected_routes(game, board, railroad, station, train):
     LOG.debug("Finding connected cities.")
     connected_cities = _find_connected_cities(game, board, railroad, station.cell, train.visit - 1)
-    LOG.debug("Connected cities: %s", ", ".join([str(cell) for cell in connected_cities]))
+    LOG.debug(f"Connected cities: {', '.join([str(cell) for cell in connected_cities])}")
 
     LOG.debug("Finding routes starting from connected cities.")
     connected_routes = set()
     for cell in connected_cities:
         connected_routes.update(_find_routes_from_cell(game, board, railroad, cell, train))
-    LOG.debug("Found %d routes from connected cities.", len(connected_routes))
+    LOG.debug(f"Found {len(connected_routes)} routes from connected cities.")
     return connected_routes
 
 def _find_all_routes(game, board, railroad):
-    LOG.info("Finding all possible routes for each train from %s's stations.", railroad.name)
+    LOG.info(f"Finding all possible routes for each train from {railroad.name}'s stations.")
 
     stations = board.stations(railroad.name)
 
@@ -250,10 +250,10 @@ def _find_all_routes(game, board, railroad):
         if train not in routes_by_train:
             routes = set()
             for station in stations:
-                LOG.debug("Finding routes starting at station at %s.", station.cell)
+                LOG.debug(f"Finding routes starting at station at {station.cell}.")
                 routes.update(_find_routes_from_cell(game, board, railroad, station.cell, train))
 
-                LOG.debug("Finding routes which pass through station at %s.", station.cell)
+                LOG.debug(f"Finding routes which pass through station at {station.cell}.")
                 connected_paths = _find_connected_routes(game, board, railroad, station, train)
                 routes.update(connected_paths)
 
@@ -263,20 +263,20 @@ def _find_all_routes(game, board, railroad):
             LOG.debug("Filtering out invalid routes")
             routes_by_train[train] = _filter_invalid_routes(game, routes, board, railroad)
 
-    LOG.info("Found %d routes.", sum(len(route) for route in routes_by_train.values()))
+    LOG.info(f"Found {sum(len(route) for route in routes_by_train.values())} routes.")
     for train, routes in routes_by_train.items():
         for route in routes:
-            LOG.debug("{}: {}".format(train, str(route)))
+            LOG.debug(f"{train}: {str(route)}")
 
     return routes_by_train
 
 def find_best_routes(game, board, railroads, active_railroad):
     if active_railroad.is_removed:
-        raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
+        raise ValueError(f"Cannot calculate routes for a removed railroad: {active_railroad.name}")
 
     game.capture_phase(railroads)
 
-    LOG.info("Finding the best route for %s.", active_railroad.name)
+    LOG.info(f"Finding the best route for {active_railroad.name}.")
 
     routes = _find_all_routes(game, board, active_railroad)
 
@@ -300,7 +300,7 @@ def find_best_routes_from_files(game, active_railroad_name, board_state_filename
 
     active_railroad = railroads_in_play[active_railroad_name]
     if active_railroad.is_removed:
-        raise ValueError("Cannot calculate routes for a removed railroad: {}".format(active_railroad.name))
+        raise ValueError(f"Cannot calculate routes for a removed railroad: {active_railroad.name}")
 
     return find_best_routes(game, board, railroads_in_play, active_railroad)
 
@@ -335,8 +335,8 @@ def main():
 
     print("RESULT")
     for route in best_route_set:
-        stop_path = " -> ".join("{} [{}]".format(stop.name, route.stop_values[stop]) for stop in route.visited_stops)
-        print("{}: {} = {} ({})".format(route.train, route, route.value, stop_path))
+        stop_path = f" -> ".join("{stop.name} [{route.stop_values[stop]}]" for stop in route.visited_stops)
+        print(f"{route.train}: {route} = {route.value} ({stop_path})")
 
 if __name__ == "__main__":
     main()

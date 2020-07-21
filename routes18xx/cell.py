@@ -45,7 +45,7 @@ class Cell(object):
         return self < other or self == other
 
     def __str__(self):
-        return "{}{}".format(self.__row, self.__col)
+        return f"{self.__row}{self.__col}"
 
     def __repr__(self):
         return str(self)

@@ -19,7 +19,7 @@ class PlacedTile(object):
             paths[start_cell] = tuple([cell.neighbors[PlacedTile._rotate(end, orientation)] for end in ends])
 
         if None in paths:
-            raise ValueError("Placing tile {} in orientation {} at {} goes off-map.".format(tile.id, orientation, cell))
+            raise ValueError(f"Placing tile {tile.id} in orientation {orientation} at {cell} goes off-map.")
 
         return paths
 
@@ -70,10 +70,10 @@ class PlacedTile(object):
 
     def add_station(self, railroad):
         if self.has_station(railroad.name):
-            raise ValueError("{} already has a station in {} ({}).".format(railroad.name, self.name, self.cell))
+            raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
 
         if self.capacity <= len(self.stations):
-            raise ValueError("{} ({}) cannot hold any more stations.".format(self.name, self.cell))
+            raise ValueError(f"{self.name} ({self.cell}) cannot hold any more stations.")
 
         station = Station(self.cell, railroad)
         self._stations.append(station)
@@ -93,7 +93,7 @@ class PlacedTile(object):
 
     def paths(self, enter_from=None, railroad=None):
         if railroad and railroad.is_removed:
-            raise ValueError("A removed railroad cannot run routes: {}".format(railroad.name))
+            raise ValueError(f"A removed railroad cannot run routes: {railroad.name}")
 
         if enter_from:
             return self._paths[enter_from]
@@ -158,7 +158,7 @@ class SplitCity(PlacedTile):
 
     def add_station(self, railroad, branch):
         if self.has_station(railroad.name):
-            raise ValueError("{} already has a station in {} ({}).".format(railroad.name, self.name, self.cell))
+            raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
 
         split_branch = tuple()
         for branch_key, value in self.capacity.items():
@@ -166,10 +166,10 @@ class SplitCity(PlacedTile):
                 split_branch = branch_key
                 break
         else:
-            raise ValueError("Attempted to add a station to a non-existant branch of a split city: {}".format(branch))
+            raise ValueError(f"Attempted to add a station to a non-existant branch of a split city: {branch}")
 
         if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
-            raise ValueError("The {} branch of {} ({}) cannot hold any more stations.".format(branch, self.name, self.cell))
+            raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
 
         station = Station(self.cell, railroad)
         self._stations.append(station)
@@ -192,4 +192,4 @@ class SplitCity(PlacedTile):
         for branch, stations in self.branch_to_station.items():
             if user_station in stations:
                 return branch
-        raise ValueError("The requested station was not found: {}".format(user_station))
+        raise ValueError(f"The requested station was not found: {user_station}")
