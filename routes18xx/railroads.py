@@ -84,7 +84,7 @@ def load(game, board, railroads_rows):
         trains_str = railroad_args.get("trains")
         if trains_str and trains_str.lower() == "removed":
             name = railroad_args["name"]
-            if info.get("is_removable"):
+            if not info.get("is_removable"):
                 raise ValueError("Attempted to remove a non-removable railroad.")
 
             railroad = RemovedRailroad.create(name)
