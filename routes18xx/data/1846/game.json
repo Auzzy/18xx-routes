@@ -1,5 +1,11 @@
 {
     "phases": ["1", "2", "3", "4"],
+    "upgrade_phases": {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4"
+    },
     "privates_close": {
         "Steamboat Company": "4",
         "Meat Packing Company": "4",

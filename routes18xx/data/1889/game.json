@@ -1,6 +1,9 @@
 {
     "phases": ["2", "3", "4", "5", "6", "D"],
-    "privates_close": {
-        
-    }
+    "upgrade_phases": {
+        "1": "2",
+        "2": "3",
+        "3": "5"
+    },
+    "privates_close": {}
 }
