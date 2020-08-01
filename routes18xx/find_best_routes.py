@@ -335,7 +335,7 @@ def main():
 
     print("RESULT")
     for route in best_route_set:
-        stop_path = f" -> ".join("{stop.name} [{route.stop_values[stop]}]" for stop in route.visited_stops)
+        stop_path = " -> ".join(f"{stop.name} [{route.stop_values[stop]}]" for stop in route.visited_stops)
         print(f"{route.train}: {route} = {route.value} ({stop_path})")
 
 if __name__ == "__main__":
