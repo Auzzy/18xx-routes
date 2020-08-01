@@ -8,11 +8,12 @@ class Board(object):
     @staticmethod
     def load(game):
         cells = cell.load(game)
-        board = Board(cells)
+        board = Board(game, cells)
         board._board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load(game, board)}
         return board
 
-    def __init__(self, cells):
+    def __init__(self, game, cells):
+        self.game = game
         self._cells = cells
 
         self._board_tiles = {}
@@ -87,19 +88,31 @@ class Board(object):
         return self._placed_tiles.get(cell) or self._board_tiles.get(cell)
 
     def validate(self):
+        self._validate_tiles_connected()
+        self._validate_tiles_upgrade_level()
+
+    def _validate_tiles_connected(self):
         invalid = []
-        for cell, placed_tile in self._placed_tiles.items():
+        for cell, placed_tile in sorted(self._placed_tiles.items()):
             if not placed_tile.stations:
                 for neighbor_cell in placed_tile.paths():
                     neighbor = self.get_space(neighbor_cell)
                     if neighbor and cell in neighbor.paths():
                         break
                 else:
-                    invalid.append(cell)
+                    invalid.append(str(cell))
 
         if invalid:
-            invalid_str = ", ".join([str(cell) for cell in invalid])
-            raise ValueError(f"Tiles at the following spots have no neighbors and no stations: {invalid_str}")
+            raise ValueError(f"Tiles at the following spots have no neighbors and no stations: {', '.join(invalid)}")
+
+    def _validate_tiles_upgrade_level(self):
+        invalid = []
+        for cell, placed_tile in sorted(self._placed_tiles.items()):
+            if self.game.compare_phases(self.game.upgrade_phases[placed_tile.upgrade_level]) < 0:
+                invalid.append(str(cell))
+
+        if invalid:
+            raise ValueError(f"Tiles at the following spots cannot be placed until a later phase: {', '.join(invalid)}")
 
     def _validate_place_tile_space_type(self, tile, old_tile):
         if old_tile and old_tile.is_terminus:
