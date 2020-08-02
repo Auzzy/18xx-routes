@@ -333,7 +333,8 @@
         "edges": [[2, 4]],
         "value": 30,
         "upgrade_level": 1,
-        "is_town": true
+        "is_town": true,
+        "upgrade_attrs": ["port"]
     },
     "438": {
         "edges": [[2, 4]],

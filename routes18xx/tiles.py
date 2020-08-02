@@ -19,7 +19,7 @@ class Tile(object):
         return paths
 
     @staticmethod
-    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=set()):
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=[]):
         paths = Tile._calc_paths(edges)
 
         if isinstance(capacity, dict):
@@ -41,7 +41,7 @@ class Tile(object):
 
         return Tile(id, paths, int(value), quantity, int(upgrade_level), is_city, is_town, is_terminus, capacity, upgrade_attrs)
 
-    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=set()):
+    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=[]):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
@@ -51,7 +51,7 @@ class Tile(object):
         self.is_town = is_town
         self.is_terminus = is_terminus
         self.capacity = capacity
-        self.upgrade_attrs = set(upgrade_attrs)
+        self.upgrade_attrs = sorted(upgrade_attrs)
 
         self.is_stop = self.is_city or self.is_town or self.is_terminus
 

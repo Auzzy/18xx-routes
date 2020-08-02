@@ -127,15 +127,16 @@ class Board(object):
             raise ValueError(f"Found too many of the following tiles on the board: {', '.join(invalid)}")
 
     def _validate_place_tile_space_type(self, tile, old_tile):
-        if old_tile and old_tile.is_terminus:
-            raise ValueError("Cannot upgrade the terminus.")
-
         if old_tile:
-            if tile.is_stop:
-                if old_tile.upgrade_attrs != tile.upgrade_attrs:
-                    old_tile_type = ", ".join(old_tile.upgrade_attrs)
-                    tile_type = ", ".join(tile.upgrade_attrs)
-                    raise ValueError(f"Tried to mix a {old_tile_type} tile and a {tile_type} tile.")
+            if old_tile.is_terminus:
+                raise ValueError("Cannot upgrade the terminus.")
+            elif old_tile.is_city != tile.is_city:
+                raise ValueError("A city tile must be placed on a city board space.")
+            elif old_tile.is_town != tile.is_town:
+                raise ValueError("A town tile must be placed on a town board space.")
+            elif tile.upgrade_attrs not in old_tile.upgrade_attrs:
+                old_tile_type = " OR ".join(str(upgrade_attr) for upgrade_attr in old_tile.upgrade_attrs)
+                raise ValueError(f"Tried to upgrade to a mismatched type. Expected: {old_tile_type}. Got: {tile.upgrade_attrs}.")
         else:
             if tile.is_stop:
                 raise ValueError("Tried to place a non-track tile on a track space.")
