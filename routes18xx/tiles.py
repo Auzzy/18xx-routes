@@ -3,7 +3,8 @@ import itertools
 import json
 
 
-_TILE_FILENAME = "tiles.json"
+_TILE_DB_FILENAME = "tiles.db.json"
+_GAME_TILES_FILENAME = "tiles.json"
 
 class Tile(object):
     @staticmethod
@@ -36,7 +37,9 @@ class Tile(object):
                 split_city_capacity[tuple(branch_path_list)] = branch_capacity
             capacity = split_city_capacity
 
-        return Tile(id, paths, int(value), int(quantity), int(upgrade_level), is_city, is_town, is_terminus, capacity, upgrade_attrs)
+        quantity = int(quantity) if quantity else None
+
+        return Tile(id, paths, int(value), quantity, int(upgrade_level), is_city, is_town, is_terminus, capacity, upgrade_attrs)
 
     def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=set()):
         self.id = id
@@ -54,7 +57,9 @@ class Tile(object):
 
 
 def load_all(game):
-    with open(game.get_data_file(_TILE_FILENAME)) as tiles_file:
-        tiles_json = json.load(tiles_file)
+    with open(game.get_data_file(_TILE_DB_FILENAME)) as tiles_file:
+        tiles_db_json = json.load(tiles_file)
+    with open(game.get_data_file(_GAME_TILES_FILENAME)) as tiles_file:
+        game_tiles_json = json.load(tiles_file)
 
-    return {id: Tile.create(id, **args) for id, args in tiles_json.items()}
+    return {id: Tile.create(id, quantity=value["quantity"], **tiles_db_json[id]) for id, value in game_tiles_json.items()}

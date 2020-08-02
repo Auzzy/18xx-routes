@@ -12,8 +12,12 @@ _GAME_FILENAME = "game.json"
 
 class Game:
     @staticmethod
+    def get_global_data_file(filename):
+        return os.path.join(_DATA_ROOT_DIR, filename)
+
+    @staticmethod
     def get_game_data_file(game_name, filename):
-        return os.path.join(_DATA_ROOT_DIR, game_name, filename)
+        return Game.get_global_data_file(os.path.join(game_name, filename))
 
     @staticmethod
     def load(game_name):
@@ -40,6 +44,9 @@ class Game:
         self.tiles = tiles
 
         self.current_phase = None
+
+    def get_global_data_file(self, filename):
+        return Game.get_global_data_file(filename)
 
     def get_data_file(self, filename):
         return Game.get_game_data_file(self.name, filename)
