@@ -6,11 +6,15 @@
         "3": "3",
         "4": "4"
     },
-    "privates_close": {
-        "Steamboat Company": "4",
-        "Meat Packing Company": "4",
-        "Mail Contract": null,
-        "Big 4": "3",
-        "Michigan Southern": "3"
+    "rules": {
+        "privates": {
+            "close": {
+                "Steamboat Company": "4",
+                "Meat Packing Company": "4",
+                "Mail Contract": null,
+                "Big 4": "3",
+                "Michigan Southern": "3"
+            }
+        }
     }
 }
