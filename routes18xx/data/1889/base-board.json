@@ -87,7 +87,8 @@
             "name": "Ritsurin Koen"
         },
         "E16": {
-            "name": "Komatsujima"
+            "name": "Komatsujima",
+            "upgrade_attrs": [["port"], []]
         },
         "F1": {
             "name": "Yawatahama",
@@ -96,10 +97,12 @@
             "value": 20
         },
         "G12": {
-            "name": "Nankoku"
+            "name": "Nankoku",
+            "upgrade_attrs": [["port"], []]
         },
         "G16": {
-            "name": "Mugi"
+            "name": "Mugi",
+            "upgrade_attrs": [["port"], []]
         },
         "I14": {
             "name": "Muroto",
@@ -108,7 +111,8 @@
             "value": 20
         },
         "J5": {
-            "name": "Nakamura"
+            "name": "Nakamura",
+            "upgrade_attrs": [["port"], []]
         }
     },
     "termini": {

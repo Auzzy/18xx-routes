@@ -19,7 +19,7 @@ class BoardSpace(object):
                 paths[cell.neighbors[exits]] = []
         return paths
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, upgrade_attrs=set(), properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, upgrade_attrs=[], properties={}):
         self.name = name or str(cell)
         self.nickname = nickname or self.name
         self.cell = cell
@@ -31,7 +31,7 @@ class BoardSpace(object):
         self.is_town = isinstance(self, Town)
         self.is_terminus = isinstance(self, Terminus)
         self.is_stop = self.is_city or self.is_terminus or self.is_town
-        self.upgrade_attrs = set(upgrade_attrs)
+        self.upgrade_attrs = sorted(sorted(attr) if isinstance(attr, list) else [attr] for attr in upgrade_attrs) or [[]]
         self.properties = properties
 
     def paths(self, enter_from=None, railroad=None):
@@ -64,12 +64,12 @@ class Track(BoardSpace):
 
 class Town(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, upgrade_attrs=set(), properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, upgrade_attrs=[], properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         return Town(name, nickname, cell, upgrade_level, paths, value, upgrade_attrs, properties)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, upgrade_attrs=set(), properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, upgrade_attrs=[], properties={}):
         super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
@@ -79,7 +79,7 @@ class Town(BoardSpace):
 
 class City(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=set(), properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=[], properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
@@ -87,7 +87,7 @@ class City(BoardSpace):
         else:
             return City(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=set(), properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=[], properties={}):
         super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
