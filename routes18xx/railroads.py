@@ -74,8 +74,10 @@ def load(game, board, railroads_rows):
     railroad_info = _load_railroad_info(game)
     train_info = trains.load_train_info(game)
 
+    railroad_rows_list = list(railroads_rows)
+
     railroads = {}
-    for railroad_args in railroads_rows:
+    for railroad_args in railroad_rows_list:
         name = railroad_args["name"]
         info = railroad_info.get(name, {})
         if not info:
@@ -97,8 +99,34 @@ def load(game, board, railroads_rows):
 
         railroads[railroad.name] = railroad
 
-        # Place the home station
-        board.place_station(info["home"], railroad)
+    # Capturing the phase allows us to place stations
+    game.capture_phase(railroads)
+
+    # Place all home stations. This is done before placing other stations to
+    # enforce a heirarchy of error messages.
+    for name, railroad in railroads.items():
+        info = railroad_info.get(name, {})
+        if not isinstance(railroad, RemovedRailroad):
+            board.place_station(game, info["home"], railroad)
+
+    # Initializing parts of the board that depend on the railroads having been
+    # created.
+    for name, info in railroad_info.items():
+        # Railroads which are in play.
+        board.get_space(board.cell(info["home"])).home = name
+        if name not in railroads or not isinstance(railroads[name], RemovedRailroad):
+            for reserved_coord in info.get("reserved", []):
+                board.get_space(board.cell(reserved_coord)).reserved = name
+
+        if name in railroads:
+            # Allow referring to the railroads in play by their nicknames.
+            for nickname in info.get("nicknames", []):
+                railroads[nickname] = railroads[name]
+
+    for railroad_args in railroad_rows_list:
+        name = railroad_args["name"]
+        info = railroad_info.get(name, {})
+        railroad = railroads[name]
 
         station_entries_str = railroad_args.get("stations")
         if station_entries_str:
@@ -110,13 +138,8 @@ def load(game, board, railroads_rows):
                         if not branch:
                             raise ValueError(f"A split city ({coord}) is listed as a station for {railroad.name}, but no station branch was specified.")
 
-                        board.place_split_station(coord, railroad, branch)
+                        board.place_split_station(game, coord, railroad, branch)
                     else:
-                        board.place_station(coord, railroad)
-
-    for name, info in railroad_info.items():
-        if name in railroads:
-            for nickname in info.get("nicknames", []):
-                railroads[nickname] = railroads[name]
+                        board.place_station(game, coord, railroad)
 
     return railroads

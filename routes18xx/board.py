@@ -49,7 +49,7 @@ class Board(object):
 
         self._placed_tiles[cell] = PlacedTile.place(cell, tile, orientation, old_tile)
 
-    def place_station(self, coord, railroad):
+    def place_station(self, game, coord, railroad):
         cell = self.cell(coord)
         tile = self.get_space(cell)
         if not tile.is_city:
@@ -58,16 +58,16 @@ class Board(object):
         if isinstance(tile, (boardtile.SplitCity, SplitCity)):
             raise ValueError(f"Since {coord} is a split city tile, please use Board.place_split_station().")
 
-        tile.add_station(railroad)
+        tile.add_station(game, railroad)
 
-    def place_split_station(self, coord, railroad, branch):
+    def place_split_station(self, game, coord, railroad, branch):
         cell = self.cell(coord)
         space = self.get_space(cell)
         if not space.is_city:
             raise ValueError(f"{cell} is not a city, so it cannot have a station.")
 
         branch_cells = tuple([self.cell(coord) for coord in branch])
-        space.add_station(railroad, branch_cells)
+        space.add_station(game, railroad, branch_cells)
 
     def place_token(self, coord, railroad, TokenType):
         if railroad.is_removed:

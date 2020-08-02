@@ -94,6 +94,9 @@ class City(BoardSpace):
         self.capacity = capacity
         self._stations = []
 
+        self.home = None
+        self.reserved = None
+
     @property
     def stations(self):
         return tuple(self._stations)
@@ -101,13 +104,20 @@ class City(BoardSpace):
     def value(self, game, railroad, train):
         return self._value + sum(token.value(game, railroad) for token in self.tokens)
 
-    def add_station(self, railroad):
+    def add_station(self, game, railroad):
         if self.has_station(railroad.name):
             raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
 
-        if self.capacity <= len(self.stations):
+        if len(self.stations) >= self.capacity :
             raise ValueError(f"{self.name} ({self.cell}) cannot hold any more stations.")
-        
+
+        if self.home and self.home != railroad.name and not self.has_station(self.home) and len(self.stations) + 1 >= self.capacity:
+                raise ValueError(f"{self.name} ({self.cell}) must leave a slot for {self.home}, its home railroad.")
+
+        if game.rules.stations_reserved_until and game.compare_phases(game.rules.stations_reserved_until) < 0:
+            if self.reserved and self.reserved != railroad.name and not self.has_station(self.reserved) and len(self.stations) + 1 >= self.capacity:
+                raise ValueError(f"{self.name} ({self.cell}) has no open slot for its {self.reserved} reservation.")
+
         station = Station(self.cell, railroad)
         self._stations.append(station)
         return station
@@ -170,7 +180,7 @@ class SplitCity(City):
 
         self.branch_to_station = {key: [] for key in self.capacity.keys()}
 
-    def add_station(self, railroad, branch):
+    def add_station(self, game, railroad, branch):
         if self.has_station(railroad.name):
             raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
 
