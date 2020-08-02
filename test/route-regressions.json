@@ -73,6 +73,20 @@
                     "Tosa Kuroshio Railroad": 750,
                     "Uwajima Railroad": 250
                 }
+            },
+            {
+                "name": "03 Jul 2020",
+                "board-state": "board-state-20-07-03.csv",
+                "railroads": "railroads-20-07-03.csv",
+                "active": {
+                    "Awa Railroad": 700,
+                    "Iyo Railroad": 320,
+                    "Sanuki Railways": 260,
+                    "Takamatsu-Kotohira Electric Rail": 320,
+                    "Tosa Electric Rail": 560,
+                    "Tosa Kuroshio Railroad": 250,
+                    "Uwajima Railroad": 280
+                }
             }
         ]
     }
