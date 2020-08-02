@@ -23,21 +23,19 @@ class Game:
         rules = Rules.load(game_json)
 
         game = Game(
-                game_name,
-                game_json["phases"],
-                {int(upgrade_level): phase for upgrade_level, phase in game_json["upgrade_phases"].items()},
-                game_json.get("privates_close", {}),
-                rules)
+            game_name,
+            game_json["phases"],
+            {int(upgrade_level): phase for upgrade_level, phase in game_json["upgrade_phases"].items()},
+            rules)
 
         game.tiles = tiles.load_all(game)
 
         return game
 
-    def __init__(self, game_name, phases, upgrade_phases, privates_close, rules, tiles={}):
+    def __init__(self, game_name, phases, upgrade_phases, rules, tiles={}):
         self.name = game_name
         self.phases = phases
         self.upgrade_phases = upgrade_phases
-        self.privates_close = privates_close
         self.rules = rules
         self.tiles = tiles
 
@@ -69,7 +67,7 @@ class Game:
             return 0
 
     def private_is_closed(self, name, phase=None):
-        close_phase = self.privates_close.get(name)
+        close_phase = self.rules.privates_close.get(name)
         if not close_phase:
             return False
         return self.compare_phases(close_phase, phase) >= 0
