@@ -3,7 +3,7 @@ import itertools
 import json
 
 
-_TILE_DB_FILENAME = "tiles.db.json"
+_TILE_DB_FILENAME = "tiles-db.json"
 _GAME_TILES_FILENAME = "tiles.json"
 
 class Tile(object):
@@ -57,9 +57,9 @@ class Tile(object):
 
 
 def load_all(game):
-    with open(game.get_data_file(_TILE_DB_FILENAME)) as tiles_file:
+    with open(game.get_global_data_file(_TILE_DB_FILENAME)) as tiles_file:
         tiles_db_json = json.load(tiles_file)
     with open(game.get_data_file(_GAME_TILES_FILENAME)) as tiles_file:
         game_tiles_json = json.load(tiles_file)
 
-    return {id: Tile.create(id, quantity=value["quantity"], **tiles_db_json[id]) for id, value in game_tiles_json.items()}
+    return {id: Tile.create(id, quantity=quantity, **tiles_db_json[id]) for id, quantity in game_tiles_json.items()}
