@@ -79,11 +79,11 @@ def _handle_independent_railroad(game, board, railroads, name, kwargs):
         if home_city in railroad_station_coords:
             return
 
-        board.place_station(home_city, owner_railroad)
+        board.place_station(game, home_city, owner_railroad)
         railroads[owner].add_private_company(name)
     else:
         if game.compare_phases("3") < 0:
-            board.place_station(home_city, Railroad.create(name, "2"))
+            board.place_station(game, home_city, Railroad.create(name, "2"))
 
 
 def load_from_csv(game, board, railroads, companies_filepath):

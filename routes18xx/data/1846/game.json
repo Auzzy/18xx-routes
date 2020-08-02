@@ -7,6 +7,9 @@
         "4": "4"
     },
     "rules": {
+        "stations": {
+            "reserved_until": "4"
+        },
         "privates": {
             "close": {
                 "Steamboat Company": "4",
