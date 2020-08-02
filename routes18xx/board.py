@@ -1,3 +1,4 @@
+import collections
 import itertools
 
 from routes18xx import boardtile, cell, games
@@ -90,6 +91,7 @@ class Board(object):
     def validate(self):
         self._validate_tiles_connected()
         self._validate_tiles_upgrade_level()
+        self._validate_tiles_quantity()
 
     def _validate_tiles_connected(self):
         invalid = []
@@ -113,6 +115,16 @@ class Board(object):
 
         if invalid:
             raise ValueError(f"Tiles at the following spots cannot be placed until a later phase: {', '.join(invalid)}")
+
+    def _validate_tiles_quantity(self):
+        tile_count = collections.Counter([placed.tile for placed in self._placed_tiles.values()])
+        invalid = []
+        for tile, count in tile_count.items():
+            if tile.quantity and tile.quantity < count:
+                invalid = [tile.id]
+
+        if invalid:
+            raise ValueError(f"Found too many of the following tiles on the board: {', '.join(invalid)}")
 
     def _validate_place_tile_space_type(self, tile, old_tile):
         if old_tile and old_tile.is_terminus:
