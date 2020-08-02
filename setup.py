@@ -5,7 +5,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name='routes-18xx',
-    version='0.7',
+    version='0.7.1',
     author="Austin Noto-Moniz",
     author_email="mathfreak65@gmail.com",
     description="Library for caluclating routes in 18xx train games.",
@@ -13,7 +13,7 @@ setup(
     long_description_content_type="text/x-rst",
     url="https://github.com/Auzzy/18xx-routes",
     packages=find_packages(),
-    package_data={"routes18xx": ["data/1846/*", "data/1889/*"]},
+    package_data={"routes18xx": ["data/*", "data/*/*"]},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Operating System :: OS Independent",
