@@ -48,6 +48,11 @@ class RemovedRailroad(Railroad):
     def is_removed(self):
         return True
 
+class ClosedRailroad(RemovedRailroad):
+    @staticmethod
+    def create(name):
+        return ClosedRailroad(name, [])
+
 def _split_station_entry(station_entry):
     if ':' not in station_entry:
         return station_entry, None
@@ -83,13 +88,17 @@ def load(game, board, railroads_rows):
         if not info:
             raise ValueError(f"Unrecognized railroad name: {name}")
 
-        trains_str = railroad_args.get("trains")
-        if trains_str and trains_str.lower() == "removed":
-            name = railroad_args["name"]
+        trains_str = (railroad_args.get("trains") or "").strip().lower()
+        if trains_str == "removed":
             if not info.get("is_removable"):
                 raise ValueError("Attempted to remove a non-removable railroad.")
 
-            railroad = RemovedRailroad.create(name)
+            railroad = RemovedRailroad.create(railroad_args["name"])
+        elif trains_str == "closed":
+            if not game.rules.railroads_can_close:
+                raise ValueError(f"Attempted to close a railroad, although railroads cannot close in {game.name}.")
+
+            railroad = ClosedRailroad.create(railroad_args["name"])
         else:
             railroad_trains = trains.convert(train_info, trains_str)
             railroad = Railroad.create(railroad_args["name"], railroad_trains)

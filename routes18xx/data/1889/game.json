@@ -4,5 +4,10 @@
         "1": "2",
         "2": "3",
         "3": "5"
+    },
+    "rules": {
+        "railroads": {
+            "can_close": false
+        }
     }
 }
