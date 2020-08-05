@@ -115,7 +115,7 @@ def load(game, board, railroads_rows):
     # enforce a heirarchy of error messages.
     for name, railroad in railroads.items():
         info = railroad_info.get(name, {})
-        if not isinstance(railroad, RemovedRailroad):
+        if not isinstance(railroad, ClosedRailroad):
             board.place_station(game, info["home"], railroad)
 
     # Initializing parts of the board that depend on the railroads having been

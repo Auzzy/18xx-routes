@@ -43,6 +43,14 @@
                     "Illinois Central": 170,
                     "Pennsylvania": 80
                 }
+            },
+            {
+                "name": "removed-home-station",
+                "board-state": "board-state-removed.csv",
+                "railroads": "railroads-removed.csv",
+                "active": {
+                    "Baltimore & Ohio": 50
+                }
             }
         ],
         "1889": [
