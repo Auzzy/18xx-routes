@@ -1,8 +1,7 @@
 import csv
-import itertools
 import json
 
-from routes18xx import trains
+from routes18xx import trains, train_limits
 from routes18xx.tokens import Station
 from routes18xx.cell import Cell
 
@@ -78,6 +77,7 @@ def load_from_csv(game, board, railroads_filepath):
 def load(game, board, railroads_rows):
     railroad_info = _load_railroad_info(game)
     train_info = trains.load_train_info(game)
+    train_limit_info = train_limits.load_train_limits(game)
 
     railroad_rows_list = list(railroads_rows)
 
@@ -110,6 +110,10 @@ def load(game, board, railroads_rows):
 
     # Capturing the phase allows us to place stations
     game.capture_phase(railroads)
+
+    # Now that we know the phase, check the train limits
+    for name, railroad in railroads.items():
+        train_limit_info.validate(game, railroad)
 
     # Place all home stations. This is done before placing other stations to
     # enforce a heirarchy of error messages.
