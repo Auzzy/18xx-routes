@@ -1,0 +1,34 @@
+{
+    "Baltimore & Ohio": {
+        "nicknames": ["BO", "Baltimore & Ohio Railroad", "Baltimore and Ohio", "Baltimore and Ohio Railroad"],
+        "home": "H6:G7"
+    },
+    "Camden & Amboy": {
+        "nicknames": ["CA", "CAR", "Camden", "Camden & Amboy Railroad", "Camden and Amboy", "Camden and Amboy Railroad"],
+        "home": "J6"
+    },
+    "Chesapeake & Ohio": {
+        "nicknames": ["CO", "Chesapeake", "Chesapeake & Ohio Railroad", "Chesapeake and Ohio", "Chesapeake and Ohio Railroad"],
+        "home": "G13"
+    },
+    "Lehigh Valley": {
+        "nicknames": ["LV", "LVR", "Lehigh Valley Railroad"],
+        "home": "J2"
+    },
+    "Norfolk & Western": {
+        "nicknames": ["NW", "NWR", "Norfolk", "Norfolk & Western Railway", "Norfolk and Western", "Norfolk and Western Railway"],
+        "home": "C13"
+    },
+    "Pennsylvania": {
+        "nicknames": ["PR", "PRR", "Pennsylvania Railroad", "Penn"],
+        "home": "F2"
+    },
+    "Pittsburgh & Lake Erie": {
+        "nicknames": ["PLE", "Pittsburgh & Lake Erie Railroad", "Pittsburgh and Lake Erie", "Pittsburgh and Lake Erie Railroad"],
+        "home": "A3"
+    },
+    "Strasburg": {
+        "nicknames": ["SR", "SRR", "Strasburg Rail Road", "Strasburg RailRoad", "Strasburg Railroad"],
+        "home": "H4"
+    }
+}

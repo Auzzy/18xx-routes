@@ -1,0 +1,54 @@
+{
+    "trains": [
+        {
+            "visit": 2,
+            "phase": "2"
+        },
+        {
+            "visit": 3,
+            "phase": "3"
+        },
+        {
+            "visit": 4,
+            "phase": "4"
+        },
+        {
+            "visit": 5,
+            "phase": "5"
+        },
+        {
+            "visit": 6,
+            "phase": "6"
+        },
+        {
+            "name": "diesel",
+            "phase": "D"
+        }
+    ],
+    "train_limits": {
+        "2": {
+            "total": 4,
+            "trains": ["2"]
+        },
+        "3": {
+            "total": 4,
+            "trains": ["2", "3"]
+        },
+        "4": {
+            "total": 3,
+            "trains": ["3", "4"]
+        },
+        "5": {
+            "total": 2,
+            "trains": ["3", "4", "5"]
+        },
+        "6": {
+            "total": 2,
+            "trains": ["4", "5", "6"]
+        },
+        "D": {
+            "total": 2,
+            "trains": ["5", "6", "diesel"]
+        }
+    }
+}

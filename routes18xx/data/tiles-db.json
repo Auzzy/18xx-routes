@@ -1,9 +1,37 @@
 {
+    "1": {
+        "edges": [[1, 5], [2, 4]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": {
+            "[[1, 5]]": 1,
+            "[[2, 4]]": 1
+        }
+    },
+    "2": {
+        "edges": [[2, 5], [3, 4]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": {
+            "[[2, 5]]": 1,
+            "[[3, 4]]": 1
+        }
+    },
     "3": {
         "edges": [[2, 3]],
         "value": 10,
         "upgrade_level": 1,
-        "is_town": true
+        "is_town": true,
+        "capacity": 1
+    },
+    "4": {
+        "edges": [[2, 5]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": 1
     },
     "5": {
         "edges": [[2, 3]],
@@ -194,6 +222,26 @@
         "is_city": true,
         "capacity": 2
     },
+    "55": {
+        "edges": [[1, 4], [2, 5]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": {
+            "[[1, 4]]": 1,
+            "[[2, 5]]": 1
+        }
+    },
+    "56": {
+        "edges": [[2, 4], [3, 5]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": {
+            "[[2, 4]]": 1,
+            "[[3, 5]]": 1
+        }
+    },
     "57": {
         "edges": [[2, 5]],
         "value": 20,
@@ -205,7 +253,18 @@
         "edges": [[2, 4]],
         "value": 10,
         "upgrade_level": 1,
-        "is_town": true
+        "is_town": true,
+        "capacity": 1
+    },
+    "69": {
+        "edges": [[0, 3], [2, 4]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true,
+        "capacity": {
+            "[[0, 3]]": 1,
+            "[[2, 4]]": 1
+        }
     },
     "70": {
         "edges": [[2, 3], [2, 4], [3, 5], [4, 5]],
@@ -404,5 +463,93 @@
         "upgrade_level": 2,
         "is_city": true,
         "capacity": 2
+    },
+    "915": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 50,
+        "upgrade_level": 4,
+        "is_city": true,
+        "capacity": 3
+    },
+    "X1e": {
+        "edges": [[2, 4]],
+        "value": 30,
+        "upgrade_level": 1,
+        "is_city": true,
+        "capacity": 1,
+        "upgrade_attrs": ["dc"]
+    },
+    "X2d": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 40,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": 2,
+        "upgrade_attrs": ["dc"]
+    },
+    "X3d": {
+        "edges": [[1, 5], [2, 4]],
+        "value": 40,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": {
+            "[[1, 5]]": 1,
+            "[[2, 4]]": 1
+        },
+        "upgrade_attrs": ["oo"]
+    },
+    "X4d": {
+        "edges": [[2, 3], [4, 5]],
+        "value": 40,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": {
+            "[[2, 3]]": 1,
+            "[[4, 5]]": 1
+        },
+        "upgrade_attrs": ["oo"]
+    },
+    "X5d": {
+        "edges": [[2, 4], [3, 5]],
+        "value": 40,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": {
+            "[[2, 4]]": 1,
+            "[[3, 5]]": 1
+        },
+        "upgrade_attrs": ["oo"]
+    },
+    "X6d": {
+        "edges": [[0, 1, 2, 3, 4, 5]],
+        "value": 70,
+        "upgrade_level": 3,
+        "is_city": true,
+        "capacity": 3,
+        "upgrade_attrs": ["dc"]
+    },
+    "X7d": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 50,
+        "upgrade_level": 3,
+        "is_city": true,
+        "capacity": 2,
+        "upgrade_attrs": ["oo"]
+    },
+    "X8d": {
+        "edges": [[0, 1, 2, 3, 4, 5]],
+        "value": 100,
+        "upgrade_level": 4,
+        "is_city": true,
+        "capacity": 4,
+        "upgrade_attrs": ["dc"]
+    },
+    "X9b": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 70,
+        "upgrade_level": 4,
+        "is_city": true,
+        "capacity": 3,
+        "upgrade_attrs": ["oo"]
     }
 }
