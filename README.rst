@@ -69,6 +69,4 @@ All private company entries follow the standard format.
 
 1889
 ####
-Does not validate the port tile is placed on a port space. The code cannot currently handle a space which can be upgraded to multiple different types of tiles.
-
 No private companies impact route finding or route values. A couple do impact tile validity, but I don't think it's worth it.
