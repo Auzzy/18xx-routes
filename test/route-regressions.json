@@ -51,6 +51,22 @@
                 "active": {
                     "Baltimore & Ohio": 50
                 }
+            },
+            {
+                "name": "revisit-single-train",
+                "board-state": "board-state-revisit.csv",
+                "railroads": "railroads-revisit-1.csv",
+                "active": {
+                    "Illinois Central": 100
+                }
+            },
+            {
+                "name": "revisit-multiple-trains",
+                "board-state": "board-state-revisit.csv",
+                "railroads": "railroads-revisit-2.csv",
+                "active": {
+                    "Illinois Central": 150
+                }
             }
         ],
         "1889": [
