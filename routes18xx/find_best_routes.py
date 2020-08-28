@@ -157,17 +157,21 @@ def _get_subroutes(routes, stations):
     subroutes = [route.subroutes(station.cell) for station in stations for route in routes]
     return set(itertools.chain.from_iterable([subroute for subroute in subroutes if subroute]))
 
-def _walk_routes(game, board, railroad, enter_from, cell, length, visited=None):
-    visited = visited or []
+def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=None, visited_stops=None):
+    visited_paths = visited_paths or []
+    visited_stops = visited_stops or []
 
     tile = board.get_space(cell)
-    if not tile or (enter_from and enter_from not in tile.paths()) or tile in visited:
+    if not tile or (enter_from and enter_from not in tile.paths()) or tile in visited_stops:
         return (Route.empty(), )
 
     if tile.is_stop \
             and (not game.rules.towns_omit_from_limit or not tile.is_town):
         if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
-            LOG.debug(f"- {', '.join([str(tile.cell) for tile in visited + [tile]])}")
+            str_visited = [str(path[0]) for path in visited_paths] \
+                    + ([str(enter_from)] if enter_from else []) \
+                    + [str(tile.cell)]
+            LOG.debug(f"- {', '.join(str_visited)}")
             return (Route.single(tile), )
 
         remaining_stops = length - 1
@@ -178,11 +182,18 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited=None):
 
     routes = []
     for neighbor in neighbors:
-        neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops, visited + [tile])
-        routes += [Route.single(tile).merge(neighbor_path) for neighbor_path in neighbor_paths if neighbor_path]
+        path = [enter_from, neighbor] if enter_from else []
+        if not path or path not in visited_paths:
+            neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops,
+                    visited_paths=visited_paths + ([path] if path else []),
+                    visited_stops=visited_stops + ([tile] if tile.is_stop else []))
+            routes += [Route.single(tile).merge(neighbor_path) for neighbor_path in neighbor_paths if neighbor_path]
 
     if not routes and tile.is_stop:
-        LOG.debug(f"- {', '.join([str(tile.cell) for tile in visited + [tile]])}")
+        str_visited = [str(path[0]) for path in visited_paths] \
+                + ([str(enter_from)] if enter_from else []) \
+                + [str(tile.cell)]
+        LOG.debug(f"- {', '.join(str_visited)}")
         routes.append(Route.single(tile))
 
     return tuple(set(routes))
