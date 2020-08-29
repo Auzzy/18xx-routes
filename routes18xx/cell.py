@@ -53,9 +53,9 @@ class Cell(object):
 def load(game):
     cell_grid = {}
     with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
-        boundaries_json = json.load(board_file)["boundaries"]
+        board_info_json = json.load(board_file)["info"]
 
-    for row, col_ranges in boundaries_json.items():
+    for row, col_ranges in board_info_json["boundaries"].items():
         cell_grid[row] = {}
         for col_range in col_ranges:
             if isinstance(col_range, int):
@@ -66,13 +66,25 @@ def load(game):
 
     for row, cols in cell_grid.items():
         for col, cell in cols.items():
-            cell.neighbors = {
-                0: cell_grid.get(chr(ord(row) + 1), {}).get(col - 1),
-                1: cell_grid.get(row, {}).get(col - 2),
-                2: cell_grid.get(chr(ord(row) - 1), {}).get(col - 1),
-                3: cell_grid.get(chr(ord(row) - 1), {}).get(col + 1),
-                4: cell_grid.get(row, {}).get(col + 2),
-                5: cell_grid.get(chr(ord(row) + 1), {}).get(col + 1)
-            }
+            if board_info_json["orientation"] == "flat":
+                cell.neighbors = {
+                    0: cell_grid.get(chr(ord(row) + 1), {}).get(col - 1),
+                    1: cell_grid.get(chr(ord(row) - 1), {}).get(col - 1),
+                    2: cell_grid.get(chr(ord(row) - 2), {}).get(col),
+                    3: cell_grid.get(chr(ord(row) - 1), {}).get(col + 1),
+                    4: cell_grid.get(chr(ord(row) + 1), {}).get(col + 1),
+                    5: cell_grid.get(chr(ord(row) + 2), {}).get(col)
+                }
+            elif board_info_json["orientation"] == "pointed":
+                cell.neighbors = {
+                    0: cell_grid.get(chr(ord(row) + 1), {}).get(col - 1),
+                    1: cell_grid.get(row, {}).get(col - 2),
+                    2: cell_grid.get(chr(ord(row) - 1), {}).get(col - 1),
+                    3: cell_grid.get(chr(ord(row) - 1), {}).get(col + 1),
+                    4: cell_grid.get(row, {}).get(col + 2),
+                    5: cell_grid.get(chr(ord(row) + 1), {}).get(col + 1)
+                }
+            else:
+                raise ValueError(f"Expected \"flat\" or \"pointed\", but got {board_info_json['orientation']}.")
 
-    return cell_grid
+    return cell_grid, board_info_json

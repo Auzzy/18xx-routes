@@ -8,14 +8,15 @@ from routes18xx.tokens import Station
 class Board(object):
     @staticmethod
     def load(game):
-        cells = cell.load(game)
-        board = Board(game, cells)
+        cells, board_info_json = cell.load(game)
+        board = Board(game, cells, board_info_json)
         board._board_tiles = {board_tile.cell: board_tile for board_tile in boardtile.load(game, board)}
         return board
 
-    def __init__(self, game, cells):
+    def __init__(self, game, cells, board_info_json):
         self.game = game
         self._cells = cells
+        self.space_orientation = board_info_json["orientation"]
 
         self._board_tiles = {}
         self._placed_tiles = {}
