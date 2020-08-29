@@ -1,0 +1,26 @@
+{
+    "Louisville & Nashville": {
+        "nicknames": ["LN", "L&N", "L&N Railroad", "Louisville & Nashville Railroad"],
+        "home": "A4"
+    },
+    "Tennessee, Alabama & Georgia": {
+        "nicknames": ["TAG", "TAG Railway", "TAG Railroad", "Tennessee, Alabama & Georgia Railroad", "Tennessee, Alabama & Georgia Railway"],
+        "home": "E6"
+    },
+    "Atlanta, Birmingham & Coast": {
+        "nicknames": ["ABC", "ABC Railroad", "Atlanta, Birmingham & Coast Railroad"],
+        "home": "G6"
+    },
+    "Mobile & Ohio": {
+        "nicknames": ["MO", "MO Railroad", "Mobile & Ohio Railroad"],
+        "home": "Q2"
+    },
+    "Western Railway of Alabama": {
+        "nicknames": ["WRA"],
+        "home": "L5"
+    },
+    "Alabama, Tennessee & Northern": {
+        "nicknames": ["ATN", "ATN Railroad", "Alabama, Tennessee & Northern Railroad"],
+        "home": "F1"
+    }
+}

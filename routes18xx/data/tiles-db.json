@@ -5,6 +5,12 @@
         "upgrade_level": 1,
         "is_town": true
     },
+    "4": {
+        "edges": [[2, 5]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_town": true
+    },
     "5": {
         "edges": [[2, 3]],
         "value": 20,
@@ -207,10 +213,35 @@
         "upgrade_level": 1,
         "is_town": true
     },
+    "63": {
+        "edges": [[1, 2, 3, 4, 5, 6]],
+        "value": 40,
+        "upgrade_level": 3,
+        "is_city": true,
+        "capacity": 2
+    },
     "70": {
         "edges": [[2, 3], [2, 4], [3, 5], [4, 5]],
         "value": 0,
         "upgrade_level": 3
+    },
+    "142": {
+        "edges": [[2, 4, 5]],
+        "value": 10,
+        "upgrade_level": 2,
+        "is_town": true
+    },
+    "143": {
+        "edges": [[2, 3, 4]],
+        "value": 10,
+        "upgrade_level": 2,
+        "is_town": true
+    },
+    "144": {
+        "edges": [[0, 2, 4]],
+        "value": 10,
+        "upgrade_level": 2,
+        "is_town": true
     },
     "205": {
         "edges": [[2, 3, 5]],
@@ -359,6 +390,53 @@
         "is_city": true,
         "capacity": 2,
         "upgrade_attrs": ["takamatsu"]
+    },
+    "441a": {
+        "edges": [[2]],
+        "value": 10,
+        "upgrade_level": 1,
+        "is_city": true,
+        "capacity": 1,
+        "upgrade_attrs": ["B"]
+    },
+    "442a": {
+        "edges": [[0, 2, 3, 4]],
+        "value": 30,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": 2,
+        "upgrade_attrs": ["B"]
+    },
+    "443a": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 40,
+        "upgrade_level": 2,
+        "is_city": true,
+        "capacity": 2,
+        "upgrade_attrs": ["M"]
+    },
+    "444a": {
+        "edges": [[1, 2, 3, 4, 5]],
+        "value": 50,
+        "upgrade_level": 3,
+        "is_city": true,
+        "capacity": 2,
+        "upgrade_attrs": [["B"], ["M"]]
+    },
+    "445": {
+        "edges": [[2, 4]],
+        "value": 20,
+        "upgrade_level": 1,
+        "is_town": true,
+        "upgrade_attrs": ["LT"]
+    },
+    "446": {
+        "edges": [[0, 1, 2, 3, 4, 5]],
+        "value": 70,
+        "upgrade_level": 4,
+        "is_city": true,
+        "capacity": 3,
+        "upgrade_attrs": ["B"]
     },
     "448": {
         "edges": [[2, 3, 4, 5]],

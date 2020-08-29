@@ -1,0 +1,17 @@
+{
+    "phases": ["2", "3", "4", "5", "6", "7", "4D"],
+    "upgrade_phases": {
+        "1": "2",
+        "2": "3",
+        "3": "5",
+        "4": "4D"
+    },
+    "rules": {
+        "railroads": {
+            "can_close": false
+        },
+        "routes": {
+            "omit_towns_from_limit": true
+        }
+    }
+}

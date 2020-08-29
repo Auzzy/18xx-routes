@@ -1,0 +1,187 @@
+{
+    "cities": {
+        "C4": {
+            "name": "Decatur",
+            "capacity": 1
+        },
+        "E6": {
+            "name": "Gadsden",
+            "edges": [[2, 3]],
+            "upgrade_level": 1,
+            "value": 20,
+            "capacity": 1
+        },
+        "F1": {
+            "name": "Tupelo",
+            "edges": [[3, 4, 5]],
+            "upgrade_level": 4,
+            "value": 30,
+            "capacity": 1
+        },
+        "G4": {
+            "name": "Birmingham",
+            "capacity": 1,
+            "upgrade_attrs": ["B"],
+        },
+        "G6": {
+            "name": "Anniston",
+            "capacity": 1
+        },
+        "H3": {
+            "name": "Tuscaloosa",
+            "capacity": 1
+        },
+        "H5": {
+            "name": "Oxmoor",
+            "edges": [[1, 3, 5]],
+            "upgrade_level": 4,
+            "value": 30,
+            "capacity": 1
+        },
+        "J7": {
+            "name": "West Point",
+            "capacity": 1
+        },
+        "K2": {
+            "name": "York",
+            "capacity": 1
+        },
+        "K4": {
+            "name": "Selma",
+            "edges": [[0, 4]],
+            "upgrade_level": 1,
+            "value": 20,
+            "capacity": 1
+        },
+        "L1": {
+            "name": "Meridan",
+            "edges": [[2, 3, 5]],
+            "upgrade_level": 4,
+            "value": {
+                "phase": {
+                    "2": 20,
+                    "5": 50
+                }
+            },
+            "capacity": 2
+        },
+        "L5": {
+            "name": "Montgomery",
+            "capacity": 1,
+            "upgrade_attrs": ["M"],
+            "upgrade_overrides": ["5", "6", "57"]
+        }
+    },
+    "towns": {
+        "C2": {
+            "name": "Florence"
+        },
+        "C6": {
+            "name": "Stevenson"
+        },
+        "D7": {
+            "name": "Rome",
+            "edges": [[0, 5]],
+            "upgrade_level": 4,
+            "value": 10
+        },
+        "M8": {
+            "name": "Phenix City",
+            "edges": [[0, 1]],
+            "upgrade_level": 4,
+            "value": 10
+        },
+        "O6": {
+            "name": "Dothan"
+        }
+    },
+    "termini": {
+        "A4": {
+            "name": "Nashville",
+            "edges": [0, 5],
+            "value": {
+                "phase": {
+                    "2": 40,
+                    "5": 50
+                }
+            },
+            "capacity": 1
+        },
+        "B1": {
+            "name": "Corinth",
+            "edges": [4],
+            "value": {
+                "phase": {
+                    "2": 40,
+                    "5": 30
+                }
+            }
+        },
+        "B7": {
+            "name": "Chattanooga",
+            "edges": [0],
+            "value": {
+                "phase": {
+                    "2": 30,
+                    "5": 50
+                }
+            }
+        },
+        "G8": {
+            "name": "Atlanta",
+            "edges": [0, 5],
+            "value": {
+                "phase": {
+                    "2": 40,
+                    "5": 70
+                }
+            }
+        },
+        "P7": {
+            "name": "Tallahassee",
+            "edges": [1, 2],
+            "value": {
+                "phase": {
+                    "2": 30,
+                    "5": 40
+                }
+            }
+        },
+        "Q2": {
+            "name": "Mobile",
+            "edges": [1, 2, 3],
+            "value": {
+                "phase": {
+                    "2": 40,
+                    "5": 50
+                }
+            },
+            "capacity": 1
+        }
+    },
+    "impassable": [
+        ["B3", "D3"]
+    ],
+    "info": {
+        "boundaries": {
+            "A": [2, 4],
+            "B": [[1, 7]],
+            "C": [[2, 6]],
+            "D": [[1, 7]],
+            "E": [[2, 6]],
+            "F": [[1, 7]],
+            "G": [[2, 8]],
+            "H": [[1, 7]],
+            "I": [[2, 8]],
+            "J": [[1, 7]],
+            "K": [[2, 8]],
+            "L": [[1, 7]],
+            "M": [[2, 8]],
+            "N": [[1, 7]],
+            "O": [[2, 6]],
+            "P": [[1, 7]],
+            "Q": [2]
+        },
+        "orientation": "flat"
+    }
+}
