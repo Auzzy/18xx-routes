@@ -25,7 +25,9 @@ class PlacedTile(object):
 
     @staticmethod
     def place(cell, tile, orientation, old_space=None):
-        if isinstance(old_space, (boardtile.SplitCity, SplitCity)):
+        # Determining if the new tile is a split city allows placements which
+        # convert a split city into a regular city, as can happen in many games.
+        if isinstance(tile.capacity, dict):
             return SplitCity.place(cell, tile, orientation, old_space)
 
         name = old_space.name if old_space else None
