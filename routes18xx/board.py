@@ -17,6 +17,7 @@ class Board(object):
         self.game = game
         self._cells = cells
         self.space_orientation = board_info_json["orientation"]
+        self.coord_format = board_info_json["coords"]
 
         self._board_tiles = {}
         self._placed_tiles = {}
