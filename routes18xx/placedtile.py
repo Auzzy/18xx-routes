@@ -28,7 +28,10 @@ class PlacedTile(object):
         # Determining if the new tile is a split city allows placements which
         # convert a split city into a regular city, as can happen in many games.
         if isinstance(tile.capacity, dict):
-            return SplitCity.place(cell, tile, orientation, old_space)
+            if tile.is_city:
+                return SplitCity.place(cell, tile, orientation, old_space)
+            elif tile.is_town:
+                return SplitTown.place(cell, tile, orientation, old_space)
 
         name = old_space.name if old_space else None
         nickname = old_space.nickname if old_space else None
@@ -166,7 +169,8 @@ class SplitCity(PlacedTile):
         super().__init__(name, nickname, cell, tile, paths, properties)
 
         self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
-        self.branch_to_station = {key: [] for key in self.capacity.keys()}
+        self.branches = set(self.capacity.keys())
+        self.branch_to_station = {key: [] for key in self.branches}
 
     def add_station(self, game, railroad, branch):
         if self.has_station(railroad.name):
@@ -205,3 +209,19 @@ class SplitCity(PlacedTile):
             if user_station in stations:
                 return branch
         raise ValueError(f"The requested station was not found: {user_station}")
+
+class SplitTown(PlacedTile):
+    @staticmethod
+    def place(cell, tile, orientation, old_space=None):
+        name = old_space.name if old_space else None
+        nickname = old_space.nickname if old_space else None
+        properties = old_space.properties if old_space else {}
+
+        paths = PlacedTile.get_paths(cell, tile, orientation)
+        return SplitTown(name, nickname, cell, tile, orientation, paths, properties)
+
+    def __init__(self, name, nickname, cell, tile, orientation, paths={}, properties={}):
+        super().__init__(name, nickname, cell, tile, paths, properties)
+
+        self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
+        self.branches = set(self.capacity.keys())

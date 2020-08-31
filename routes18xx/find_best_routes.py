@@ -161,7 +161,7 @@ def _visited_stop_entry(tile, path, neighbor):
     new_visited_stop = {}
     if tile.is_stop:
         new_visited_stop[tile] = None
-        for branch in getattr(tile, 'branch_to_station', {}).keys():
+        for branch in getattr(tile, 'branches', set()):
             if tuple(path) in branch or (neighbor, ) in branch:
                 new_visited_stop[tile] = branch
                 break
@@ -181,7 +181,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
     if not tile or (enter_from and enter_from not in tile.paths()):
         return (Route.empty(), )
     elif tile in visited_stops:
-        if not isinstance(tile, (boardtile.SplitCity, placedtile.SplitCity)) \
+        if not isinstance(tile, (boardtile.SplitCity, placedtile.SplitCity, boardtile.SplitTown, placedtile.SplitTown)) \
                 or str(cell) in game.rules.routes.cannot_revisit \
                 or (enter_from and enter_from in set(itertools.chain.from_iterable(visited_stops[tile]))):
             return (Route.empty(), )
