@@ -64,18 +64,35 @@ class Track(BoardSpace):
 
 class Town(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, upgrade_attrs=[], properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=[], properties={}):
+        name = ' & '.join(name) if isinstance(name, list) else name
         paths = BoardSpace._calc_paths(cell, edges)
 
-        return Town(name, nickname, cell, upgrade_level, paths, value, upgrade_attrs, properties)
+        if isinstance(capacity, dict):
+            return SplitTown.create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+        else:
+            return Town(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, upgrade_attrs=[], properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=[], properties={}):
         super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
+        self.capacity = capacity
 
     def value(self, game, railroad, train):
         return self._value + sum(token.value(game, railroad) for token in self.tokens)
+
+class SplitTown(Town):
+    @staticmethod
+    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+        split_town_capacity = SplitCity._parse_branch_dict(capacity, cell)
+
+        return SplitTown(name, nickname, cell, upgrade_level, paths, value, split_town_capacity, upgrade_attrs, properties)
+
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+
+        self.branches = set(self.capacity.keys())
 
 class City(BoardSpace):
     @staticmethod
@@ -161,9 +178,9 @@ class SplitCity(City):
         return new_branch_dict
 
     @staticmethod
-    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
-        split_city_capacity = {}
-        for branch_paths_str, branch_capacity in capacity.items():
+    def _parse_branch_dict(capacity, cell):
+        split_branch_dict = {}
+        for branch_paths_str, branch_value in capacity.items():
             branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
             branch_path_list = []
             for entrance, exits in branch_path_dict.items():
@@ -173,16 +190,21 @@ class SplitCity(City):
                     branch_paths = [(entrance, exit) for exit in exits]
                 branch_path_list.extend(tuple(branch_paths))
 
-            split_city_capacity[tuple(branch_path_list)] = branch_capacity
+            split_branch_dict[tuple(branch_path_list)] = branch_value
 
-        split_city_capacity = SplitCity._branches_with_unique_exits(split_city_capacity)
+        return SplitCity._branches_with_unique_exits(split_branch_dict)
+
+    @staticmethod
+    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+        split_city_capacity = SplitCity._parse_branch_dict(capacity, cell)
 
         return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
 
     def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
         super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
 
-        self.branch_to_station = {key: [] for key in self.capacity.keys()}
+        self.branches = set(self.capacity.keys())
+        self.branch_to_station = {key: [] for key in self.branches}
 
     def add_station(self, game, railroad, branch):
         if self.has_station(railroad.name):
