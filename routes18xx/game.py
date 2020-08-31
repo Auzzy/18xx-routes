@@ -74,7 +74,7 @@ class Game:
             return 0
 
     def private_is_closed(self, name, phase=None):
-        close_phase = self.rules.privates_close.get(name)
+        close_phase = self.rules.privates.close.get(name)
         if not close_phase:
             return False
         return self.compare_phases(close_phase, phase) >= 0
