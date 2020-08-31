@@ -1,3 +1,4 @@
+import collections
 import functools
 import heapq
 import itertools
@@ -42,11 +43,17 @@ class Route(object):
         for to_include in always_include:
             del stop_values[to_include[0]]
 
+        # If a single stop appears multiple times, make sure it shows up mltiple times in the value list
+        stop_value_list = list(stop_values.items())
+        for space, count in collections.Counter(self).items():
+            if count > 1 and space in route_stop_values:
+                stop_value_list.extend([(space, route_stop_values[space])] * (count - 1))
+
         # The route can collect stops only after accounting for anything marked always collect
         collect = train.collect - len(always_include)
         if game.rules.routes.omit_towns_from_limit:
             collect += len(path_towns)
-        best_stops = stop_values if collect == math.inf else dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
+        best_stops = stop_values if collect == math.inf else dict(heapq.nlargest(collect, stop_value_list, key=lambda stop_item: stop_item[1]))
 
         # Add back in the stops marked always collect
         best_stops.update(dict(always_include))
@@ -151,7 +158,7 @@ class _RunRoute(object):
         self._route = route
         self.stop_values = dict.fromkeys(route.stops, 0)
         self.stop_values.update(visited_stop_values)
-        self.value = sum(self.stop_values.values())
+        self.value = sum(visited_stop_values.get(stop, 0) for stop in route.stops)
         self.train = train
 
     def overlap(self, other):

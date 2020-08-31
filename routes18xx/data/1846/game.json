@@ -18,6 +18,9 @@
                 "Big 4": "3",
                 "Michigan Southern": "3"
             }
+        },
+        "routes": {
+            "cannot_revisit": ["D6"]
         }
     }
 }
