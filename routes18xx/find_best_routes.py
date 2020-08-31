@@ -8,7 +8,7 @@ import os
 import queue
 import sys
 
-from routes18xx import boardstate, railroads
+from routes18xx import boardstate, boardtile, placedtile, railroads
 from routes18xx.board import Board
 from routes18xx.game import Game
 from routes18xx.route import RouteSet, Route
@@ -157,21 +157,39 @@ def _get_subroutes(routes, stations):
     subroutes = [route.subroutes(station.cell) for station in stations for route in routes]
     return set(itertools.chain.from_iterable([subroute for subroute in subroutes if subroute]))
 
+def _visited_stop_entry(tile, path, neighbor):
+    new_visited_stop = {}
+    if tile.is_stop:
+        new_visited_stop[tile] = None
+        for branch in getattr(tile, 'branch_to_station', {}).keys():
+            if tuple(path) in branch or (neighbor, ) in branch:
+                new_visited_stop[tile] = branch
+                break
+    return new_visited_stop
+
+def _walk_routes_debug_line(visited_paths, enter_from, tile):
+    str_visited = [str(path[0]) for path in visited_paths] \
+            + ([str(enter_from)] if enter_from else []) \
+            + [str(tile.cell)]
+    return ", ".join(str_visited)
+
 def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=None, visited_stops=None):
     visited_paths = visited_paths or []
-    visited_stops = visited_stops or []
+    visited_stops = visited_stops or {}
 
     tile = board.get_space(cell)
-    if not tile or (enter_from and enter_from not in tile.paths()) or tile in visited_stops:
+    if not tile or (enter_from and enter_from not in tile.paths()):
         return (Route.empty(), )
+    elif tile in visited_stops:
+        if not isinstance(tile, (boardtile.SplitCity, placedtile.SplitCity)) \
+                or str(cell) in game.rules.routes.cannot_revisit \
+                or (enter_from and enter_from in set(itertools.chain.from_iterable(visited_stops[tile]))):
+            return (Route.empty(), )
 
     if tile.is_stop \
             and (not game.rules.routes.omit_towns_from_limit or not tile.is_town):
         if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
-            str_visited = [str(path[0]) for path in visited_paths] \
-                    + ([str(enter_from)] if enter_from else []) \
-                    + [str(tile.cell)]
-            LOG.debug(f"- {', '.join(str_visited)}")
+            LOG.debug(f"- {_walk_routes_debug_line(visited_paths, enter_from, tile)}")
             return (Route.single(tile), )
 
         remaining_stops = length - 1
@@ -186,14 +204,11 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
         if not path or path not in visited_paths:
             neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops,
                     visited_paths=visited_paths + ([path] if path else []),
-                    visited_stops=visited_stops + ([tile] if tile.is_stop else []))
+                    visited_stops={**visited_stops, **_visited_stop_entry(tile, path, neighbor)})
             routes += [Route.single(tile).merge(neighbor_path) for neighbor_path in neighbor_paths if neighbor_path]
 
     if not routes and tile.is_stop:
-        str_visited = [str(path[0]) for path in visited_paths] \
-                + ([str(enter_from)] if enter_from else []) \
-                + [str(tile.cell)]
-        LOG.debug(f"- {', '.join(str_visited)}")
+        LOG.debug(f"- {_walk_routes_debug_line(visited_paths, enter_from, tile)}")
         routes.append(Route.single(tile))
 
     return tuple(set(routes))

@@ -52,8 +52,10 @@ class RouteRules:
     def load(rules_json):
         route_rules = rules_json.get("routes", {})
         return RouteRules(
-            route_rules.get("omit_towns_from_limit", False)
+            route_rules.get("omit_towns_from_limit", False),
+            route_rules.get("cannot_revisit", [])
         )
 
-    def __init__(self, omit_towns_from_limit=False):
+    def __init__(self, omit_towns_from_limit=False, cannot_revisit=[]):
         self.omit_towns_from_limit = omit_towns_from_limit
+        self.cannot_revisit = cannot_revisit
