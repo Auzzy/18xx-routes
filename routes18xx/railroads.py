@@ -95,7 +95,7 @@ def load(game, board, railroads_rows):
 
             railroad = RemovedRailroad.create(railroad_args["name"])
         elif trains_str == "closed":
-            if not game.rules.railroads_can_close:
+            if not game.rules.railroads.can_close:
                 raise ValueError(f"Attempted to close a railroad, although railroads cannot close in {game.name}.")
 
             railroad = ClosedRailroad.create(railroad_args["name"])

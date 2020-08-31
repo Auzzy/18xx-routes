@@ -114,7 +114,7 @@ class City(BoardSpace):
         if self.home and self.home != railroad.name and not self.has_station(self.home) and len(self.stations) + 1 >= self.capacity:
                 raise ValueError(f"{self.name} ({self.cell}) must leave a slot for {self.home}, its home railroad.")
 
-        if game.rules.stations_reserved_until and game.compare_phases(game.rules.stations_reserved_until) < 0:
+        if game.rules.stations.reserved_until and game.compare_phases(game.rules.stations.reserved_until) < 0:
             if self.reserved and self.reserved != railroad.name and not self.has_station(self.reserved) and len(self.stations) + 1 >= self.capacity:
                 raise ValueError(f"{self.name} ({self.cell}) has no open slot for its {self.reserved} reservation.")
 

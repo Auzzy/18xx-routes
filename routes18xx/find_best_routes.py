@@ -166,7 +166,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
         return (Route.empty(), )
 
     if tile.is_stop \
-            and (not game.rules.towns_omit_from_limit or not tile.is_town):
+            and (not game.rules.routes.omit_towns_from_limit or not tile.is_town):
         if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
             str_visited = [str(path[0]) for path in visited_paths] \
                     + ([str(enter_from)] if enter_from else []) \
