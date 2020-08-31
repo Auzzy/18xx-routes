@@ -218,20 +218,20 @@ class SplitCity(City):
                 return branch
         raise ValueError(f"The requested station was not found: {user_station}")
 
-class Terminus(BoardSpace):
+class Terminus(City):
     @staticmethod
-    def create(cell, name, edges, values, nickname=None, is_east=False, is_west=False, properties={}):
+    def create(cell, name, edges, values, capacity=0, nickname=None, is_east=False, is_west=False, properties={}):
         paths = {cell.neighbors[side]: [] for side in edges}
 
         if is_east:
-            return EasternTerminus(name, nickname, cell, paths, values, properties)
+            return EasternTerminus(name, nickname, cell, paths, values, capacity, properties)
         elif is_west:
-            return WesternTerminus(name, nickname, cell, paths, values, properties)
+            return WesternTerminus(name, nickname, cell, paths, values, capacity, properties)
         else:
-            return Terminus(name, nickname, cell, paths, values, properties)
+            return Terminus(name, nickname, cell, paths, values, capacity, properties)
 
-    def __init__(self, name, nickname, cell, paths, value_dict, properties):
-        super().__init__(name, nickname, cell, None, paths, properties=properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
+        super().__init__(name, nickname, cell, None, paths, value_dict, capacity, properties=properties)
 
         self.phase_value = {phase: val for phase, val in value_dict.get("phase", {}).items()}
         self.train_value = {train: val for train, val in value_dict.get("train", {}).items()}
@@ -253,8 +253,8 @@ class Terminus(BoardSpace):
         return False
 
 class EasternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value_dict, properties):
-        super().__init__(name, nickname, cell, paths, value_dict, properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
+        super().__init__(name, nickname, cell, paths, value_dict, capacity, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
@@ -262,8 +262,8 @@ class EasternTerminus(Terminus):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value_dict, properties):
-        super().__init__(name, nickname, cell, paths, value_dict, properties)
+    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
+        super().__init__(name, nickname, cell, paths, value_dict, capacity, properties)
         
         self.e2w_bonus = value_dict["e2w-bonus"]
 
