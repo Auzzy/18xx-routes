@@ -120,13 +120,18 @@ def load(game, board, railroads_rows):
     for name, railroad in railroads.items():
         info = railroad_info.get(name, {})
         if not isinstance(railroad, ClosedRailroad):
-            board.place_station(game, info["home"], railroad)
+            coord, branch = _split_station_entry(info["home"])
+            if isinstance(board.get_space(board.cell(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
+                board.place_split_station(game, coord, railroad, branch)
+            else:
+                board.place_station(game, coord, railroad)
 
     # Initializing parts of the board that depend on the railroads having been
     # created.
     for name, info in railroad_info.items():
         # Railroads which are in play.
-        board.get_space(board.cell(info["home"])).home = name
+        coord, branch = _split_station_entry(info["home"])
+        board.get_space(board.cell(coord)).home = name
         if name not in railroads or not isinstance(railroads[name], RemovedRailroad):
             for reserved_coord in info.get("reserved", []):
                 board.get_space(board.cell(reserved_coord)).reserved = name
@@ -146,7 +151,7 @@ def load(game, board, railroads_rows):
             station_entries = [entry.strip() for entry in station_entries_str.split(",")]
             for entry in station_entries:
                 coord, branch = _split_station_entry(entry)
-                if coord and coord != info["home"]:
+                if coord and coord != _split_station_entry(info["home"])[0]:
                     if isinstance(board.get_space(board.cell(coord)), (placedtile.SplitCity, boardtile.SplitCity)):
                         if not branch:
                             raise ValueError(f"A split city ({coord}) is listed as a station for {railroad.name}, but no station branch was specified.")
