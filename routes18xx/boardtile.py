@@ -46,7 +46,7 @@ class BoardSpace(object):
     def place_token(self, railroad, TokenType):
         self.tokens.append(TokenType.place(self.cell, railroad, self.properties))
 
-    def passable(self, enter_cell, railroad):
+    def passable(self, enter_cell, exit_cell, railroad):
         return True
 
 class Track(BoardSpace):
@@ -131,7 +131,11 @@ class City(BoardSpace):
     def has_station(self, railroad_name):
         return bool(self.get_station(railroad_name))
 
-    def passable(self, enter_cell, railroad):
+    def passable(self, enter_cell, exit_cell, railroad):
+        # Starting from a city is always legal
+        if not enter_cell:
+            return True
+
         return self.capacity - len(self.stations) > 0 or self.has_station(railroad.name)
 
 class SplitCity(City):
@@ -195,21 +199,30 @@ class SplitCity(City):
         if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
             raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
 
-        station = Station(self.cell, railroad)
+        station = Station(self.cell, railroad, branch)
         self._stations.append(station)
         self.branch_to_station[split_branch].append(station)
         return station
 
-    def passable(self, enter_cell, railroad):
-        for branch, stations in self.branch_to_station.items():
-            for path in branch:
-                if enter_cell in path:
-                    if len(stations) < self.capacity[branch]:
-                        return True
+    def passable(self, enter_cell, exit_cell, railroad):
+        # Starting from a city is always legal
+        if not enter_cell:
+            return True
 
-                    for station in stations:
-                        if station.railroad == railroad:
-                            return True
+        for branch, stations in self.branch_to_station.items():
+            # Only look at the branch formed by the enter and exit cells
+            if (enter_cell, exit_cell) not in branch:
+                continue
+
+            # Check branch capacity
+            if len(stations) < self.capacity[branch]:
+                return True
+
+            # Check if this branch has a station belonging to the railroad
+            for station in stations:
+                if station.railroad == railroad:
+                    return True
+
         return False
 
     def get_station_branch(self, user_station):
@@ -249,8 +262,9 @@ class Terminus(BoardSpace):
 
         return base_value + sum(token.value(game, railroad) for token in self.tokens)
 
-    def passable(self, enter_cell, railroad):
-        return False
+    def passable(self, enter_cell, exit_cell, railroad):
+        # A path entering a terminus is never passable. A path exiting it always is.
+        return not enter_cell
 
 class EasternTerminus(Terminus):
     def __init__(self, name, nickname, cell, paths, value_dict, properties):

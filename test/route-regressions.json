@@ -67,6 +67,14 @@
                 "active": {
                     "Illinois Central": 150
                 }
+            },
+            {
+                "name": "chicago-wrong-exit",
+                "board-state": "board-state-chicago-wrong-exit.csv",
+                "railroads": "railroads-chicago-wrong-exit.csv",
+                "active": {
+                    "Illinois Central": 60
+                }
             }
         ],
         "1889": [

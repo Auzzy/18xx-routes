@@ -167,7 +167,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
 
     if tile.is_stop \
             and (not game.rules.routes.omit_towns_from_limit or not tile.is_town):
-        if length - 1 == 0 or (enter_from and not tile.passable(enter_from, railroad)):
+        if length - 1 == 0:
             str_visited = [str(path[0]) for path in visited_paths] \
                     + ([str(enter_from)] if enter_from else []) \
                     + [str(tile.cell)]
@@ -182,6 +182,9 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
 
     routes = []
     for neighbor in neighbors:
+        if not tile.passable(enter_from, neighbor, railroad):
+            continue
+
         path = [enter_from, neighbor] if enter_from else []
         if not path or path not in visited_paths:
             neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops,
@@ -221,7 +224,7 @@ def _filter_invalid_routes(game, routes, board, railroad):
             continue
 
         # Each route must contain at least 1 station
-        stations_on_route = [station for station in stations if route.contains_cell(station.cell)]
+        stations_on_route = [station for station in stations if route.contains_station(station)]
         if not stations_on_route:
             continue
 
@@ -261,7 +264,7 @@ def _find_all_routes(game, board, railroad):
         if train not in routes_by_train:
             routes = set()
             for station in stations:
-                LOG.debug(f"Finding routes starting at station at {station.cell}.")
+                LOG.debug(f"Finding routes starting at station at {station}.")
                 routes.update(_find_routes_from_cell(game, board, railroad, station.cell, train))
 
                 LOG.debug(f"Finding routes which pass through station at {station.cell}.")

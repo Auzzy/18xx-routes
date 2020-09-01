@@ -59,9 +59,11 @@ class PlacedTile(object):
     def value(self, game, railroad, train):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
 
-    def passable(self, enter_cell, railroad):
-        if not self.is_stop or self.is_town:
+    def passable(self, enter_cell, exit_cell, railroad):
+        # Towns and track tiles are always passable, as is starting from this tile.
+        if not enter_cell or not self.is_stop or self.is_town:
             return True
+        # A terminus is never passable (unless the start of a path, but that's handled above)
         if self.is_terminus:
             return False
 
@@ -181,21 +183,30 @@ class SplitCity(PlacedTile):
         if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
             raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
 
-        station = Station(self.cell, railroad)
+        station = Station(self.cell, railroad, branch)
         self._stations.append(station)
         self.branch_to_station[split_branch].append(station)
         return station
 
-    def passable(self, enter_cell, railroad):
-        for branch, stations in self.branch_to_station.items():
-            for path in branch:
-                if enter_cell in path:
-                    if len(stations) < self.capacity[branch]:
-                        return True
+    def passable(self, enter_cell, exit_cell, railroad):
+        # Starting from a city is always legal
+        if not enter_cell:
+            return True
 
-                    for station in stations:
-                        if station.railroad == railroad:
-                            return True
+        for branch, stations in self.branch_to_station.items():
+            # Only look at the branch formed by the enter and exit cells
+            if (enter_cell, exit_cell) not in branch:
+                continue
+
+            # Check branch capacity
+            if len(stations) < self.capacity[branch]:
+                return True
+
+            # Check if this branch has a station belonging to the railroad
+            for station in stations:
+                if station.railroad == railroad:
+                    return True
+
         return False
 
     def get_station_branch(self, user_station):
