@@ -221,7 +221,7 @@ def _filter_invalid_routes(game, routes, board, railroad):
             continue
 
         # Each route must contain at least 1 station
-        stations_on_route = [station for station in stations if route.contains_cell(station.cell)]
+        stations_on_route = [station for station in stations if route.contains_station(station)]
         if not stations_on_route:
             continue
 
@@ -261,7 +261,7 @@ def _find_all_routes(game, board, railroad):
         if train not in routes_by_train:
             routes = set()
             for station in stations:
-                LOG.debug(f"Finding routes starting at station at {station.cell}.")
+                LOG.debug(f"Finding routes starting at station at {station}.")
                 routes.update(_find_routes_from_cell(game, board, railroad, station.cell, train))
 
                 LOG.debug(f"Finding routes which pass through station at {station.cell}.")

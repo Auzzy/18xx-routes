@@ -4,7 +4,17 @@ class Token(object):
         self.railroad = railroad
 
 class Station(Token):
-    pass
+    def __init__(self, cell, railroad, branch=None):
+        super().__init__(cell, railroad)
+
+        self.branch = branch
+
+    def __str__(self):
+        if self.branch:
+            branch_str = self.branch[0] if len(self.branch) == 1 else str(list(self.branch))
+            return f"{self.cell}:{branch_str}"
+        else:
+            return str(self.cell)
 
 class PrivateCompanyToken(Token):
     @staticmethod
