@@ -195,7 +195,7 @@ class SplitCity(City):
         if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
             raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
 
-        station = Station(self.cell, railroad)
+        station = Station(self.cell, railroad, branch)
         self._stations.append(station)
         self.branch_to_station[split_branch].append(station)
         return station

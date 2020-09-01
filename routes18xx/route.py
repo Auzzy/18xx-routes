@@ -1,5 +1,6 @@
 import functools
 import heapq
+import itertools
 import math
 import numbers
 
@@ -20,6 +21,7 @@ class Route(object):
 
     def __init__(self, path):
         self._path = tuple(path)
+        self._cell_to_space = {space.cell: space for space in self._path if space}
         self._edges = [{path[k-1], path[k]} for k in range(1, len(path))]
 
     def merge(self, route):
@@ -91,6 +93,25 @@ class Route(object):
 
     def contains_cell(self, cell):
         return cell in [tile.cell for tile in self]
+
+    def contains_station(self, station):
+        if not self.contains_cell(station.cell):
+            return False
+
+        if station.branch:
+            # If the station is on a branch, check that the path uses the correct branch, by confirming its neighbors
+            # (if it has any) are part of the branch paths.
+            station_space = self._cell_to_space[station.cell]
+            station_space_index = self._path.index(station_space)
+
+            branches = station_space.get_station_branch(station)
+            spaces = {self._cell_to_space.get(cell) for cell in itertools.chain.from_iterable(branches)} - {None}
+            if station_space_index != 0 and self._path[station_space_index - 1] not in spaces:
+                return False
+            if station_space_index != len(self._path) - 1 and self._path[station_space_index + 1] not in spaces:
+                return False
+
+        return True
 
     @property
     def cities(self):
