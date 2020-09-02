@@ -120,6 +120,32 @@
                     "Uwajima Railroad": 280
                 }
             }
+        ],
+        "18chesapeake": [
+            {
+                "name": "revisit-town",
+                "board-state": "board-state-revisit-town.csv",
+                "railroads": "railroads-revisit-town.csv",
+                "active": {
+                    "Lehigh Valley Railroad": 290
+                }
+            },
+            {
+                "name": "revisit-split-city-other-branch",
+                "board-state": "board-state-revisit-legal.csv",
+                "railroads": "railroads-revisit-legal.csv",
+                "active": {
+                    "Strasburg Railroad": 120
+                }
+            },
+            {
+                "name": "revisit-split-city-same-branch",
+                "board-state": "board-state-revisit-illegal.csv",
+                "railroads": "railroads-revisit-illegal.csv",
+                "active": {
+                    "Strasburg Railroad": 80
+                }
+            }
         ]
     }
 }
