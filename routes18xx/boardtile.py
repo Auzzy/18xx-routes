@@ -119,7 +119,20 @@ class City(BoardSpace):
         return tuple(self._stations)
 
     def value(self, game, railroad, train):
-        return self._value + sum(token.value(game, railroad) for token in self.tokens)
+        if isinstance(self._value, int):
+            base_value = self._value
+        else:
+            if train.name in self._value.get("train", {}):
+                base_value = self._value["train"][train.name]
+            else:
+                for phase, value in sorted(self._value.get("phase", {}).items(), reverse=True):
+                    if game.compare_phases(phase) >= 0:
+                        base_value = value
+                        break
+                else:
+                    raise ValueError(f"No value could be found for the provided phase: {game.current_phase}")
+
+        return base_value + sum(token.value(game, railroad) for token in self.tokens)
 
     def add_station(self, game, railroad):
         if self.has_station(railroad.name):
@@ -267,19 +280,6 @@ class Terminus(City):
 
     def __init__(self, name, nickname, cell, paths, value, capacity, properties):
         super().__init__(name, nickname, cell, None, paths, value, capacity, properties=properties)
-
-    def value(self, game, railroad, train):
-        if train.name in self._value.get("train", {}):
-            base_value = self._value["train"][train.name]
-        else:
-            for phase, value in sorted(self._value.get("phase", {}).items(), reverse=True):
-                if game.compare_phases(phase) >= 0:
-                    base_value = value
-                    break
-            else:
-                raise ValueError(f"No value could be found for the provided phase: {game.current_phase}")
-
-        return base_value + sum(token.value(game, railroad) for token in self.tokens)
 
     def passable(self, enter_cell, exit_cell, railroad):
         # A path entering a terminus is never passable. A path exiting it always is.
