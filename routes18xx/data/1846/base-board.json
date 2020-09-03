@@ -140,7 +140,7 @@
         "B8": {
             "name": "Holland",
             "edges": [4],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 40,
                     "3": 10
@@ -153,7 +153,7 @@
         "B18": {
             "name": "Sarnia",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 30,
                     "3": 50
@@ -166,7 +166,7 @@
             "name": "Chicago Connections",
             "nickname": "Chicago Conn.",
             "edges": [5],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 20,
                     "3": 40
@@ -181,7 +181,7 @@
         "C17": {
             "name": "Windsor",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 40,
                     "3": 60
@@ -193,7 +193,7 @@
         "C21": {
             "name": "Buffalo",
             "edges": [0],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 30,
                     "3": 60
@@ -205,7 +205,7 @@
         "D22": {
             "name": "Buffalo",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 30,
                     "3": 60
@@ -217,7 +217,7 @@
         "E23": {
             "name": "Binghamton",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 20,
                     "3": 50
@@ -229,7 +229,7 @@
         "F22": {
             "name": "Pittsburg",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 30,
                     "3": 70
@@ -241,7 +241,7 @@
         "G21": {
             "name": "Pittsburg",
             "edges": [1, 2],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 30,
                     "3": 70
@@ -253,7 +253,7 @@
         "H20": {
             "name": "Cumberland",
             "edges": [2],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 20,
                     "3": 40
@@ -265,7 +265,7 @@
         "I1": {
             "name": "St. Louis",
             "edges": [3, 4],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 50,
                     "3": 70
@@ -281,7 +281,7 @@
         "I17": {
             "name": "Charleston",
             "edges": [1],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 20,
                     "3": 50
@@ -293,7 +293,7 @@
         "J10": {
             "name": "Louisville",
             "edges": [2, 3],
-            "values": {
+            "value": {
                 "phase": {
                     "1": 50,
                     "3": 70

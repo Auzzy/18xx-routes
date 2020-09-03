@@ -119,7 +119,7 @@
         "A12": {
             "name": "Sakaide & Okayama",
             "edges": [0, 5],
-            "values": {
+            "value": {
                 "phase": {
                     "2": 20,
                     "5": 40
@@ -132,7 +132,7 @@
         "C6": {
             "name": "Imabari",
             "edges": [0, 5],
-            "values": {
+            "value": {
                 "phase": {
                     "2": 30,
                     "5": 60
@@ -145,7 +145,7 @@
         "C18": {
             "name": "Naruto & Awaji",
             "edges": [0, 1],
-            "values": {
+            "value": {
                 "phase": {
                     "2": 20,
                     "5": 40

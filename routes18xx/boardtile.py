@@ -255,27 +255,24 @@ class SplitCity(City):
 
 class Terminus(City):
     @staticmethod
-    def create(cell, name, edges, values, capacity=0, nickname=None, is_east=False, is_west=False, properties={}):
+    def create(cell, name, edges, value, capacity=0, nickname=None, is_east=False, is_west=False, properties={}):
         paths = {cell.neighbors[side]: [] for side in edges}
 
         if is_east:
-            return EasternTerminus(name, nickname, cell, paths, values, capacity, properties)
+            return EasternTerminus(name, nickname, cell, paths, value, capacity, properties)
         elif is_west:
-            return WesternTerminus(name, nickname, cell, paths, values, capacity, properties)
+            return WesternTerminus(name, nickname, cell, paths, value, capacity, properties)
         else:
-            return Terminus(name, nickname, cell, paths, values, capacity, properties)
+            return Terminus(name, nickname, cell, paths, value, capacity, properties)
 
-    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
-        super().__init__(name, nickname, cell, None, paths, value_dict, capacity, properties=properties)
-
-        self.phase_value = {phase: val for phase, val in value_dict.get("phase", {}).items()}
-        self.train_value = {train: val for train, val in value_dict.get("train", {}).items()}
+    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
+        super().__init__(name, nickname, cell, None, paths, value, capacity, properties=properties)
 
     def value(self, game, railroad, train):
-        if train.name in self.train_value:
-            base_value = self.train_value[train.name]
+        if train.name in self._value.get("train", {}):
+            base_value = self._value["train"][train.name]
         else:
-            for phase, value in sorted(self.phase_value.items(), reverse=True):
+            for phase, value in sorted(self._value.get("phase", {}).items(), reverse=True):
                 if game.compare_phases(phase) >= 0:
                     base_value = value
                     break
@@ -289,19 +286,19 @@ class Terminus(City):
         return not enter_cell
 
 class EasternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
-        super().__init__(name, nickname, cell, paths, value_dict, capacity, properties)
+    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
+        super().__init__(name, nickname, cell, paths, value, capacity, properties)
         
-        self.e2w_bonus = value_dict["e2w-bonus"]
+        self.e2w_bonus = value["e2w-bonus"]
 
     def value(self, game, railroad, train, east_to_west=False):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value_dict, capacity, properties):
-        super().__init__(name, nickname, cell, paths, value_dict, capacity, properties)
+    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
+        super().__init__(name, nickname, cell, paths, value, capacity, properties)
         
-        self.e2w_bonus = value_dict["e2w-bonus"]
+        self.e2w_bonus = value["e2w-bonus"]
 
     def value(self, game, railroad, train, east_to_west=False):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
