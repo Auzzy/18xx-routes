@@ -34,9 +34,12 @@ class Route(object):
         # Find the station city to always include
         always_include.append(max(station_cities.items(), key=lambda tile_and_value: tile_and_value[1]))
 
-        path_towns = [(stop, value) for stop, value in route_stop_values.items() if stop.is_town]
+        # Only collect stops which aren't already set to be included.
+        collect = train.collect - len(always_include)
+
+        # With this rule, towns will always be included because they don't count against the collection limit.
         if game.rules.routes.omit_towns_from_limit:
-            always_include.extend(path_towns)
+            always_include.extend([(stop, value) for stop, value in route_stop_values.items() if stop.is_town])
 
         # Remove from consideration the station city and any stops that should always be included.
         stop_values = route_stop_values.copy()
@@ -49,10 +52,6 @@ class Route(object):
             if count > 1 and space in route_stop_values:
                 stop_value_list.extend([(space, route_stop_values[space])] * (count - 1))
 
-        # The route can collect stops only after accounting for anything marked always collect
-        collect = train.collect - len(always_include)
-        if game.rules.routes.omit_towns_from_limit:
-            collect += len(path_towns)
         best_stops = stop_values if collect == math.inf else dict(heapq.nlargest(collect, stop_value_list, key=lambda stop_item: stop_item[1]))
 
         # Add back in the stops marked always collect
