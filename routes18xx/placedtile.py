@@ -19,7 +19,7 @@ class PlacedTile(object):
             paths[start_cell] = tuple([cell.neighbors[PlacedTile._rotate(end, orientation)] for end in ends])
 
         if None in paths:
-            raise ValueError(f"Placing tile {tile.id} in orientation {orientation} at {cell} goes off-map.")
+            raise ValueError(f"Placing tile {tile.id} in orientation {orientation} at {cell} is illegal.")
 
         return paths
 

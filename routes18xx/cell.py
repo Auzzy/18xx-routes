@@ -74,26 +74,35 @@ class Cell(object):
     def __repr__(self):
         return str(self)
 
-def _set_neighbors(board_info_json, cell_grid, transform_dict):
-    orientation = board_info_json["orientation"]
+def _create_impassable_dict(base_board_json):
+    impassable_dict = collections.defaultdict(list)
+    for path in base_board_json.get("impassable", []):
+        impassable_dict[path[0]].append(path[1])
+        impassable_dict[path[1]].append(path[0])
+    return impassable_dict
+
+def _set_neighbors(base_board_json, cell_grid, transform_dict):
+    orientation = base_board_json["info"]["orientation"]
     if orientation not in ORIENTATIONS:
         raise ValueError(f"Orientation should be one of {', '.join(ORIENTATIONS)}. Got {orientation}.")
 
     if set(transform_dict.keys()) != ORIENTATIONS:
         raise ValueError(f"Transform dictionary should have exactly {len(ORIENTATIONS)} keys: {', '.join(ORIENTATIONS)}")
 
+    impassable_dict = _create_impassable_dict(base_board_json)
     for row, cols in cell_grid.items():
         for col, cell in cols.items():
             for side, factor in transform_dict[orientation].items():
-                cell.neighbors[side] = cell_grid.get(chr(ord(row) + factor[0]), {}).get(col + factor[1])
+                neighbor = cell_grid.get(chr(ord(row) + factor[0]), {}).get(col + factor[1])
+                cell.neighbors[side] = neighbor if str(neighbor) not in impassable_dict.get(str(cell), []) else None
 
-def _load_flipped_coords(board_info_json):
+def _load_flipped_coords(base_board_json):
     # Normalize the coords such that letters are always first, since that's a
     # more natural way to represent coordinates. This means interpreting the
     # column values (the letters) as rows (and vice versa), and using the
     # flipped neighbor offsets
     cell_grid = collections.defaultdict(dict)
-    for row, col_ranges in board_info_json["boundaries"].items():
+    for row, col_ranges in base_board_json["info"]["boundaries"].items():
         row = int(row)
         for col_range in col_ranges:
             if isinstance(col_range, str):
@@ -102,13 +111,13 @@ def _load_flipped_coords(board_info_json):
                 for col in range(ord(col_range[0]), ord(col_range[1]) + 1, 2):
                     cell_grid[chr(col)][row] = Cell(chr(col), row)
 
-    _set_neighbors(board_info_json, cell_grid, FLIPPED_NEIGHBOR_TRANSFORM)
+    _set_neighbors(base_board_json, cell_grid, FLIPPED_NEIGHBOR_TRANSFORM)
 
     return cell_grid
 
-def _load_standard_coords(board_info_json):
+def _load_standard_coords(base_board_json):
     cell_grid = collections.defaultdict(dict)
-    for row, col_ranges in board_info_json["boundaries"].items():
+    for row, col_ranges in base_board_json["info"]["boundaries"].items():
         for col_range in col_ranges:
             if isinstance(col_range, int):
                 cell_grid[row][col_range] = Cell(row, col_range)
@@ -116,16 +125,16 @@ def _load_standard_coords(board_info_json):
                 for col in range(col_range[0], col_range[1] + 1, 2):
                     cell_grid[row][col] = Cell(row, col)
 
-    _set_neighbors(board_info_json, cell_grid, NEIGHBOR_TRANFORM)
+    _set_neighbors(base_board_json, cell_grid, NEIGHBOR_TRANFORM)
 
     return cell_grid
 
 def load(game):
     with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
-        board_info_json = json.load(board_file)["info"]
+        base_board_json = json.load(board_file)
 
-    board_info_json["coords"] = board_info_json.get("coords") or "letter-number"
-    if board_info_json["coords"] == "letter-number":
-        return _load_standard_coords(board_info_json), board_info_json
+    base_board_json["info"]["coords"] = base_board_json["info"].get("coords") or "letter-number"
+    if base_board_json["info"]["coords"] == "letter-number":
+        return _load_standard_coords(base_board_json), base_board_json["info"]
     else:
-        return _load_flipped_coords(board_info_json), board_info_json
+        return _load_flipped_coords(base_board_json), base_board_json["info"]
