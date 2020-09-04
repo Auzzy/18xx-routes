@@ -68,7 +68,7 @@ class Route(object):
 
         # Check if the route runs from east to west.
         termini = [self._path[0], self._path[-1]]
-        east_to_west = all(isinstance(tile, (EasternTerminus, WesternTerminus)) for tile in termini) and type(termini[0]) != type(termini[1])
+        east_to_west = {EasternTerminus, WesternTerminus} == set(map(type, termini))
         if east_to_west:
             # There is an east-west route. Confirm that a route including those
             # termini is the highest value route (including bonuses).
