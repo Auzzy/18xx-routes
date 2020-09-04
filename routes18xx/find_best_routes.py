@@ -79,7 +79,7 @@ def _get_train_sets(railroad):
     train_sets = []
     for train_count in range(1, len(railroad.trains) + 1):
         train_combinations = set(itertools.combinations(railroad.trains, train_count))
-        train_sets += [tuple(sorted(train_set, key=lambda train: train.collect)) for train_set in train_combinations]
+        train_sets += [tuple(sorted(train_set)) for train_set in train_combinations]
     return train_sets
 
 
@@ -187,11 +187,9 @@ def _walk_routes(game, board, railroad, enter_from, cell, train, visited_paths=N
                 or (enter_from and enter_from in set(itertools.chain.from_iterable(visited_stops[tile]))):
             return (Route.empty(), )
 
-    if tile.is_stop \
-            and (not game.rules.routes.omit_towns_from_limit or not tile.is_town):
-        if train.visit  - len(visited_stops) - 1 == 0:
-            LOG.debug(f"- {_walk_routes_debug_line(visited_paths, enter_from, tile)}")
-            return (Route.single(tile), )
+    if train.is_end_of_route(game, board, railroad, enter_from, cell, visited_paths, visited_stops):
+        LOG.debug(f"- {_walk_routes_debug_line(visited_paths, enter_from, tile)}")
+        return (Route.single(tile), )
 
     neighbors = tile.paths(enter_from, railroad)
 

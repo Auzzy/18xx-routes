@@ -1,8 +1,12 @@
+import collections
+import functools
+import heapq
 import json
 import math
 
 _TRAINS_FILENAME = "trains.json"
 
+@functools.total_ordering
 class Train:
     @staticmethod
     def _get_name(collect, visit):
@@ -39,6 +43,9 @@ class Train:
         return isinstance(other, Train) and \
                 self.collect == other.collect and \
                 self.visit == other.visit
+
+    def __gt__(self, other):
+        return self.collect > other.collect
 
 class TrainContainer(Train):
     @staticmethod
