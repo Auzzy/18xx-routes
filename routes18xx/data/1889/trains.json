@@ -1,28 +1,27 @@
 {
     "trains": [
         {
-            "collect": 2,
+            "visit": 2,
             "phase": "2"
         },
         {
-            "collect": 3,
+            "visit": 3,
             "phase": "3"
         },
         {
-            "collect": 4,
+            "visit": 4,
             "phase": "4"
         },
         {
-            "collect": 5,
+            "visit": 5,
             "phase": "5"
         },
         {
-            "collect": 6,
+            "visit": 6,
             "phase": "6"
         },
         {
             "name": "diesel",
-            "collect": null,
             "phase": "D"
         }
     ],

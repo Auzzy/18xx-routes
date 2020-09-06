@@ -9,55 +9,41 @@ _TRAINS_FILENAME = "trains.json"
 @functools.total_ordering
 class Train:
     @staticmethod
-    def _get_name(collect, visit):
-        if collect == math.inf:
-            return "diesel"
-        elif collect == visit:
-            return str(collect)
-        else:
-            return f"{collect} / {visit}"
+    def _get_name(visit):
+        return str(visit)
 
     @staticmethod
-    def normalize_name(name):
-        parts = name.split("/")
-        try:
-            collect = int(parts[0].strip())
-        except ValueError:
-            collect = math.inf
-        visit = collect if len(parts) == 1 else int(parts[1].strip())
-        return Train._get_name(collect, visit)
+    def normalize_train_str(train_str):
+        return Train._get_name(int(train_str.strip()))
 
     @staticmethod
-    def create(name, collect, visit, phase):
-        if not collect:
-            collect = math.inf
+    def create(phase, visit=math.inf, name=None, **kwargs):
+        if name and name == "diesel":
+            return Diesel.create(phase)
+        if "collect" in kwargs:
+            return Selection.create(phase, kwargs["collect"], visit, name)
 
-        if not visit:
-            visit = collect
+        name = name or Train._get_name(visit)
 
-        name = name or Train._get_name(collect, visit)
+        return Train(phase, visit, name)
 
-        return Train(name, collect, visit, phase)
-
-    def __init__(self, name, collect, visit, phase):
-        self.name = name
-        self.collect = collect
-        self.visit = visit
+    def __init__(self, phase, visit, name):
         self.phase = phase
+        self.visit = visit
+        self.name = name
 
     def __str__(self):
         return self.name
 
     def __hash__(self):
-        return hash((self.collect, self.visit))
+        return hash(self.visit)
 
     def __eq__(self, other):
         return isinstance(other, Train) and \
-                self.collect == other.collect and \
                 self.visit == other.visit
 
     def __gt__(self, other):
-        return self.collect > other.collect
+        return self.visit > other.visit
 
     def is_end_of_route(self, game, board, railroad, enter_from, cell, visited_paths, visited_stops):
         tile = board.get_space(cell)
@@ -66,9 +52,6 @@ class Train:
             and self.visit  - len(visited_stops) - 1 <= 0
 
     def route_best_stops(self, game, route, route_stop_values, always_include):
-        # Only collect stops which aren't already set to be included.
-        collect = self.collect - len(always_include)
-
         # With this rule, towns will always be included because they don't count against the collection limit.
         if game.rules.routes.omit_towns_from_limit:
             always_include.extend([stop for stop in route_stop_values if stop.is_town])
@@ -84,7 +67,7 @@ class Train:
             if count > 1 and space in route_stop_values:
                 stop_value_list.extend([(space, route_stop_values[space])] * (count - 1))
 
-        return stop_value_list if collect == math.inf else dict(heapq.nlargest(collect, stop_value_list, key=lambda stop_item: stop_item[1]))
+        return dict(stop_value_list)
 
     def route_stop_values(self, raw_visited_stop_values):
         return raw_visited_stop_values.copy()
@@ -93,6 +76,73 @@ class Train:
         # Simply doing sum(self.stop_values.values()) fails to appropriately
         # count stops visited multiple times.
         return sum(stop_values.get(stop, 0) for stop in route.stops)
+
+class Diesel(Train):
+    @staticmethod
+    def normalize_train_str(train_str):
+        return train_str.strip()
+
+    @staticmethod
+    def create(phase):
+        return Diesel(phase)
+
+    def __init__(self, phase):
+        super().__init__(phase, math.inf, "diesel")
+
+    def __hash__(self):
+        return hash(self.visit)
+
+    def __eq__(self, other):
+        return isinstance(other, Diesel)
+
+@functools.total_ordering
+class Selection(Train):
+    @staticmethod
+    def _get_name(collect, visit):
+        return f"{collect} / {visit}"
+
+    @staticmethod
+    def normalize_train_str(train_str):
+        parts = train_str.split("/")
+        if len(parts) != 2:
+            raise ValueError("Malformatted selection train string: found {len(parts) - 1} forward-slashes.")
+        collect = int(parts[0].strip())
+        visit = int(parts[1].strip())
+        return Selection._get_name(collect, visit)
+
+    @staticmethod
+    def create(phase, collect, visit, name):
+        name = name or Selection._get_name(collect, visit)
+
+        return Selection(phase, collect, visit, name)
+
+    def __init__(self, phase, collect, visit, name):
+        super().__init__(phase, visit, name)
+
+        self.collect = collect
+
+    def __hash__(self):
+        return hash((self.collect, self.visit))
+
+    def __eq__(self, other):
+        return isinstance(other, Selection) and \
+                self.visit == other.visit and \
+                self.collect == other.collect
+
+    def __gt__(self, other):
+        if self.visit == other.visit:
+            other_collect = other.collect if isinstance(other, Selection) else other.visit
+            return self.collect > other_collect
+        else:
+            return self.visit > other.visit
+
+    def route_best_stops(self, game, route, route_stop_values, always_include):
+        # Only collect stops which aren't already set to be included.
+        collect = self.collect - len(always_include)
+
+        stop_values = super().route_best_stops(game, route, route_stop_values, always_include)
+
+        return dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
 
 def convert(train_info, trains_str):
     if not trains_str:
@@ -103,7 +153,11 @@ def convert(train_info, trains_str):
         train_str = train_str.strip()
         if train_str:
             for train in train_info:
-                if train.normalize_name(train_str) == train.name:
+                try:
+                    normalized_train_str = train.normalize_train_str(train_str)
+                except ValueError:
+                    continue
+                if normalized_train_str == train.name:
                     railroad_trains.append(train)
     return railroad_trains
 
@@ -111,4 +165,4 @@ def load_train_info(game):
     with open(game.get_data_file(_TRAINS_FILENAME)) as trains_file:
         trains_json = json.load(trains_file)
 
-    return [Train.create(info.get("name"), info["collect"], info.get("visit"), info["phase"]) for info in trains_json["trains"]]
+    return [Train.create(**info) for info in trains_json["trains"]]
