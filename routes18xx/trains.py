@@ -20,6 +20,8 @@ class Train:
     def create(phase, visit=math.inf, name=None, **kwargs):
         if name and name == "diesel":
             return Diesel.create(phase)
+        if kwargs.get("multiplier", 0) == 2:
+            return Double.create(phase, visit, name)
         if "collect" in kwargs:
             return Selection.create(phase, kwargs["collect"], visit, name)
 
@@ -143,6 +145,31 @@ class Selection(Train):
         stop_values = super().route_best_stops(game, route, route_stop_values, always_include)
 
         return dict(heapq.nlargest(collect, stop_values.items(), key=lambda stop_item: stop_item[1]))
+
+class Double(Train):
+    @staticmethod
+    def _get_name(visit):
+        return f"{visit}D"
+
+    @staticmethod
+    def normalize_train_str(train_str):
+        return Double._get_name(int(train_str.strip()[:-1]))
+
+    @staticmethod
+    def create(phase, visit, name):
+        name = name or Double._get_name(visit)
+
+        return Double(phase, visit, name)
+
+    def __hash__(self):
+        return hash(self.visit)
+
+    def __eq__(self, other):
+        return isinstance(other, Double) and \
+                self.visit == other.visit
+
+    def route_stop_values(self, raw_visited_stop_values):
+        return {stop: value * (2 if not stop.is_town else 1) for stop, value in raw_visited_stop_values.items()}
 
 def convert(train_info, trains_str):
     if not trains_str:
