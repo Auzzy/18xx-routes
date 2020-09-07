@@ -22,7 +22,7 @@ class PrivateCompanyToken(Token):
         if railroad.is_removed:
             raise ValueError(f"A removed railroad cannot place a private company's token: {railroad.name}")
 
-        return PrivateCompanyToken(cell, railroad)
+        return PrivateCompanyToken(name, cell, railroad)
 
     def __init__(self, name, cell, railroad, bonus=0):
         super().__init__(cell, railroad)

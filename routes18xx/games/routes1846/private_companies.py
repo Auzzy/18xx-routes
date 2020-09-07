@@ -1,13 +1,14 @@
 import csv
 
-from routes18xx.railroads import Railroad
+from routes18xx.games import handle_token_company, load_base, load_from_csv_base
 from routes18xx.games.routes1846.tokens import MeatPackingToken, SteamboatToken
+from routes18xx.railroads import Railroad
 
 FIELDNAMES = ("name", "owner", "coord")
 
 COMPANIES = {
-    "Steamboat Company": lambda game, board, railroads, kwargs: _handle_steamboat_company(game, board, railroads, kwargs),
-    "Meat Packing Company": lambda game, board, railroads, kwargs: _handle_meat_packing_company(game, board, railroads, kwargs),
+    SteamboatToken.NAME: lambda game, board, railroads, kwargs: handle_token_company(game, board, railroads, kwargs, SteamboatToken),
+    MeatPackingToken.NAME: lambda game, board, railroads, kwargs: handle_token_company(game, board, railroads, kwargs, MeatPackingToken),
     "Mail Contract": lambda game, board, railroads, kwargs: _handle_mail_contract(game, board, railroads, kwargs),
     "Big 4": lambda game, board, railroads, kwargs: _handle_independent_railroad(game, board, railroads, "Big 4", kwargs),
     "Michigan Southern": lambda game, board, railroads, kwargs: _handle_independent_railroad(game, board, railroads, "Michigan Southern", kwargs)
@@ -19,8 +20,8 @@ HOME_CITIES = {
 }
 
 PRIVATE_COMPANY_COORDS = {
-    "Steamboat Company": SteamboatToken.COORDS,
-    "Meat Packing Company": MeatPackingToken.COORDS,
+    SteamboatToken.NAME: SteamboatToken.COORDS,
+    MeatPackingToken.NAME: MeatPackingToken.COORDS,
     "Big 4": [HOME_CITIES["Big 4"]],
     "Michigan Southern": [HOME_CITIES["Michigan Southern"]]
 }
@@ -29,30 +30,6 @@ PRIVATE_COMPANY_DEFAULT_COORDS = {
     "Big 4": HOME_CITIES["Big 4"],
     "Michigan Southern": HOME_CITIES["Michigan Southern"]
 }
-
-def _handle_steamboat_company(game, board, railroads, kwargs):
-    owner = kwargs.get("owner")
-    coord = kwargs["coord"]
-    if not owner or not coord:
-        return
-
-    if owner not in railroads:
-        raise ValueError(f"Assigned the Steamboat Company to an unrecognized or unfounded railroad: {owner}")
-
-    board.place_token(coord, railroads[owner], SteamboatToken)
-    railroads[owner].add_private_company("Steamboat Company")
-
-def _handle_meat_packing_company(game, board, railroads, kwargs):
-    owner = kwargs.get("owner")
-    coord = kwargs["coord"]
-    if not owner or not coord:
-        return
-
-    if owner not in railroads:
-        raise ValueError(f"Assigned the Meat Packing Company to an unrecognized or unfounded railroad: {owner}")
-
-    board.place_token(coord, railroads[owner], MeatPackingToken)
-    railroads[owner].add_private_company("Meat Packing Company")
 
 def _handle_mail_contract(game, board, railroads, kwargs):
     owner = kwargs.get("owner")
@@ -85,23 +62,8 @@ def _handle_independent_railroad(game, board, railroads, name, kwargs):
         if game.compare_phases("3") < 0:
             board.place_station(game, home_city, Railroad.create(name, "2"))
 
-
 def load_from_csv(game, board, railroads, companies_filepath):
-    if companies_filepath:
-        with open(companies_filepath, newline='') as companies_file:
-            return load(game, board, railroads, tuple(csv.DictReader(companies_file, fieldnames=FIELDNAMES, delimiter=';', skipinitialspace=True)))
+    return load_from_csv_base(game, board, railroads, companies_filepath, COMPANIES, FIELDNAMES)
 
 def load(game, board, railroads, companies_rows):
-    if not companies_rows:
-        return
-
-    private_company_names = [company["name"] for company in companies_rows]
-    if len(private_company_names) != len(set(private_company_names)):
-        raise ValueError("Each private company should only have a single entry.")
-
-    for company_kwargs in companies_rows:
-        name = company_kwargs.get("name")
-        if name not in COMPANIES:
-            raise ValueError(f"An unrecognized private company was provided: {name}")
-
-        COMPANIES[name](game, board, railroads, company_kwargs)
+    return load_base(game, board, railroads, companies_rows, COMPANIES)
