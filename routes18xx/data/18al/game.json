@@ -12,6 +12,12 @@
         },
         "routes": {
             "omit_towns_from_limit": true
+        },
+        "privates": {
+            "close": {
+                "South and North Alabama RR": "6",
+                "Memphis and Charleston RR": null
+            }
         }
     }
 }
