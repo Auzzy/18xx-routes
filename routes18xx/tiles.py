@@ -51,7 +51,7 @@ class Tile(object):
         self.is_town = is_town
         self.is_terminus = is_terminus
         self.capacity = capacity
-        self.upgrade_attrs = sorted(upgrade_attrs)
+        self.upgrade_attrs = sorted(sorted(attr) if isinstance(attr, list) else [attr] for attr in upgrade_attrs) or [[]]
 
         self.is_stop = self.is_city or self.is_town or self.is_terminus
 

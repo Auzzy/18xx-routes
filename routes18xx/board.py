@@ -134,7 +134,7 @@ class Board(object):
                 raise ValueError("A city tile must be placed on a city board space.")
             elif old_tile.is_town != tile.is_town:
                 raise ValueError("A town tile must be placed on a town board space.")
-            elif tile.upgrade_attrs not in old_tile.upgrade_attrs:
+            elif not any(upgrade_attr in old_tile.upgrade_attrs for upgrade_attr in tile.upgrade_attrs):
                 old_tile_type = " OR ".join(str(upgrade_attr) for upgrade_attr in old_tile.upgrade_attrs)
                 raise ValueError(f"Tried to upgrade to a mismatched type. Expected: {old_tile_type}. Got: {tile.upgrade_attrs}.")
         else:
