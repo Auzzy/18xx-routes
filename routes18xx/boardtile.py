@@ -3,6 +3,7 @@ import itertools
 import json
 
 from routes18xx.cell import Cell
+from routes18xx.railroads import _load_railroad_info, _split_station_entry
 from routes18xx.tokens import Station
 
 BASE_BOARD_FILENAME = "base-board.json"
@@ -96,23 +97,27 @@ class SplitTown(Town):
 
 class City(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=[], properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, home_to=[], reserved_for=[],
+            upgrade_attrs=[], properties={}):
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
-            return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+                    upgrade_attrs, properties)
         else:
-            return City(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return City(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+                    upgrade_attrs, properties)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=[], properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+            upgrade_attrs=[], properties={}):
         super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
 
         self._value = value
         self.capacity = capacity
         self._stations = []
 
-        self.home = []
-        self.reserved = []
+        self.home = [home_to] if isinstance(home_to, str) else home_to
+        self.reserved = [reserved_for] if isinstance(reserved_for, str) else reserved_for
 
     @property
     def stations(self):
@@ -222,13 +227,17 @@ class SplitCity(City):
         return SplitCity._branches_with_unique_exits(split_branch_dict)
 
     @staticmethod
-    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+    def create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+            upgrade_attrs, properties):
         split_city_capacity = SplitCity._parse_branch_dict(capacity, cell)
 
-        return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, upgrade_attrs, properties)
+        return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, home_to, reserved_for,
+                upgrade_attrs, properties)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
-        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+            upgrade_attrs, properties):
+        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+                upgrade_attrs, properties)
 
         self.branches = set(self.capacity.keys())
         self.branch_to_station = {key: [] for key in self.branches}
@@ -282,26 +291,27 @@ class SplitCity(City):
 
 class Terminus(City):
     @staticmethod
-    def create(cell, name, edges, value, capacity=0, nickname=None, is_east=False, is_west=False, properties={}):
+    def create(cell, name, edges, value, capacity=0, nickname=None, is_east=False, is_west=False,
+            home_to=[], reserved_for=[], properties={}):
         paths = {cell.neighbors[side]: [] for side in edges}
 
         if is_east:
-            return EasternTerminus(name, nickname, cell, paths, value, capacity, properties)
+            return EasternTerminus(name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties)
         elif is_west:
-            return WesternTerminus(name, nickname, cell, paths, value, capacity, properties)
+            return WesternTerminus(name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties)
         else:
-            return Terminus(name, nickname, cell, paths, value, capacity, properties)
+            return Terminus(name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties)
 
-    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
-        super().__init__(name, nickname, cell, None, paths, value, capacity, properties=properties)
+    def __init__(self, name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties):
+        super().__init__(name, nickname, cell, None, paths, value, capacity, home_to, reserved_for, properties=properties)
 
     def passable(self, enter_cell, exit_cell, railroad):
         # A path entering a terminus is never passable. A path exiting it always is.
         return not enter_cell
 
 class EasternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
-        super().__init__(name, nickname, cell, paths, value, capacity, properties)
+    def __init__(self, name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties):
+        super().__init__(name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties)
         
         self.e2w_bonus = value["e2w-bonus"]
 
@@ -309,20 +319,33 @@ class EasternTerminus(Terminus):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
 class WesternTerminus(Terminus):
-    def __init__(self, name, nickname, cell, paths, value, capacity, properties):
-        super().__init__(name, nickname, cell, paths, value, capacity, properties)
+    def __init__(self, name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties):
+        super().__init__(name, nickname, cell, paths, value, capacity, home_to, reserved_for, properties)
         
         self.e2w_bonus = value["e2w-bonus"]
 
     def value(self, game, railroad, train, east_to_west=False):
         return super().value(game, railroad, train) + (self.e2w_bonus if east_to_west else 0)
 
+def _load_reservations(game):
+    railroad_info = _load_railroad_info(game)
+    reservations = collections.defaultdict(lambda: collections.defaultdict(list))
+    for railroad, info in railroad_info.items():
+        home_cell, home_branch = _split_station_entry(info["home"])
+        reservations[home_cell]["home_to"].append(railroad)
+        for reserved_coord in info.get("reserved", []):
+            reserved_cell, reserved_branch = _split_station_entry(reserved_coord)
+            reservations[reserved_cell]["reserved_for"].append(railroad)
+    return reservations
+
 def load(game, board):
+    reservation_params = _load_reservations(game)
+
     board_tiles = []
     with open(game.get_data_file(BASE_BOARD_FILENAME)) as board_file:
         board_json = json.load(board_file)
         board_tiles.extend([Track.create(board.cell(coord), **track_args) for coord, track_args in board_json.get("tracks", {}).items()])
         board_tiles.extend([Town.create(board.cell(coord), **town_args) for coord, town_args in board_json.get("towns", {}).items()])
-        board_tiles.extend([City.create(board.cell(coord), **city_args) for coord, city_args in board_json.get("cities", {}).items()])
-        board_tiles.extend([Terminus.create(board.cell(coord), **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
+        board_tiles.extend([City.create(board.cell(coord), **reservation_params.get(coord, {}), **city_args) for coord, city_args in board_json.get("cities", {}).items()])
+        board_tiles.extend([Terminus.create(board.cell(coord), **reservation_params.get(coord, {}), **board_edge_args) for coord, board_edge_args in board_json.get("termini", {}).items()])
     return board_tiles

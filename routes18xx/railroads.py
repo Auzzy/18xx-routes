@@ -126,14 +126,12 @@ def load(game, board, railroads_rows):
             else:
                 board.place_station(game, coord, railroad)
 
-    # Mark home and reserved station slots
+    # Remove the reservations of removed or closed railroads.
     for name, info in railroad_info.items():
-        coord, branch = _split_station_entry(info["home"])
-        board.get_space(board.cell(coord)).home.append(name)
-        # Railroads which are in play.
-        if name not in railroads or not isinstance(railroads[name], RemovedRailroad):
+        if name in railroads and isinstance(railroads[name], (RemovedRailroad, ClosedRailroad)):
             for reserved_coord in info.get("reserved", []):
-                board.get_space(board.cell(reserved_coord)).reserved.append(name)
+                reserved_cell, reserved_branch = _split_station_entry(reserved_coord)
+                board.get_space(board.cell(reserved_cell)).reserved.remove(name)
 
     # Allow referring to railroads by their nicknames
     for name, info in railroad_info.items():

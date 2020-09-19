@@ -36,11 +36,13 @@ class PlacedTile(object):
         name = old_space.name if old_space else None
         nickname = old_space.nickname if old_space else None
         properties = old_space.properties if old_space else {}
+        home = old_space.home if old_space and old_space.is_city else []
+        reserved = old_space.reserved if old_space and old_space.is_city else []
 
         paths = PlacedTile.get_paths(cell, tile, orientation)
-        return PlacedTile(name, nickname, cell, tile, paths, properties)
+        return PlacedTile(name, nickname, cell, tile, paths, home, reserved, properties)
 
-    def __init__(self, name, nickname, cell, tile, paths={}, properties={}):
+    def __init__(self, name, nickname, cell, tile, paths={}, home=[], reserved=[], properties={}):
         self.name = name or str(cell)
         self.nickname = nickname or self.name
         self.cell = cell
@@ -58,8 +60,8 @@ class PlacedTile(object):
         self.is_stop = self.tile.is_stop
         self.upgrade_attrs = self.tile.upgrade_attrs
 
-        self.home = []
-        self.reserved = []
+        self.home = home or []
+        self.reserved = reserved or []
 
     def value(self, game, railroad, train):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
@@ -177,12 +179,14 @@ class SplitCity(PlacedTile):
         name = old_space.name if old_space else None
         nickname = old_space.nickname if old_space else None
         properties = old_space.properties if old_space else {}
+        home = old_space.home if old_space and old_space.is_city else []
+        reserved = old_space.reserved if old_space and old_space.is_city else []
 
         paths = PlacedTile.get_paths(cell, tile, orientation)
         return SplitCity(name, nickname, cell, tile, orientation, paths, properties)
 
-    def __init__(self, name, nickname, cell, tile, orientation, paths={}, properties={}):
-        super().__init__(name, nickname, cell, tile, paths, properties)
+    def __init__(self, name, nickname, cell, tile, orientation, paths={}, home=[], reserved=[], properties={}):
+        super().__init__(name, nickname, cell, tile, paths, home, reserved, properties)
 
         self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
         self.branches = set(self.capacity.keys())
