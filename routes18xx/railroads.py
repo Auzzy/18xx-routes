@@ -126,18 +126,18 @@ def load(game, board, railroads_rows):
             else:
                 board.place_station(game, coord, railroad)
 
-    # Initializing parts of the board that depend on the railroads having been
-    # created.
+    # Mark home and reserved station slots
     for name, info in railroad_info.items():
-        # Railroads which are in play.
         coord, branch = _split_station_entry(info["home"])
-        board.get_space(board.cell(coord)).home = name
+        board.get_space(board.cell(coord)).home.append(name)
+        # Railroads which are in play.
         if name not in railroads or not isinstance(railroads[name], RemovedRailroad):
             for reserved_coord in info.get("reserved", []):
-                board.get_space(board.cell(reserved_coord)).reserved = name
+                board.get_space(board.cell(reserved_coord)).reserved.append(name)
 
+    # Allow referring to railroads by their nicknames
+    for name, info in railroad_info.items():
         if name in railroads:
-            # Allow referring to the railroads in play by their nicknames.
             for nickname in info.get("nicknames", []):
                 railroads[nickname] = railroads[name]
 

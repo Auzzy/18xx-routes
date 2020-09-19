@@ -58,8 +58,8 @@ class PlacedTile(object):
         self.is_stop = self.tile.is_stop
         self.upgrade_attrs = self.tile.upgrade_attrs
 
-        self.home = None
-        self.reserved = None
+        self.home = []
+        self.reserved = []
 
     def value(self, game, railroad, train):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
@@ -78,6 +78,25 @@ class PlacedTile(object):
     def stations(self):
         return tuple(self._stations)
 
+    def _assert_preserves_reservations(self, game, railroad):
+        def _preserves_space(reservations):
+            unclaimed_reservations = [name for name in reservations if not self.has_station(name)]
+            return railroad.name in reservations \
+                or not unclaimed_reservations \
+                or len(self.stations) + len(unclaimed_reservations) + 1 <= self.capacity
+
+        reservations = self.home.copy()
+        if game.rules.stations.reserved_until and game.compare_phases(game.rules.stations.reserved_until) < 0:
+            reservations.extend(self.reserved.copy())
+
+        if not _preserves_space(reservations):
+            unclaimed_home = [name for name in self.home if not self.has_station(name)]
+            if unclaimed_home:
+                raise ValueError(f"{self.name} ({self.cell}) must leave space for its home railroad(s): {', '.join(unclaimed_home)}.")
+            else:
+                unclaimed_reservations = [name for name in self.reserved if not self.has_station(name)]
+                raise ValueError(f"{self.name} ({self.cell}) must leave space for its reservation(s): {', '.join(unclaimed_reservations)}.")
+
     def add_station(self, game, railroad):
         if self.has_station(railroad.name):
             raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
@@ -85,12 +104,7 @@ class PlacedTile(object):
         if len(self.stations) >= self.capacity:
             raise ValueError(f"{self.name} ({self.cell}) cannot hold any more stations.")
 
-        if self.home and self.home != railroad.name and not self.has_station(self.home) and len(self.stations) + 1 >= self.capacity:
-                raise ValueError(f"{self.name} ({self.cell}) must leave a slot for {self.home}, its home railroad.")
-
-        if game.rules.stations.reserved_until and game.compare_phases(game.rules.stations.reserved_until) < 0:
-            if self.reserved and self.reserved != railroad.name and not self.has_station(self.reserved) and len(self.stations) + 1 >= self.capacity:
-                raise ValueError(f"{self.name} ({self.cell}) has no open slot for its {self.reserved} reservation.")
+        self._assert_preserves_reservations(game, railroad)
 
         station = Station(self.cell, railroad)
         self._stations.append(station)
