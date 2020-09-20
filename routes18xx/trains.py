@@ -49,9 +49,23 @@ class Train:
 
     def is_end_of_route(self, game, board, railroad, enter_from, cell, visited_paths, visited_stops):
         tile = board.get_space(cell)
-        return tile.is_stop \
-            and (not game.rules.routes.omit_towns_from_limit or not tile.is_town) \
-            and self.visit  - len(visited_stops) - 1 <= 0
+        if tile.is_stop:
+            if game.rules.routes.omit_towns_from_limit:
+                visited_counted_stops = [stop for stop in visited_stops if not stop.is_town]
+                return self.visit  - len(visited_counted_stops) - 1 < 0
+            else:
+                return self.visit  - len(visited_stops) - 1 <= 0
+
+        return False
+
+    def route_stops_valid(self, game, route):
+        # Confirms no more than the maximum stops are included in the
+        # route. This is mostly relevant for games in which towns count
+        # their value but not as a visit.
+        if game.rules.routes.omit_towns_from_limit:
+            return self.visit >= len(route.cities)
+        else:
+            return self.visit >= len(route.stops)
 
     def route_best_stops(self, game, route, route_stop_values, always_include):
         # With this rule, towns will always be included because they don't count against the collection limit.

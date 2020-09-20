@@ -211,7 +211,7 @@ def _walk_routes(game, board, railroad, enter_from, cell, train, visited_paths=N
 
     return tuple(set(routes))
 
-def _filter_invalid_routes(game, routes, board, railroad):
+def _filter_invalid_routes(game, routes, board, railroad, train):
     """
     Given a collection of routes, returns a new set containing only valid routes. Invalid routes removed:
     - contain less than 2 cities, or
@@ -236,6 +236,9 @@ def _filter_invalid_routes(game, routes, board, railroad):
         # Each route must contain at least 1 station
         stations_on_route = [station for station in stations if route.contains_station(station)]
         if not stations_on_route:
+            continue
+
+        if not train.route_stops_valid(game, route):
             continue
 
         valid_routes.add(route)
@@ -281,7 +284,7 @@ def _find_all_routes(game, board, railroad):
             routes.update(_get_subroutes(routes, stations))
 
             LOG.debug("Filtering out invalid routes")
-            routes_by_train[train] = _filter_invalid_routes(game, routes, board, railroad)
+            routes_by_train[train] = _filter_invalid_routes(game, routes, board, railroad, train)
 
     LOG.info(f"Found {sum(len(route) for route in routes_by_train.values())} routes.")
     for train, routes in routes_by_train.items():
