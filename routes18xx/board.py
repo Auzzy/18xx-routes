@@ -130,6 +130,11 @@ class Board(object):
 
     def _validate_place_tile_space_type(self, tile, old_tile):
         if old_tile:
+            # The space has specifically said this tile can be used to upgrade
+            # it, so we can ignore all other upgrade type rules.
+            if tile.id in old_tile.upgrade_overrides:
+                return
+
             if old_tile.is_terminus:
                 raise ValueError("Cannot upgrade the terminus.")
             elif old_tile.is_city != tile.is_city:

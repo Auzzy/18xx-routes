@@ -63,6 +63,12 @@ class PlacedTile(object):
         self.home = home or []
         self.reserved = reserved or []
 
+        # In theory, a certain tile (especially a special one) could allow a
+        # non-standard upgrade. However, I won't support that until I need to.
+        # For now, this just makes a consistent interface between placedtile
+        # and boardtile objects.
+        self.upgrade_override = []
+
     def value(self, game, railroad, train):
         return self.tile.value + sum(token.value(game, railroad) for token in self.tokens)
 

@@ -20,7 +20,7 @@ class BoardSpace(object):
                 paths[cell.neighbors[exits]] = []
         return paths
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, upgrade_attrs=[], properties={}):
+    def __init__(self, name, nickname, cell, upgrade_level, paths, upgrade_attrs=[], properties={}, upgrade_overrides=[]):
         self.name = name or str(cell)
         self.nickname = nickname or self.name
         self.cell = cell
@@ -34,6 +34,7 @@ class BoardSpace(object):
         self.is_stop = self.is_city or self.is_terminus or self.is_town
         self.upgrade_attrs = sorted(sorted(attr) if isinstance(attr, list) else [attr] for attr in upgrade_attrs) or [[]]
         self.properties = properties
+        self.upgrade_overrides = upgrade_overrides
 
     def paths(self, enter_from=None, railroad=None):
         if railroad and railroad.is_removed:
@@ -52,30 +53,30 @@ class BoardSpace(object):
 
 class Track(BoardSpace):
     @staticmethod
-    def create(cell, edges=[], upgrade_level=None):
+    def create(cell, edges=[], upgrade_level=None, upgrade_overrides=[]):
         paths = BoardSpace._calc_paths(cell, edges)
 
-        return Track(cell, upgrade_level, paths)
+        return Track(cell, upgrade_level, paths, upgrade_overrides)
 
-    def __init__(self, cell, upgrade_level, paths):
-        super().__init__(None, None, cell, upgrade_level, paths)
+    def __init__(self, cell, upgrade_level, paths, upgrade_overrides):
+        super().__init__(None, None, cell, upgrade_level, paths, upgrade_overrides=upgrade_overrides)
 
     def value(self, game, railroad, train):
         return 0
 
 class Town(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=[], properties={}):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, upgrade_attrs=[], properties={}, upgrade_overrides=[]):
         name = ' & '.join(name) if isinstance(name, list) else name
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
-            return SplitTown.create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return SplitTown.create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides)
         else:
-            return Town(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+            return Town(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=[], properties={}):
-        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs=[], properties={}, upgrade_overrides=[]):
+        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties, upgrade_overrides)
 
         self._value = value
         self.capacity = capacity
@@ -85,32 +86,32 @@ class Town(BoardSpace):
 
 class SplitTown(Town):
     @staticmethod
-    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
+    def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides):
         split_town_capacity = SplitCity._parse_branch_dict(capacity, cell)
 
-        return SplitTown(name, nickname, cell, upgrade_level, paths, value, split_town_capacity, upgrade_attrs, properties)
+        return SplitTown(name, nickname, cell, upgrade_level, paths, value, split_town_capacity, upgrade_attrs, properties, upgrade_overrides)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties):
-        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties)
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides):
+        super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides)
 
         self.branches = set(self.capacity.keys())
 
 class City(BoardSpace):
     @staticmethod
     def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, home_to=[], reserved_for=[],
-            upgrade_attrs=[], properties={}):
+            upgrade_attrs=[], properties={}, upgrade_overrides=[]):
         paths = BoardSpace._calc_paths(cell, edges)
 
         if isinstance(capacity, dict):
             return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-                    upgrade_attrs, properties)
+                    upgrade_attrs, properties, upgrade_overrides)
         else:
             return City(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-                    upgrade_attrs, properties)
+                    upgrade_attrs, properties, upgrade_overrides)
 
     def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-            upgrade_attrs=[], properties={}):
-        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties)
+            upgrade_attrs=[], properties={}, upgrade_overrides=[]):
+        super().__init__(name, nickname, cell, upgrade_level, paths, upgrade_attrs, properties, upgrade_overrides)
 
         self._value = value
         self.capacity = capacity
@@ -228,16 +229,16 @@ class SplitCity(City):
 
     @staticmethod
     def create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-            upgrade_attrs, properties):
+            upgrade_attrs, properties, upgrade_overrides):
         split_city_capacity = SplitCity._parse_branch_dict(capacity, cell)
 
         return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, home_to, reserved_for,
-                upgrade_attrs, properties)
+                upgrade_attrs, properties, upgrade_overrides)
 
     def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-            upgrade_attrs, properties):
+            upgrade_attrs, properties, upgrade_overrides):
         super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-                upgrade_attrs, properties)
+                upgrade_attrs, properties, upgrade_overrides)
 
         self.branches = set(self.capacity.keys())
         self.branch_to_station = {key: [] for key in self.branches}
