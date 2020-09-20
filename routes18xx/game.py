@@ -1,4 +1,5 @@
 import importlib
+import itertools
 import json
 import os
 
@@ -52,11 +53,14 @@ class Game:
         return Game.get_game_data_file(self.name, filename)
 
     def capture_phase(self, railroads):
-        self.current_phase = self.detect_phase(railroads)
+        self.current_phase = self.detect_phase_from_railroads(railroads)
         return self.current_phase
 
-    def detect_phase(self, railroads):
-        all_train_phases = [train.phase for railroad in railroads.values() for train in railroad.trains]
+    def detect_phase_from_railroads(self, railroads):
+        return self.detect_phase(itertools.chain.from_iterable([railroad.trains for railroad in railroads.values()]))
+
+    def detect_phase(self, trains):
+        all_train_phases = {train.phase for train in trains}
         return str(max(all_train_phases, key=lambda phase: self.phases.index(phase))) if all_train_phases else self.phases[0]
 
     def compare_phases(self, other, current=None):
