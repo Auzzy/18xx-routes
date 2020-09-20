@@ -51,7 +51,7 @@ class BoardSpace(object):
 
 class Track(BoardSpace):
     @staticmethod
-    def create(cell, edges, upgrade_level=None):
+    def create(cell, edges=[], upgrade_level=None):
         paths = BoardSpace._calc_paths(cell, edges)
 
         return Track(cell, upgrade_level, paths)
