@@ -162,8 +162,8 @@ def _visited_stop_entry(tile, path, neighbor):
     new_visited_stop = {}
     if tile.is_stop:
         new_visited_stop[tile] = None
-        for branch in getattr(tile, 'branches', set()):
-            if tuple(path) in branch or (neighbor, ) in branch:
+        for branch, branch_paths in getattr(tile, 'branch_paths', dict()).items():
+            if (path and path[1] in branch_paths.get(path[0], {})) or neighbor in branch_paths:
                 new_visited_stop[tile] = branch
                 break
     return new_visited_stop

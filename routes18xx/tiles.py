@@ -19,10 +19,13 @@ class Tile(object):
         return paths
 
     @staticmethod
-    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=[]):
+    def create(id, edges, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False,
+            branch_map={}, capacity=0, upgrade_attrs=[]):
         paths = Tile._calc_paths(edges)
 
-        if isinstance(capacity, dict):
+        branch_paths = {branch: Tile._calc_paths(edges) for branch, edges in branch_map.items()} if branch_map else {}
+        '''
+        if hasattr(capacity, dict):
             split_city_capacity = {}
             for branch_paths_str, branch_capacity in capacity.items():
                 branch_path_dict = Tile._calc_paths(json.loads(branch_paths_str))
@@ -36,12 +39,15 @@ class Tile(object):
 
                 split_city_capacity[tuple(branch_path_list)] = branch_capacity
             capacity = split_city_capacity
+        '''
 
         quantity = int(quantity) if quantity else None
 
-        return Tile(id, paths, int(value), quantity, int(upgrade_level), is_city, is_town, is_terminus, capacity, upgrade_attrs)
+        return Tile(id, paths, int(value), quantity, int(upgrade_level), is_city, is_town, is_terminus, branch_paths,
+                capacity, upgrade_attrs)
 
-    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False, capacity=0, upgrade_attrs=[]):
+    def __init__(self, id, paths, value, quantity, upgrade_level, is_city=False, is_town=False, is_terminus=False,
+            branch_paths={}, capacity=0, upgrade_attrs=[]):
         self.id = id
         self.paths = {enter: tuple(exits) for enter, exits in paths.items()}
         self.value = value
@@ -50,6 +56,7 @@ class Tile(object):
         self.is_city = is_city
         self.is_town = is_town
         self.is_terminus = is_terminus
+        self.branch_paths = branch_paths
         self.capacity = capacity
         self.upgrade_attrs = sorted(sorted(attr) if isinstance(attr, list) else [attr] for attr in upgrade_attrs) or [[]]
 

@@ -69,8 +69,9 @@ class Board(object):
         if not space.is_city:
             raise ValueError(f"{cell} is not a city, so it cannot have a station.")
 
-        branch_cells = tuple([self.cell(coord) for coord in branch])
-        space.add_station(game, railroad, branch_cells)
+        # branch_cells = tuple([self.cell(coord) for coord in branch])
+        # space.add_station(game, railroad, branch_cells)
+        space.add_station(game, railroad, branch)
 
     def place_token(self, coord, railroad, TokenType):
         if railroad.is_removed:

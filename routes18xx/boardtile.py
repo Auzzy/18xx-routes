@@ -86,8 +86,46 @@ class Town(BoardSpace):
 
 class SplitTown(Town):
     @staticmethod
+    def _branches_with_unique_exits(branch_dict):
+        # Indicating a branch on a split city can be done by a single unqiue
+        # neighbor, if such a neighbor exists. This determines what they are,
+        # then add them to the branch keys.
+        branch_to_sides = {branch_key: tuple(set(itertools.chain.from_iterable(branch_key))) for branch_key in branch_dict}
+        unique_exit_sides = {}
+        for key, sides in branch_to_sides.items():
+            # Get all the neighbors that appear in branches other than the
+            # current one, and remove them from the current branch. If any
+            # remain, they must be unique.
+            unique_exits = set(sides) - set(itertools.chain.from_iterable(set(branch_to_sides.values()) - {sides}))
+            unique_exit_sides[key] = {(side, ) for side in unique_exits}
+
+        new_branch_dict = {}
+        for old_key, value in branch_dict.items():
+            new_key = tuple(set(old_key).union(unique_exit_sides[old_key]))
+            new_branch_dict[new_key] = value
+
+        return new_branch_dict
+
+    @staticmethod
+    def _parse_branch_dict(capacity, cell):
+        split_branch_dict = {}
+        for branch_paths_str, branch_value in capacity.items():
+            branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
+            branch_path_list = []
+            for entrance, exits in branch_path_dict.items():
+                if not exits:
+                    branch_paths = [(entrance, )]
+                else:
+                    branch_paths = [(entrance, exit) for exit in exits]
+                branch_path_list.extend(tuple(branch_paths))
+
+            split_branch_dict[tuple(branch_path_list)] = branch_value
+
+        return SplitTown._branches_with_unique_exits(split_branch_dict)
+
+    @staticmethod
     def create(name, nickname, cell, upgrade_level, paths, value, capacity, upgrade_attrs, properties, upgrade_overrides):
-        split_town_capacity = SplitCity._parse_branch_dict(capacity, cell)
+        split_town_capacity = SplitTown._parse_branch_dict(capacity, cell)
 
         return SplitTown(name, nickname, cell, upgrade_level, paths, value, split_town_capacity, upgrade_attrs, properties, upgrade_overrides)
 
@@ -98,13 +136,13 @@ class SplitTown(Town):
 
 class City(BoardSpace):
     @staticmethod
-    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, capacity=0, home_to=[], reserved_for=[],
-            upgrade_attrs=[], properties={}, upgrade_overrides=[]):
+    def create(cell, name, nickname=None, upgrade_level=0, edges=[], value=0, branch_map={}, capacity=0, home_to=[],
+            reserved_for=[], upgrade_attrs=[], properties={}, upgrade_overrides=[]):
         paths = BoardSpace._calc_paths(cell, edges)
 
-        if isinstance(capacity, dict):
-            return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
-                    upgrade_attrs, properties, upgrade_overrides)
+        if branch_map:
+            return SplitCity.create(name, nickname, cell, upgrade_level, paths, value, branch_map, capacity, home_to,
+                    reserved_for, upgrade_attrs, properties, upgrade_overrides)
         else:
             return City(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
                     upgrade_attrs, properties, upgrade_overrides)
@@ -190,77 +228,35 @@ class City(BoardSpace):
 
 class SplitCity(City):
     @staticmethod
-    def _branches_with_unique_exits(branch_dict):
-        # Indicating a branch on a split city can be done by a single unqiue
-        # neighbor, if such a neighbor exists. This determines what they are,
-        # then add them to the branch keys.
-        branch_to_sides = {branch_key: tuple(set(itertools.chain.from_iterable(branch_key))) for branch_key in branch_dict}
-        unique_exit_sides = {}
-        for key, sides in branch_to_sides.items():
-            # Get all the neighbors that appear in branches other than the
-            # current one, and remove them from the current branch. If any
-            # remain, they must be unique.
-            unique_exits = set(sides) - set(itertools.chain.from_iterable(set(branch_to_sides.values()) - {sides}))
-            unique_exit_sides[key] = {(side, ) for side in unique_exits}
-
-        new_branch_dict = {}
-        for old_key, value in branch_dict.items():
-            new_key = tuple(set(old_key).union(unique_exit_sides[old_key]))
-            new_branch_dict[new_key] = value
-
-        return new_branch_dict
-
-    @staticmethod
-    def _parse_branch_dict(capacity, cell):
-        split_branch_dict = {}
-        for branch_paths_str, branch_value in capacity.items():
-            branch_path_dict = City._calc_paths(cell, json.loads(branch_paths_str))
-            branch_path_list = []
-            for entrance, exits in branch_path_dict.items():
-                if not exits:
-                    branch_paths = [(entrance, )]
-                else:
-                    branch_paths = [(entrance, exit) for exit in exits]
-                branch_path_list.extend(tuple(branch_paths))
-
-            split_branch_dict[tuple(branch_path_list)] = branch_value
-
-        return SplitCity._branches_with_unique_exits(split_branch_dict)
-
-    @staticmethod
-    def create(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+    def create(name, nickname, cell, upgrade_level, paths, value, branch_map, capacity, home_to, reserved_for,
             upgrade_attrs, properties, upgrade_overrides):
-        split_city_capacity = SplitCity._parse_branch_dict(capacity, cell)
+        branch_paths = {branch: BoardSpace._calc_paths(cell, edges) for branch, edges in branch_map.items()}
 
-        return SplitCity(name, nickname, cell, upgrade_level, paths, value, split_city_capacity, home_to, reserved_for,
-                upgrade_attrs, properties, upgrade_overrides)
+        return SplitCity(name, nickname, cell, upgrade_level, paths, value, branch_paths, capacity, home_to,
+                reserved_for, upgrade_attrs, properties, upgrade_overrides)
 
-    def __init__(self, name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
+    def __init__(self, name, nickname, cell, upgrade_level, paths, value, branch_paths, capacity, home_to, reserved_for,
             upgrade_attrs, properties, upgrade_overrides):
         super().__init__(name, nickname, cell, upgrade_level, paths, value, capacity, home_to, reserved_for,
                 upgrade_attrs, properties, upgrade_overrides)
 
-        self.branches = set(self.capacity.keys())
-        self.branch_to_station = {key: [] for key in self.branches}
+        self.branch_paths = branch_paths
+        self.branches = self.branch_paths.keys()
+        self.branch_to_station = {branch: [] for branch in self.branches}
 
     def add_station(self, game, railroad, branch):
         if self.has_station(railroad.name):
             raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
 
-        split_branch = tuple()
-        for branch_key, value in self.capacity.items():
-            if branch in branch_key:
-                split_branch = branch_key
-                break
-        else:
+        if branch not in self.branches:
             raise ValueError(f"Attempted to add a station to a non-existant branch of a split city: {branch}")
 
-        if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
+        if self.capacity[branch] <= len(self.branch_to_station[branch]):
             raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
 
         station = Station(self.cell, railroad, branch)
         self._stations.append(station)
-        self.branch_to_station[split_branch].append(station)
+        self.branch_to_station[branch].append(station)
         return station
 
     def passable(self, enter_cell, exit_cell, railroad):

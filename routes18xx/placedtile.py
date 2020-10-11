@@ -27,7 +27,7 @@ class PlacedTile(object):
     def place(cell, tile, orientation, old_space=None):
         # Determining if the new tile is a split city allows placements which
         # convert a split city into a regular city, as can happen in many games.
-        if isinstance(tile.capacity, dict):
+        if tile.branch_paths:
             if tile.is_city:
                 return SplitCity.place(cell, tile, orientation, old_space)
             elif tile.is_town:
@@ -141,6 +141,86 @@ class PlacedTile(object):
 
 class SplitCity(PlacedTile):
     @staticmethod
+    def _map_branches_to_cells(cell, orientation, raw_branch_paths):
+        branch_paths = collections.defaultdict(dict)
+        # Tiles indicate their neighbors by side number relative to upright.
+        # Once placed, given the placement orientation, we need to know their
+        # neighboring coordinates.
+        for branch, raw_paths in raw_branch_paths.items():
+            for start_side, end_sides in raw_paths.items():
+                rotated_side = int(orientation) if isinstance(start_side, Cell) else PlacedTile._rotate(start_side, orientation)
+                start_cell = cell.neighbors[rotated_side]
+
+                end_cells = []
+                for end_side in end_sides:
+                    rotated_side = int(orientation) if isinstance(end_side, Cell) else PlacedTile._rotate(end_side, orientation)
+                    end_cells.append(cell.neighbors[rotated_side])
+                branch_paths[branch][start_cell] = tuple(end_cells)
+
+        return branch_paths
+
+    @staticmethod
+    def place(cell, tile, orientation, old_space=None):
+        name = old_space.name if old_space else None
+        nickname = old_space.nickname if old_space else None
+        properties = old_space.properties if old_space else {}
+        home = old_space.home if old_space and old_space.is_city else []
+        reserved = old_space.reserved if old_space and old_space.is_city else []
+
+        paths = PlacedTile.get_paths(cell, tile, orientation)
+        return SplitCity(name, nickname, cell, tile, orientation, paths, properties)
+
+    def __init__(self, name, nickname, cell, tile, orientation, paths={}, home=[], reserved=[], properties={}):
+        super().__init__(name, nickname, cell, tile, paths, home, reserved, properties)
+
+        self.branch_paths = SplitCity._map_branches_to_cells(cell, orientation, tile.branch_paths)
+        self.branches = self.branch_paths.keys()
+        self.branch_to_station = {key: [] for key in self.branches}
+
+    def add_station(self, game, railroad, branch):
+        if self.has_station(railroad.name):
+            raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
+
+        if branch not in self.branches:
+            raise ValueError(f"Attempted to add a station to a non-existant branch of a split city: {branch}")
+
+        if self.capacity[branch] <= len(self.branch_to_station[branch]):
+            raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
+
+        station = Station(self.cell, railroad, branch)
+        self._stations.append(station)
+        self.branch_to_station[branch].append(station)
+        return station
+
+    def passable(self, enter_cell, exit_cell, railroad):
+        # Starting from a city is always legal
+        if not enter_cell:
+            return True
+
+        for branch, stations in self.branch_to_station.items():
+            # Only look at the branch formed by the enter and exit cells
+            if exit_cell in self.branch_paths[branch].get(enter_cell, {}):
+                continue
+
+            # Check branch capacity
+            if len(stations) < self.capacity[branch]:
+                return True
+
+            # Check if this branch has a station belonging to the railroad
+            for station in stations:
+                if station.railroad == railroad:
+                    return True
+
+        return False
+
+    def get_station_branch(self, user_station):
+        for branch, stations in self.branch_to_station.items():
+            if user_station in stations:
+                return branch
+        raise ValueError(f"The requested station was not found: {user_station}")
+
+class SplitTown(PlacedTile):
+    @staticmethod
     def _branches_with_unique_exits(branch_dict):
         # Indicating a branch on a split city can be done by a single unqiue
         # neighbor, if such a neighbor exists. This determines what they are,
@@ -178,74 +258,8 @@ class SplitCity(PlacedTile):
                 branch_paths.append(tuple(path_cells))
             branch_dict[tuple(branch_paths)] = value
 
-        return SplitCity._branches_with_unique_exits(branch_dict)
+        return SplitTown._branches_with_unique_exits(branch_dict)
 
-    @staticmethod
-    def place(cell, tile, orientation, old_space=None):
-        name = old_space.name if old_space else None
-        nickname = old_space.nickname if old_space else None
-        properties = old_space.properties if old_space else {}
-        home = old_space.home if old_space and old_space.is_city else []
-        reserved = old_space.reserved if old_space and old_space.is_city else []
-
-        paths = PlacedTile.get_paths(cell, tile, orientation)
-        return SplitCity(name, nickname, cell, tile, orientation, paths, properties)
-
-    def __init__(self, name, nickname, cell, tile, orientation, paths={}, home=[], reserved=[], properties={}):
-        super().__init__(name, nickname, cell, tile, paths, home, reserved, properties)
-
-        self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
-        self.branches = set(self.capacity.keys())
-        self.branch_to_station = {key: [] for key in self.branches}
-
-    def add_station(self, game, railroad, branch):
-        if self.has_station(railroad.name):
-            raise ValueError(f"{railroad.name} already has a station in {self.name} ({self.cell}).")
-
-        split_branch = tuple()
-        for branch_key, value in self.capacity.items():
-            if branch in branch_key:
-                split_branch = branch_key
-                break
-        else:
-            raise ValueError(f"Attempted to add a station to a non-existant branch of a split city: {branch}")
-
-        if self.capacity[split_branch] <= len(self.branch_to_station[split_branch]):
-            raise ValueError(f"The {branch} branch of {self.name} ({self.cell}) cannot hold any more stations.")
-
-        station = Station(self.cell, railroad, branch)
-        self._stations.append(station)
-        self.branch_to_station[split_branch].append(station)
-        return station
-
-    def passable(self, enter_cell, exit_cell, railroad):
-        # Starting from a city is always legal
-        if not enter_cell:
-            return True
-
-        for branch, stations in self.branch_to_station.items():
-            # Only look at the branch formed by the enter and exit cells
-            if (enter_cell, exit_cell) not in branch:
-                continue
-
-            # Check branch capacity
-            if len(stations) < self.capacity[branch]:
-                return True
-
-            # Check if this branch has a station belonging to the railroad
-            for station in stations:
-                if station.railroad == railroad:
-                    return True
-
-        return False
-
-    def get_station_branch(self, user_station):
-        for branch, stations in self.branch_to_station.items():
-            if user_station in stations:
-                return branch
-        raise ValueError(f"The requested station was not found: {user_station}")
-
-class SplitTown(PlacedTile):
     @staticmethod
     def place(cell, tile, orientation, old_space=None):
         name = old_space.name if old_space else None
@@ -258,5 +272,5 @@ class SplitTown(PlacedTile):
     def __init__(self, name, nickname, cell, tile, orientation, paths={}, properties={}):
         super().__init__(name, nickname, cell, tile, paths, properties)
 
-        self.capacity = SplitCity._map_branches_to_cells(cell, orientation, self.capacity)
+        self.capacity = SplitTown._map_branches_to_cells(cell, orientation, self.capacity)
         self.branches = set(self.capacity.keys())

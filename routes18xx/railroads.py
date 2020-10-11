@@ -154,7 +154,7 @@ def load(game, board, railroads_rows):
                         if not branch:
                             raise ValueError(f"A split city ({coord}) is listed as a station for {railroad.name}, but no station branch was specified.")
 
-                        board.place_split_station(game, coord, railroad, branch)
+                        board.place_split_station(game, coord, railroad, branch[0])
                     else:
                         board.place_station(game, coord, railroad)
 
