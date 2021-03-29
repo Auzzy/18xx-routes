@@ -67,6 +67,14 @@
                 "active": {
                     "Illinois Central": 150
                 }
+            },
+            {
+                "name": "cannot-reuse-track",
+                "board-state": "board-state-track-reuse.csv",
+                "railroads": "railroads-track-reuse.csv",
+                "active": {
+                    "Erie": 410
+                }
             }
         ],
         "1889": [
