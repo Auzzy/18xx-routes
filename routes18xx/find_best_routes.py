@@ -182,8 +182,8 @@ def _walk_routes(game, board, railroad, enter_from, cell, length, visited_paths=
 
     routes = []
     for neighbor in neighbors:
-        path = [enter_from, neighbor] if enter_from else []
-        if not path or path not in visited_paths:
+        path = [tile.cell, neighbor]
+        if path not in visited_paths and list(reversed(path)) not in visited_paths:
             neighbor_paths = _walk_routes(game, board, railroad, cell, neighbor, remaining_stops,
                     visited_paths=visited_paths + ([path] if path else []),
                     visited_stops=visited_stops + ([tile] if tile.is_stop else []))
